@@ -16,11 +16,11 @@ export class Path {
 
   static separator = nodePath.sep
 
-  private readonly _relativePath: string = ''
-  private readonly _absolutePath: string = ''
-  private readonly _baseName: string = ''
-  private readonly _fileExtension: string | null = ''
-  private readonly _type: string = ''
+  private readonly _relativePath: string
+  private readonly _absolutePath: string
+  private readonly _baseName: string
+  private readonly _fileExtension: string | null
+  private readonly _type: PathType
 
 
   constructor(...path: string[]) {
@@ -48,7 +48,7 @@ export class Path {
     return this._fileExtension
   }
 
-  get type(): string {
+  get type(): PathType {
     return this._type
   }
 
@@ -69,7 +69,7 @@ export class Path {
     return extension
   }
 
-  private getType(path: string): string {
+  private getType(path: string): PathType {
     const lStats = fs.lstatSync(path)
     if (lStats.isFile()) {
       return PathType.FILE
