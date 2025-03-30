@@ -4,8 +4,8 @@ npm-debug.log
 yarn-error.log
 
 # Build
-dist
-libs
+/dist
+/libs
 
 # Testing
 /coverage

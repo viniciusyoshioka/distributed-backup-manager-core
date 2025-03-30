@@ -11,16 +11,15 @@
             "@database/*": ["src/database/*"],
             "@modules/*": ["src/modules/*"],
             "@utils": ["src/utils"],
-            "@utils/*": ["src/utils/*"],
+            "@utils/*": ["src/utils/*"]
         },
         "lib": [
             "ESNext",
-            "DOM",
+            "DOM"
         ],
-        "moduleResolution": "nodenext",
-        "module": "NodeNext",
+        "module": "CommonJS"
     },
     "include": [
-        "src",
-    ],
+        "src"
+    ]
 }
