@@ -19,6 +19,18 @@ export default [
   },
   {
     rules: {
+      '@stylistic/max-len': ['warn', {
+        code: 100,
+        tabWidth: 2,
+        comments: 100,
+        // ignorePattern: "",
+        ignoreComments: false,
+        ignoreTrailingComments: false,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreRegExpLiterals: true,
+      }],
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
     },
