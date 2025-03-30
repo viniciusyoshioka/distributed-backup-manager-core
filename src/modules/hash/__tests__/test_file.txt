@@ -1,0 +1,1 @@
+This .txt file is used to test the hash module.
