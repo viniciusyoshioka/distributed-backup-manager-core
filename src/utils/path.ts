@@ -1,6 +1,8 @@
 import fs from 'node:fs'
 import nodePath from 'node:path'
 
+import { hash } from '@modules/hash'
+
 
 export enum PathType {
   FILE = 'FILE',
@@ -21,6 +23,7 @@ export class Path {
   private readonly _baseName: string
   private readonly _fileExtension: string | null
   private readonly _type: PathType
+  private _checksum?: string | null = undefined
 
 
   constructor(...path: string[]) {
@@ -50,6 +53,13 @@ export class Path {
 
   get type(): PathType {
     return this._type
+  }
+
+  async getHash(): Promise<string | null> {
+    if (this._checksum === undefined) {
+      this._checksum = await hash(this)
+    }
+    return this._checksum
   }
 
 
