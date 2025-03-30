@@ -1,6 +1,6 @@
 import process from 'node:process'
 
-import { Path } from '@utils'
+import { Path, PathType } from '@utils'
 import { hash, HashType } from '../hash'
 
 
@@ -14,6 +14,7 @@ describe('Test Hash module', () => {
 
   const mockPath = {
     absolutePath: [cwd, './src/modules/hash/__tests__/not_existent_file.txt'].join(Path.separator),
+    type: PathType.FILE,
   } as Path
 
 
@@ -22,10 +23,16 @@ describe('Test Hash module', () => {
     expect(checksum).toBe(expectedSha256)
   })
 
-  it('should throw if the path does not exists', () => {
+  it('should throw if the file does not exists', () => {
     expect(hash(mockPath))
       .rejects
       .toThrow(`ENOENT: no such file or directory, open '${mockPath.absolutePath}'`)
+  })
+
+  it('should return null if the path is not a file', async () => {
+    const folderPath = new Path('./src/modules/hash/__tests__')
+    const checksum = await hash(folderPath)
+    expect(checksum).toBe(null)
   })
 
   it('should return the correct hash when using SHA-256 hash type', async () => {

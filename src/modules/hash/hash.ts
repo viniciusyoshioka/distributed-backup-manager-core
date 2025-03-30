@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 
-import { Path } from '@utils'
+import { Path, PathType } from '@utils'
 
 
 export enum HashType {
@@ -10,7 +10,11 @@ export enum HashType {
 
 
 // TODO: Add validation to assert hashType is a valid enum value
-export async function hash(path: Path, hashType = HashType.SHA_256): Promise<string> {
+export async function hash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
+  // TODO: Maybe its possible to calculate the hash if it is a PathType.FILE_SYMLINK
+  if (path.type !== PathType.FILE) {
+    return null
+  }
 
 
   const hashStream = createHash(hashType)
