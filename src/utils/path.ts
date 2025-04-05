@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import nodePath from 'node:path'
 
-import { hash } from '@modules/hash'
+import { hash } from '../modules/hash'
 
 
 export enum PathType {

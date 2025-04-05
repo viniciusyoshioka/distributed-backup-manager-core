@@ -10,8 +10,8 @@ export default [
         tsconfigRootDir: '.',
         projectService: {
           allowDefaultProject: [
-            'eslint.config.js',
-            'jest.config.js',
+            'eslint.config.mjs',
+            'jest.config.mjs',
           ],
         },
       },

@@ -1,7 +1,7 @@
 import process from 'node:process'
 
-import { Path, PathType } from '@utils'
-import { hash, HashType } from '../hash'
+import { hash, HashType } from '..'
+import { Path, PathType } from '../../../utils'
 
 
 describe('Test Hash module', () => {

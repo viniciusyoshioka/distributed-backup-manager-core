@@ -1,6 +1,6 @@
 import process from 'node:process'
 
-import { Path, PathType } from '@utils/path'
+import { Path, PathType } from '../path'
 
 
 describe('Teste Path', () => {

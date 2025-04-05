@@ -3,7 +3,7 @@
     "description": "Core library for the distributed backup manager",
     "version": "0.0.1",
     "private": true,
-    "type": "module",
+    "type": "commonjs",
     "scripts": {
         "postinstall": "npx patch-package",
         "lint": "eslint '**/*.{js,ts,tsx}'",

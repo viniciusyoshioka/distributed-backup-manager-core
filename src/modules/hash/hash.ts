@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 
-import { Path, PathType } from '@utils'
+import { Path, PathType } from '../../utils'
 
 
 export enum HashType {

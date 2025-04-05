@@ -6,13 +6,6 @@
         "declaration": true,
         "declarationDir": "libs/types",
         "incremental": true,
-        "paths": {
-            "@database": ["src/database"],
-            "@database/*": ["src/database/*"],
-            "@modules/*": ["src/modules/*"],
-            "@utils": ["src/utils"],
-            "@utils/*": ["src/utils/*"]
-        },
         "lib": [
             "ESNext",
             "DOM"

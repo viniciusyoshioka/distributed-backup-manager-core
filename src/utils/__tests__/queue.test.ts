@@ -1,4 +1,4 @@
-import { Queue } from '@utils'
+import { Queue } from '../queue'
 
 
 describe('Test Queue', () => {
