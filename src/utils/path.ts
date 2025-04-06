@@ -28,7 +28,7 @@ export class Path {
 
 
   constructor(...path: string[]) {
-    const joinedPath = path.join(Path.separator)
+    const joinedPath = nodePath.join(...path)
     const isJoinedPathAbsolute = Path.isAbsolute(joinedPath)
 
     this.relativePath = isJoinedPathAbsolute

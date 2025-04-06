@@ -11,7 +11,7 @@ describe('Teste Path', () => {
 
   it('should return cwd when no path is provided', () => {
     const path = new Path()
-    expect(path.relativePath).toBe('')
+    expect(path.relativePath).toBe('.')
     expect(path.absolutePath).toBe(cwdPath)
   })
 
