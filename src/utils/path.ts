@@ -19,7 +19,6 @@ export class Path {
 
   static separator = nodePath.sep
 
-  readonly relativePath: string | null
   readonly absolutePath: string
   readonly baseName: string
   readonly fileExtension: string | null
@@ -29,11 +28,7 @@ export class Path {
 
   constructor(...path: string[]) {
     const joinedPath = nodePath.join(...path)
-    const isJoinedPathAbsolute = Path.isAbsolute(joinedPath)
 
-    this.relativePath = isJoinedPathAbsolute
-      ? null
-      : joinedPath
     this.absolutePath = this.toAbsolutePath(joinedPath)
     this.baseName = this.getBaseName(this.absolutePath)
     this.fileExtension = this.getFileExtension(this.absolutePath)

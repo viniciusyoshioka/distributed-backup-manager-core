@@ -11,7 +11,6 @@ describe('Teste Path', () => {
 
   it('should return cwd when no path is provided', () => {
     const path = new Path()
-    expect(path.relativePath).toBe('.')
     expect(path.absolutePath).toBe(cwdPath)
   })
 
@@ -21,7 +20,6 @@ describe('Teste Path', () => {
     const path = new Path(absolutePath)
 
     expect(Path.isAbsolute(absolutePath)).toBe(true)
-    expect(path.relativePath).toBeNull()
     expect(path.absolutePath).toBe(absolutePath)
     expect(path.absolutePath.startsWith(cwdPath)).toBe(false)
   })
@@ -55,11 +53,9 @@ describe('Teste Path', () => {
     const pathSegments = ['src', 'utils', 'path.ts']
     const path = new Path(...pathSegments)
 
-    it('should return the correct relative and absolute paths', () => {
+    it('should return the correct absolute path', () => {
       const relativePath = pathSegments.join(Path.separator)
-      expect(path.relativePath).toBe(relativePath)
-
-      const absolutePath = cwdPath.concat(Path.separator).concat(relativePath)
+      const absolutePath = [cwdPath, relativePath].join(Path.separator)
       expect(path.absolutePath).toBe(absolutePath)
     })
 
@@ -82,11 +78,9 @@ describe('Teste Path', () => {
     const pathSegments = ['src', 'utils', '__tests__']
     const path = new Path(...pathSegments)
 
-    it('should return the correct relative and absolute paths', () => {
+    it('should return the correct absolute path', () => {
       const relativePath = pathSegments.join(Path.separator)
-      expect(path.relativePath).toBe(relativePath)
-
-      const absolutePath = cwdPath.concat(Path.separator).concat(relativePath)
+      const absolutePath = [cwdPath, relativePath].join(Path.separator)
       expect(path.absolutePath).toBe(absolutePath)
     })
 
@@ -102,6 +96,7 @@ describe('Teste Path', () => {
       expect(path.type).toBe(PathType.DIR)
     })
   })
+
 
   // TODO: Test other path types
 })
