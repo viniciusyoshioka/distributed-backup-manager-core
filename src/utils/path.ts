@@ -19,46 +19,25 @@ export class Path {
 
   static separator = nodePath.sep
 
-  private readonly _relativePath: string | null
-  private readonly _absolutePath: string
-  private readonly _baseName: string
-  private readonly _fileExtension: string | null
-  private readonly _type: PathType
-  private _checksum?: string | null = undefined
+  readonly relativePath: string | null
+  readonly absolutePath: string
+  readonly baseName: string
+  readonly fileExtension: string | null
+  readonly type: PathType
+  private checksum?: string | null = undefined
 
 
   constructor(...path: string[]) {
     const joinedPath = path.join(Path.separator)
     const isJoinedPathAbsolute = Path.isAbsolute(joinedPath)
 
-    this._relativePath = isJoinedPathAbsolute
+    this.relativePath = isJoinedPathAbsolute
       ? null
       : path.join(Path.separator)
-    this._absolutePath = this.toAbsolutePath(path)
-    this._baseName = this.getBaseName(this._absolutePath)
-    this._fileExtension = this.getFileExtension(this._absolutePath)
-    this._type = this.getType(this._absolutePath)
-  }
-
-
-  get relativePath(): string | null {
-    return this._relativePath
-  }
-
-  get absolutePath(): string {
-    return this._absolutePath
-  }
-
-  get baseName(): string {
-    return this._baseName
-  }
-
-  get fileExtension(): string | null {
-    return this._fileExtension
-  }
-
-  get type(): PathType {
-    return this._type
+    this.absolutePath = this.toAbsolutePath(path)
+    this.baseName = this.getBaseName(this.absolutePath)
+    this.fileExtension = this.getFileExtension(this.absolutePath)
+    this.type = this.getType(this.absolutePath)
   }
 
 
@@ -68,10 +47,10 @@ export class Path {
 
 
   async getHash(): Promise<string | null> {
-    if (this._checksum === undefined) {
-      this._checksum = await hash(this)
+    if (this.checksum === undefined) {
+      this.checksum = await hash(this)
     }
-    return this._checksum
+    return this.checksum
   }
 
   exists(): boolean {
