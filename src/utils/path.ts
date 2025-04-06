@@ -33,8 +33,8 @@ export class Path {
 
     this.relativePath = isJoinedPathAbsolute
       ? null
-      : path.join(Path.separator)
-    this.absolutePath = this.toAbsolutePath(path)
+      : joinedPath
+    this.absolutePath = this.toAbsolutePath(joinedPath)
     this.baseName = this.getBaseName(this.absolutePath)
     this.fileExtension = this.getFileExtension(this.absolutePath)
     this.type = this.getType(this.absolutePath)
@@ -58,8 +58,8 @@ export class Path {
   }
 
 
-  private toAbsolutePath(path: string[]): string {
-    return nodePath.resolve(...path)
+  private toAbsolutePath(path: string): string {
+    return nodePath.resolve(path)
   }
 
   private getBaseName(path: string): string {
