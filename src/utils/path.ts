@@ -22,7 +22,7 @@ export class Path {
   readonly absolutePath: string
   readonly baseName: string
   readonly fileExtension: string | null
-  readonly type: PathType
+  private _type: PathType
   private checksum?: string | null = undefined
 
 
@@ -32,7 +32,12 @@ export class Path {
     this.absolutePath = this.toAbsolutePath(joinedPath)
     this.baseName = this.getBaseName(this.absolutePath)
     this.fileExtension = this.getFileExtension(this.absolutePath)
-    this.type = this.getType(this.absolutePath)
+    this._type = this.getType(this.absolutePath)
+  }
+
+
+  get type(): PathType {
+    return this._type
   }
 
 
@@ -49,7 +54,11 @@ export class Path {
   }
 
   exists(): boolean {
-    return fs.existsSync(this.absolutePath)
+    const pathExists = fs.existsSync(this.absolutePath)
+    if (pathExists && this._type === PathType.PENDING) {
+      this._type = this.getType(this.absolutePath)
+    }
+    return pathExists
   }
 
   getRelativePathToRoot(rootPath: string): string {
