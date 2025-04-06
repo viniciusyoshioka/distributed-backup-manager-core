@@ -40,6 +40,15 @@ describe('Teste Path', () => {
     expect(path.type).toBe(PathType.PENDING)
   })
 
+  it('should return the relative path relative to the current working directory', () => {
+    const pathSegments = ['src', 'utils', 'path.ts']
+    const path = new Path(...pathSegments)
+
+    const relativePathExpected = pathSegments.join(Path.separator)
+
+    expect(path.getRelativePathToRoot(cwdPath)).toBe(relativePathExpected)
+  })
+
 
   describe('Test with files', () => {
 

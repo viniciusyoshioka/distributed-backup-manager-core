@@ -57,6 +57,10 @@ export class Path {
     return fs.existsSync(this.absolutePath)
   }
 
+  getRelativePathToRoot(rootPath: string): string {
+    return nodePath.relative(rootPath, this.absolutePath)
+  }
+
 
   private toAbsolutePath(path: string): string {
     return nodePath.resolve(path)
