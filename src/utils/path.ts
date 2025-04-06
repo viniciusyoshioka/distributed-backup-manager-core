@@ -58,19 +58,31 @@ export class Path {
   }
 
   getRelativePathToRoot(rootPath: string): string {
+    const isRootPathAbsolute = Path.isAbsolute(rootPath)
+    if (!isRootPathAbsolute) {
+      throw new Error('Root path must be absolute')
+    }
+
     return nodePath.relative(rootPath, this.absolutePath)
   }
 
 
   private toAbsolutePath(path: string): string {
+    if (Path.isAbsolute(path)) {
+      return path
+    }
     return nodePath.resolve(path)
   }
 
   private getBaseName(path: string): string {
+    path = this.toAbsolutePath(path)
+
     return nodePath.basename(path)
   }
 
   private getFileExtension(path: string): string | null {
+    path = this.toAbsolutePath(path)
+
     const extension = nodePath.extname(path)
     if (!extension.length) {
       return null
@@ -79,6 +91,8 @@ export class Path {
   }
 
   private getType(path: string): PathType {
+    path = this.toAbsolutePath(path)
+
     const pathExists = fs.existsSync(path)
     if (!pathExists) {
       return PathType.PENDING
