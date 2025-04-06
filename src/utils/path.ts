@@ -10,6 +10,7 @@ export enum PathType {
   FILE_SYMLINK = 'FILE_SYMLINK',
   DIR_SYMLINK = 'DIR_SYMLINK',
   OTHER = 'OTHER',
+  PENDING = 'PENDING',
 }
 
 
@@ -73,6 +74,10 @@ export class Path {
     return this._checksum
   }
 
+  exists(): boolean {
+    return fs.existsSync(this.absolutePath)
+  }
+
 
   private toAbsolutePath(path: string[]): string {
     return nodePath.resolve(...path)
@@ -91,6 +96,11 @@ export class Path {
   }
 
   private getType(path: string): PathType {
+    const pathExists = fs.existsSync(path)
+    if (!pathExists) {
+      return PathType.PENDING
+    }
+
     const lStats = fs.lstatSync(path)
     if (lStats.isFile()) {
       return PathType.FILE
