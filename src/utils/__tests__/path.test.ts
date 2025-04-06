@@ -15,15 +15,29 @@ describe('Teste Path', () => {
     expect(path.absolutePath).toBe(cwdPath)
   })
 
-  it('should throw when the path does not exists', () => {
+  it('should not add cwdPath prefix when an absolute path is provided', () => {
+    const pathSegments = ['', 'path', 'to', 'nowhere']
+    const absolutePath = pathSegments.join(Path.separator)
+    const path = new Path(absolutePath)
+
+    expect(Path.isAbsolute(absolutePath)).toBe(true)
+    expect(path.relativePath).toBeNull()
+    expect(path.absolutePath).toBe(absolutePath)
+    expect(path.absolutePath.startsWith(cwdPath)).toBe(false)
+  })
+
+  it('should not throw when the path does not exists', () => {
     const pathSegments = ['path', 'to', 'nowhere']
 
-    const relativePath = pathSegments.join(Path.separator)
-    const absolutePath = cwdPath.concat(Path.separator).concat(relativePath)
+    expect(() => new Path(...pathSegments)).not.toThrow()
+  })
 
-    expect(() => {
-      new Path(...pathSegments)
-    }).toThrow(`ENOENT: no such file or directory, lstat '${absolutePath}'`)
+  it('should set Path.type to be PENDING when the path does not exists', () => {
+    const pathSegments = ['path', 'to', 'nowhere']
+
+    const path = new Path(...pathSegments)
+
+    expect(path.type).toBe(PathType.PENDING)
   })
 
 

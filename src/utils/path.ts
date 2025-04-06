@@ -18,7 +18,7 @@ export class Path {
 
   static separator = nodePath.sep
 
-  private readonly _relativePath: string
+  private readonly _relativePath: string | null
   private readonly _absolutePath: string
   private readonly _baseName: string
   private readonly _fileExtension: string | null
@@ -27,7 +27,12 @@ export class Path {
 
 
   constructor(...path: string[]) {
-    this._relativePath = path.join(Path.separator)
+    const joinedPath = path.join(Path.separator)
+    const isJoinedPathAbsolute = Path.isAbsolute(joinedPath)
+
+    this._relativePath = isJoinedPathAbsolute
+      ? null
+      : path.join(Path.separator)
     this._absolutePath = this.toAbsolutePath(path)
     this._baseName = this.getBaseName(this._absolutePath)
     this._fileExtension = this.getFileExtension(this._absolutePath)
@@ -35,7 +40,7 @@ export class Path {
   }
 
 
-  get relativePath(): string {
+  get relativePath(): string | null {
     return this._relativePath
   }
 
@@ -54,6 +59,12 @@ export class Path {
   get type(): PathType {
     return this._type
   }
+
+
+  static isAbsolute(path: string): boolean {
+    return nodePath.isAbsolute(path)
+  }
+
 
   async getHash(): Promise<string | null> {
     if (this._checksum === undefined) {
