@@ -52,6 +52,10 @@ export class Path {
     return nodePath.isAbsolute(path)
   }
 
+  static exists(path: string): boolean {
+    return fs.existsSync(path)
+  }
+
 
   async calculateHash(): Promise<string | null> {
     this._hash = await hash(this)
@@ -59,7 +63,7 @@ export class Path {
   }
 
   exists(): boolean {
-    const pathExists = fs.existsSync(this.absolutePath)
+    const pathExists = Path.exists(this.absolutePath)
     if (pathExists && this._type === PathType.PENDING) {
       this._type = this.getType(this.absolutePath)
     }
@@ -108,7 +112,7 @@ export class Path {
   private getType(path: string): PathType {
     path = this.toAbsolutePath(path)
 
-    const pathExists = fs.existsSync(path)
+    const pathExists = Path.exists(path)
     if (!pathExists) {
       return PathType.PENDING
     }
