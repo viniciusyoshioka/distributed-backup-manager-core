@@ -20,8 +20,10 @@ export class Path {
   static separator = nodePath.sep
 
   readonly absolutePath: string
+  readonly parentAbsolutePath: string
   readonly baseName: string
   readonly fileExtension: string | null
+
   private _type: PathType
   private checksum?: string | null = undefined
 
@@ -30,6 +32,7 @@ export class Path {
     const joinedPath = nodePath.join(...path)
 
     this.absolutePath = this.toAbsolutePath(joinedPath)
+    this.parentAbsolutePath = this.toParentAbsolutePath(this.absolutePath)
     this.baseName = this.getBaseName(this.absolutePath)
     this.fileExtension = this.getFileExtension(this.absolutePath)
     this._type = this.getType(this.absolutePath)
@@ -76,6 +79,12 @@ export class Path {
       return path
     }
     return nodePath.resolve(path)
+  }
+
+  private toParentAbsolutePath(path: string): string {
+    path = this.toAbsolutePath(path)
+
+    return nodePath.dirname(path)
   }
 
   private getBaseName(path: string): string {
