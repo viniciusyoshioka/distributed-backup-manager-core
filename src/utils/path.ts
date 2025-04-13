@@ -25,7 +25,7 @@ export class Path {
   readonly fileExtension: string | null
 
   private _type: PathType
-  private checksum?: string | null = undefined
+  private _hash: string | null | undefined = undefined
 
 
   constructor(...path: string[]) {
@@ -43,17 +43,19 @@ export class Path {
     return this._type
   }
 
+  get hash(): string | null | undefined {
+    return this._hash
+  }
+
 
   static isAbsolute(path: string): boolean {
     return nodePath.isAbsolute(path)
   }
 
 
-  async getHash(): Promise<string | null> {
-    if (this.checksum === undefined) {
-      this.checksum = await hash(this)
-    }
-    return this.checksum
+  async calculateHash(): Promise<string | null> {
+    this._hash = await hash(this)
+    return this._hash
   }
 
   exists(): boolean {
