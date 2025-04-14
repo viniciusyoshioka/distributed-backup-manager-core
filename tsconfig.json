@@ -10,7 +10,8 @@
             "ESNext",
             "DOM"
         ],
-        "module": "CommonJS"
+        "module": "CommonJS",
+        "experimentalDecorators": true
     },
     "include": [
         "src"

@@ -16,25 +16,25 @@ async function main() {
     const exceptions: string[] = [
     ]
 
-    const localSyncer = new LocalSyncer({
+    const syncer = new LocalSyncer({
       source: sourcePath,
       destination: destinationPath,
       exceptions: exceptionsToPath(sourcePath, exceptions),
     })
 
-    const pathsToConfirm = await localSyncer.scanDiffs()
+    const pathsToConfirm = await syncer.scanDiffs()
     if (!pathsToConfirm) {
       console.log('No path with diffs found on scan')
       process.exit(0)
     }
 
-    const pathsToSync = await localSyncer.confirmDiffsToSync(pathsToConfirm)
+    const pathsToSync = await syncer.confirmDiffsToSync(pathsToConfirm)
     if (!pathsToSync) {
       console.log('No path with diffs was confirmed to be synced')
       process.exit(0)
     }
 
-    await localSyncer.syncDiffs(pathsToSync)
+    await syncer.syncDiffs(pathsToSync)
   } catch (error) {
     console.error(error)
   }
