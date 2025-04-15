@@ -13,10 +13,12 @@
         "start": "node --env-file='.env' dist/index.js"
     },
     "dependencies": {
+        "express": "^5.1.0",
         "zod": "^3.24.2"
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "^4.2.0",
+        "@types/express": "^5",
         "@types/jest": "^29.5.14",
         "@vinicius1313/eslint-config": "^2.0.1",
         "@vinicius1313/tsconfig": "^1.0.0",
