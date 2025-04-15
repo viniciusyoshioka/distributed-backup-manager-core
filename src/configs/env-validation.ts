@@ -4,6 +4,7 @@ import { z } from 'zod'
 const envSchema = z
   .object({
     STAGE: z.enum(['development', 'production']),
+    PORT: z.number({ coerce: true }).positive(),
     EXECUTION_TIME_ENABLED: z.enum(['true', 'false']).optional(),
   })
   .superRefine((arg, ctx) => {
