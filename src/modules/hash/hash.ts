@@ -11,7 +11,6 @@ export enum HashType {
 
 // TODO: Add validation to assert hashType is a valid enum value
 export async function hash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
-  // TODO: Maybe its possible to calculate the hash if it is a PathType.FILE_SYMLINK
   if (path.type !== PathType.FILE) {
     return null
   }
