@@ -1,5 +1,6 @@
 import './configs/env-validation'
 
+import { LocalFileSystem } from './modules/file-system'
 import { LocalSyncer } from './modules/syncer'
 import { Path } from './utils'
 
@@ -20,6 +21,7 @@ async function main() {
       source: sourcePath,
       destination: destinationPath,
       exceptions: exceptionsToPath(sourcePath, exceptions),
+      fileSystem: new LocalFileSystem(),
     })
 
     const pathsToConfirm = await syncer.scanDiffs()

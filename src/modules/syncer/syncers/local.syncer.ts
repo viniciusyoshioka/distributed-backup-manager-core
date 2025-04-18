@@ -1,4 +1,3 @@
-import fs, { CopySyncOptions, RmOptions } from 'node:fs'
 import { stdin, stdout } from 'node:process'
 import readline from 'node:readline/promises'
 
@@ -86,11 +85,10 @@ export class LocalSyncer extends Syncer {
   }
 
   @ExecutionTime()
-  // eslint-disable-next-line @typescript-eslint/require-await
   async syncDiffs(diffs: Diffs): Promise<void> {
-    this.deletePathsInDestination(diffs.pathsToDelete)
-    this.updatePathsInDestination(diffs.pathsToUpdate)
-    this.createPathsInDestination(diffs.pathsToCreate)
+    await this.deletePathsInDestination(diffs.pathsToDelete)
+    await this.updatePathsInDestination(diffs.pathsToUpdate)
+    await this.createPathsInDestination(diffs.pathsToCreate)
   }
 
 
@@ -113,12 +111,12 @@ export class LocalSyncer extends Syncer {
     const destinationPath = new Path(this.destination.absolutePath, path)
 
 
-    const sourceChildren = this.readPath(sourcePath)
+    const sourceChildren = await this.fileSystem.readDirectory(sourcePath)
     if (!sourceChildren) {
       throw new Error(`Source path "${sourcePath.absolutePath}" is not a directory`)
     }
 
-    const destinationChildren = this.readPath(destinationPath)
+    const destinationChildren = await this.fileSystem.readDirectory(destinationPath)
     if (!destinationChildren) {
       throw new Error(`Destination path "${destinationPath.absolutePath}" is not a directory`)
     }
@@ -133,7 +131,6 @@ export class LocalSyncer extends Syncer {
   }
 
   // TODO: Add a 'itemsToRename' to avoid transfer files (same hash but different name)
-  // TODO: Check if sync will perform a full sync. If not, don't delete
   private async getDiffs(params: GetDiffsParams): Promise<PathDiffs> {
     const { sourceParentPath, destinationParentPath } = params
     const { sourceChildrenNames, destinationChildrenNames } = params
@@ -288,7 +285,7 @@ export class LocalSyncer extends Syncer {
   }
 
 
-  private createPathsInDestination(pathsToCreate: Queue<string>): void {
+  private async createPathsInDestination(pathsToCreate: Queue<string>): Promise<void> {
     if (pathsToCreate.isEmpty()) return
 
     console.log('Creating in destination:')
@@ -300,14 +297,11 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path(this.destination.absolutePath, path)
 
       // TODO: Add try/catch
-      const isPathCopied = this.copyPath(pathFromSource, pathFromDestination)
-      if (!isPathCopied) {
-        console.log(`\t\tIgnored because of unsupported type: ${pathFromSource.type}`)
-      }
+      await this.fileSystem.copy(pathFromSource, pathFromDestination)
     }
   }
 
-  private updatePathsInDestination(pathsToUpdate: Queue<string>): void {
+  private async updatePathsInDestination(pathsToUpdate: Queue<string>): Promise<void> {
     if (pathsToUpdate.isEmpty()) return
 
     console.log('Updating in destination:')
@@ -319,15 +313,12 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path(this.destination.absolutePath, path)
 
       // TODO: Add try/catch
-      const isPathDeleted = this.deletePath(pathFromDestination)
-      const isPathCopied = this.copyPath(pathFromSource, pathFromDestination)
-      if (!isPathDeleted && !isPathCopied) {
-        console.log(`\t\tIgnored because of unsupported type: ${pathFromSource.type}`)
-      }
+      await this.fileSystem.delete(pathFromDestination)
+      await this.fileSystem.copy(pathFromSource, pathFromDestination)
     }
   }
 
-  private deletePathsInDestination(pathsToDelete: Queue<string>): void {
+  private async deletePathsInDestination(pathsToDelete: Queue<string>): Promise<void> {
     if (pathsToDelete.isEmpty()) return
 
     console.log('Deleting from destination:')
@@ -335,138 +326,10 @@ export class LocalSyncer extends Syncer {
       const path = pathsToDelete.dequeue()
       console.log(`\t${path}`)
 
-      const pathFromSource = new Path(this.source.absolutePath, path)
       const pathFromDestination = new Path(this.destination.absolutePath, path)
 
       // TODO: Add try/catch
-      const isPathDeleted = this.deletePath(pathFromDestination)
-      if (!isPathDeleted) {
-        console.log(`\t\tIgnored because of unsupported type: ${pathFromSource.type}`)
-      }
+      await this.fileSystem.delete(pathFromDestination)
     }
-  }
-
-  private deletePath(path: Path): boolean {
-    const pathExists = path.exists()
-    if (!pathExists) {
-      return true
-    }
-
-    if (path.type === PathType.FILE) {
-      this.deleteFile(path)
-      return true
-    }
-
-    if (path.type === PathType.DIR) {
-      this.deleteDir(path)
-      return true
-    }
-
-    return false
-  }
-
-  private deleteFile(path: Path): void {
-    const pathExists = path.exists()
-    if (!pathExists) {
-      throw new Error('Cannot delete file because it does not exists')
-    }
-
-    if (path.type !== PathType.FILE) {
-      throw new Error('Cannot delete path with deleteFile because it is not a file')
-    }
-
-    const rmOptions: RmOptions = {
-      force: true,
-      recursive: true,
-    }
-
-    fs.rmSync(path.absolutePath, rmOptions)
-  }
-
-  private deleteDir(path: Path): void {
-    const pathExists = path.exists()
-    if (!pathExists) {
-      throw new Error('Cannot delete directory because it does not exists')
-    }
-
-    if (path.type !== PathType.DIR) {
-      throw new Error('Cannot delete path with deleteDir because it is not a directory')
-    }
-
-    const rmOptions: RmOptions = {
-      force: true,
-      recursive: true,
-    }
-
-    fs.rmSync(path.absolutePath, rmOptions)
-  }
-
-  private copyPath(fromPath: Path, toPath: Path): boolean {
-    if (fromPath.type === PathType.FILE) {
-      this.copyFile(fromPath, toPath)
-      return true
-    }
-
-    if (fromPath.type === PathType.DIR) {
-      this.copyDir(fromPath, toPath)
-      return true
-    }
-
-    return false
-  }
-
-  private copyDir(fromPath: Path, toPath: Path): void {
-    const fromPathExists = fromPath.exists()
-    if (!fromPathExists) {
-      throw new Error('Cannot copy directory from fromPath to toPath because fromPath does not exists')
-    }
-
-    if (fromPath.type !== PathType.DIR) {
-      throw new Error('Cannot copy fromPath with copyDir because it is not a directory')
-    }
-
-    const toPathExists = toPath.exists()
-    if (toPathExists) {
-      this.deletePath(toPath)
-    }
-
-    const copySyncOptions: CopySyncOptions = {
-      force: true,
-      recursive: true,
-    }
-
-    fs.cpSync(fromPath.absolutePath, toPath.absolutePath, copySyncOptions)
-  }
-
-  private copyFile(fromPath: Path, toPath: Path): void {
-    const fromPathExists = fromPath.exists()
-    if (!fromPathExists) {
-      throw new Error('Cannot copy file from fromPath to toPath because fromPath does not exists')
-    }
-
-    if (fromPath.type !== PathType.FILE) {
-      throw new Error('Cannot copy fromPath with copyFile because it is not a file')
-    }
-
-    const toPathExists = toPath.exists()
-    if (toPathExists) {
-      this.deletePath(toPath)
-    }
-
-    const parentPath = new Path(toPath.parentAbsolutePath)
-    const parentPathExists = parentPath.exists()
-    if (!parentPathExists) {
-      this.createDir(parentPath)
-    }
-
-    fs.copyFileSync(fromPath.absolutePath, toPath.absolutePath)
-  }
-
-  private createDir(path: Path): void {
-    if (path.exists()) {
-      throw new Error('Cannot create directory because something already exists in given path')
-    }
-
-    fs.mkdirSync(path.absolutePath, { recursive: true })
   }
 }

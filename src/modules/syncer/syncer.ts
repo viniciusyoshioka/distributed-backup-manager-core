@@ -1,6 +1,5 @@
-import fs from 'node:fs'
-
-import { Path, PathType } from '../../utils'
+import { Path } from '../../utils'
+import { FileSystem } from '../file-system'
 import { Diffs } from './syncer.types'
 
 
@@ -33,6 +32,8 @@ export interface SyncerParams {
    * Default: `SyncerMode.BLOCKLIST`
    */
   exceptionMode?: SyncerExceptionMode
+
+  fileSystem: FileSystem
 }
 
 
@@ -43,6 +44,7 @@ export abstract class Syncer {
   protected readonly destination: Path
   protected readonly exceptions: Path[]
   protected readonly exceptionMode: SyncerExceptionMode
+  protected readonly fileSystem: FileSystem
 
 
   constructor(params: SyncerParams) {
@@ -50,6 +52,7 @@ export abstract class Syncer {
     this.destination = params.destination
     this.exceptions = params.exceptions ?? []
     this.exceptionMode = params.exceptionMode ?? SyncerExceptionMode.BLOCKLIST
+    this.fileSystem = params.fileSystem
   }
 
 
@@ -59,17 +62,6 @@ export abstract class Syncer {
 
   abstract syncDiffs(diffs: Diffs): Promise<void>
 
-
-  // TODO: Add support to read path on remote machines
-  protected readPath(path: Path): string[] | null {
-    if (!path.exists()) {
-      return []
-    }
-    if (path.type !== PathType.DIR) {
-      return null
-    }
-    return fs.readdirSync(path.absolutePath)
-  }
 
   protected isPathInExceptionList(path: Path): boolean {
     const rootAbsolutePath = this.source.absolutePath
