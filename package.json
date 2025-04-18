@@ -10,7 +10,9 @@
         "typecheck": "tsc --noEmit",
         "build": "tsc",
         "test": "jest",
-        "start": "node --env-file='.env' dist/index.js"
+        "start": "node --env-file='.env' dist/index.js",
+        "sync-server:start:prod": "node --env-file='.env' dist/modules/sync-server/index.js",
+        "sync-server:start:dev": "nodemon --env-file='.env' dist/modules/sync-server/index.js"
     },
     "dependencies": {
         "express": "^5.1.0",
