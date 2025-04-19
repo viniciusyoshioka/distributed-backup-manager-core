@@ -107,8 +107,8 @@ export class LocalSyncer extends Syncer {
   private async scanPathDiffs(path: string): Promise<PathDiffs> {
     console.log(`Scanning diffs for "${path}"...`)
 
-    const sourcePath = new Path(this.source.absolutePath, path)
-    const destinationPath = new Path(this.destination.absolutePath, path)
+    const sourcePath = new Path([this.source.absolutePath, path])
+    const destinationPath = new Path([this.destination.absolutePath, path])
 
 
     const sourceChildren = await this.fileSystem.readDirectory(sourcePath)
@@ -143,8 +143,8 @@ export class LocalSyncer extends Syncer {
 
 
     for (const sourceChildName of sourceChildrenNames) {
-      const sourceChildPath = new Path(sourceParentPath.absolutePath, sourceChildName)
-      const destinationChildPath = new Path(destinationParentPath.absolutePath, sourceChildName)
+      const sourceChildPath = new Path([sourceParentPath.absolutePath, sourceChildName])
+      const destinationChildPath = new Path([destinationParentPath.absolutePath, sourceChildName])
       const sourceRelativePath = sourceChildPath.getRelativePathToRoot(this.source.absolutePath)
 
 
@@ -200,10 +200,10 @@ export class LocalSyncer extends Syncer {
 
     // Delete path in destination
     for (const destinationChildName of destinationChildrenNames) {
-      const destinationChildPath = new Path(
+      const destinationChildPath = new Path([
         destinationParentPath.absolutePath,
         destinationChildName,
-      )
+      ])
       const destinationRelativePath = destinationChildPath.getRelativePathToRoot(
         this.destination.absolutePath,
       )
@@ -293,8 +293,8 @@ export class LocalSyncer extends Syncer {
       const path = pathsToCreate.dequeue()
       console.log(`\t${path}`)
 
-      const pathFromSource = new Path(this.source.absolutePath, path)
-      const pathFromDestination = new Path(this.destination.absolutePath, path)
+      const pathFromSource = new Path([this.source.absolutePath, path])
+      const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
       await this.fileSystem.copy(pathFromSource, pathFromDestination)
@@ -309,8 +309,8 @@ export class LocalSyncer extends Syncer {
       const path = pathsToUpdate.dequeue()
       console.log(`\t${path}`)
 
-      const pathFromSource = new Path(this.source.absolutePath, path)
-      const pathFromDestination = new Path(this.destination.absolutePath, path)
+      const pathFromSource = new Path([this.source.absolutePath, path])
+      const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
       await this.fileSystem.delete(pathFromDestination)
@@ -326,7 +326,7 @@ export class LocalSyncer extends Syncer {
       const path = pathsToDelete.dequeue()
       console.log(`\t${path}`)
 
-      const pathFromDestination = new Path(this.destination.absolutePath, path)
+      const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
       await this.fileSystem.delete(pathFromDestination)

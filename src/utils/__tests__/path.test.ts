@@ -27,20 +27,20 @@ describe('Teste Path', () => {
   it('should not throw when the path does not exists', () => {
     const pathSegments = ['path', 'to', 'nowhere']
 
-    expect(() => new Path(...pathSegments)).not.toThrow()
+    expect(() => new Path(pathSegments)).not.toThrow()
   })
 
   it('should set Path.type to be PENDING when the path does not exists', () => {
     const pathSegments = ['path', 'to', 'nowhere']
 
-    const path = new Path(...pathSegments)
+    const path = new Path(pathSegments)
 
     expect(path.type).toBe(PathType.PENDING)
   })
 
   it('should return the relative path relative to the current working directory', () => {
     const pathSegments = ['src', 'utils', 'path.ts']
-    const path = new Path(...pathSegments)
+    const path = new Path(pathSegments)
 
     const relativePathExpected = pathSegments.join(Path.separator)
 
@@ -51,7 +51,7 @@ describe('Teste Path', () => {
   describe('Test with files', () => {
 
     const pathSegments = ['src', 'utils', 'path.ts']
-    const path = new Path(...pathSegments)
+    const path = new Path(pathSegments)
 
     it('should return the correct absolute path', () => {
       const relativePath = pathSegments.join(Path.separator)
@@ -76,7 +76,7 @@ describe('Teste Path', () => {
   describe('Test Path for folders', () => {
 
     const pathSegments = ['src', 'utils', '__tests__']
-    const path = new Path(...pathSegments)
+    const path = new Path(pathSegments)
 
     it('should return the correct absolute path', () => {
       const relativePath = pathSegments.join(Path.separator)

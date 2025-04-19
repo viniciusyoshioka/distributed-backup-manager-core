@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import nodePath from 'node:path'
+import process from 'node:process'
 
 import { hash } from '../modules/hash'
 
@@ -28,8 +29,10 @@ export class Path {
   private _hash: string | null | undefined = undefined
 
 
-  constructor(...path: string[]) {
-    const joinedPath = nodePath.join(...path)
+  constructor(path: string | string[] = process.cwd()) {
+    const joinedPath = Array.isArray(path)
+      ? nodePath.join(...path)
+      : path
 
     this.absolutePath = this.toAbsolutePath(joinedPath)
     this.parentAbsolutePath = this.toParentAbsolutePath(this.absolutePath)

@@ -6,7 +6,7 @@ import { Path } from './utils'
 
 
 function exceptionsToPath(sourcePath: Path, exceptions: string[]): Path[] {
-  return exceptions.map(path => new Path(sourcePath.absolutePath, path))
+  return exceptions.map(path => new Path([sourcePath.absolutePath, path]))
 }
 
 
