@@ -1,3 +1,5 @@
+import '../../configs/env-validation'
+
 import { createServer } from './server'
 
 
