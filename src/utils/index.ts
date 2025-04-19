@@ -1,4 +1,5 @@
 export * from './assert'
+export * from './ip'
 export * from './path'
 export * from './queue'
 export * from './validators'
