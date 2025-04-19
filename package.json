@@ -6,10 +6,10 @@
     "type": "commonjs",
     "scripts": {
         "postinstall": "npx patch-package",
-        "lint": "eslint '**/*.{js,ts,tsx}'",
+        "lint": "eslint 'src/**/*.{js,ts,tsx}'",
         "typecheck": "tsc --noEmit",
-        "build": "tsc",
         "test": "jest",
+        "build": "tsc",
         "start": "node --env-file='.env' dist/index.js",
         "sync-server:start:prod": "node --env-file='.env' dist/modules/sync-server/index.js",
         "sync-server:start:dev": "nodemon --env-file='.env' dist/modules/sync-server/index.js"
