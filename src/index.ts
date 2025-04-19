@@ -12,8 +12,9 @@ function exceptionsToPath(sourcePath: Path, exceptions: string[]): Path[] {
 
 async function main() {
   try {
-    const sourcePath = new Path('')
-    const destinationPath = new Path('')
+    const cwd = process.cwd()
+    const sourcePath = new Path([cwd, ''])
+    const destinationPath = new Path([cwd, ''])
     const exceptions: string[] = [
     ]
 

@@ -9,7 +9,7 @@ describe('Test Hash module', () => {
 
   const cwd = process.cwd()
 
-  const path = new Path('./src/modules/hash/__tests__/test_file.txt')
+  const path = new Path([cwd, 'src/modules/hash/__tests__/test_file.txt'])
   const expectedSha256 = '04d2f0aa6d6415cd1671b56695b9417fce416afb0e9106f08f752f86839e3ad3'
 
   const mockPath = {
@@ -30,7 +30,7 @@ describe('Test Hash module', () => {
   })
 
   it('should return null if the path is not a file', async () => {
-    const folderPath = new Path('./src/modules/hash/__tests__')
+    const folderPath = new Path([cwd, 'src/modules/hash/__tests__'])
     const checksum = await hash(folderPath)
     expect(checksum).toBe(null)
   })

@@ -1,6 +1,5 @@
 import fs from 'node:fs'
 import nodePath from 'node:path'
-import process from 'node:process'
 
 import { hash } from '../modules/hash'
 
@@ -11,7 +10,7 @@ export enum PathType {
   FILE_SYMLINK = 'FILE_SYMLINK',
   DIR_SYMLINK = 'DIR_SYMLINK',
   OTHER = 'OTHER',
-  PENDING = 'PENDING',
+  UNKNOWN = 'UNKNOWN',
 }
 
 
@@ -29,13 +28,15 @@ export class Path {
   private _hash: string | null | undefined = undefined
 
 
-  constructor(path: string | string[] = process.cwd()) {
+  constructor(path: string | string[]) {
     const joinedPath = Array.isArray(path)
       ? nodePath.join(...path)
       : path
 
-    this.absolutePath = this.toAbsolutePath(joinedPath)
-    this.parentAbsolutePath = this.toParentAbsolutePath(this.absolutePath)
+    this.assertPathIsAbsolute(joinedPath)
+
+    this.absolutePath = joinedPath
+    this.parentAbsolutePath = this.getParentAbsolutePath(this.absolutePath)
     this.baseName = this.getBaseName(this.absolutePath)
     this.fileExtension = this.getFileExtension(this.absolutePath)
     this._type = this.getType(this.absolutePath)
@@ -67,7 +68,7 @@ export class Path {
 
   exists(): boolean {
     const pathExists = Path.exists(this.absolutePath)
-    if (pathExists && this._type === PathType.PENDING) {
+    if (pathExists && this._type === PathType.UNKNOWN) {
       this._type = this.getType(this.absolutePath)
     }
     return pathExists
@@ -83,41 +84,38 @@ export class Path {
   }
 
 
-  private toAbsolutePath(path: string): string {
-    if (Path.isAbsolute(path)) {
-      return path
+  private assertPathIsAbsolute(path: string): void {
+    const pathIsAbsolute = Path.isAbsolute(path)
+    if (!pathIsAbsolute) {
+      throw new Error('Path must be absolute')
     }
-    return nodePath.resolve(path)
   }
 
-  private toParentAbsolutePath(path: string): string {
-    path = this.toAbsolutePath(path)
+  private getParentAbsolutePath(path: string): string {
+    this.assertPathIsAbsolute(path)
 
     return nodePath.dirname(path)
   }
 
   private getBaseName(path: string): string {
-    path = this.toAbsolutePath(path)
+    this.assertPathIsAbsolute(path)
 
     return nodePath.basename(path)
   }
 
   private getFileExtension(path: string): string | null {
-    path = this.toAbsolutePath(path)
+    this.assertPathIsAbsolute(path)
 
     const extension = nodePath.extname(path)
-    if (!extension.length) {
-      return null
-    }
-    return extension
+    return extension.length ? extension : null
   }
 
   private getType(path: string): PathType {
-    path = this.toAbsolutePath(path)
+    this.assertPathIsAbsolute(path)
 
     const pathExists = Path.exists(path)
     if (!pathExists) {
-      return PathType.PENDING
+      return PathType.UNKNOWN
     }
 
     const lStats = fs.lstatSync(path)

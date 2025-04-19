@@ -9,40 +9,40 @@ describe('Teste Path', () => {
   const cwdPath = process.cwd()
 
 
-  it('should return cwd when no path is provided', () => {
-    const path = new Path()
-    expect(path.absolutePath).toBe(cwdPath)
-  })
-
-  it('should not add cwdPath prefix when an absolute path is provided', () => {
+  it('should create Path correctly', () => {
     const pathSegments = ['', 'path', 'to', 'nowhere']
     const absolutePath = pathSegments.join(Path.separator)
     const path = new Path(absolutePath)
 
     expect(Path.isAbsolute(absolutePath)).toBe(true)
     expect(path.absolutePath).toBe(absolutePath)
-    expect(path.absolutePath.startsWith(cwdPath)).toBe(false)
+  })
+
+  it('should throw when the given path is not absolute', () => {
+    const pathSegments = ['src', 'utils', 'path.ts']
+    expect(() => new Path(pathSegments)).toThrow('Path must be absolute')
   })
 
   it('should not throw when the path does not exists', () => {
-    const pathSegments = ['path', 'to', 'nowhere']
+    const pathSegments = [cwdPath, 'path', 'to', 'nowhere']
 
     expect(() => new Path(pathSegments)).not.toThrow()
   })
 
-  it('should set Path.type to be PENDING when the path does not exists', () => {
-    const pathSegments = ['path', 'to', 'nowhere']
+  it(`should set Path.type to ${PathType.UNKNOWN} when the path does not exists`, () => {
+    const pathSegments = [cwdPath, 'path', 'to', 'nowhere']
 
     const path = new Path(pathSegments)
 
-    expect(path.type).toBe(PathType.PENDING)
+    expect(path.type).toBe(PathType.UNKNOWN)
   })
 
   it('should return the relative path relative to the current working directory', () => {
-    const pathSegments = ['src', 'utils', 'path.ts']
-    const path = new Path(pathSegments)
+    const relativePathSegments = ['src', 'utils', 'path.ts']
+    const absolutePathSegments = [cwdPath, ...relativePathSegments]
+    const path = new Path(absolutePathSegments)
 
-    const relativePathExpected = pathSegments.join(Path.separator)
+    const relativePathExpected = relativePathSegments.join(Path.separator)
 
     expect(path.getRelativePathToRoot(cwdPath)).toBe(relativePathExpected)
   })
@@ -50,12 +50,11 @@ describe('Teste Path', () => {
 
   describe('Test with files', () => {
 
-    const pathSegments = ['src', 'utils', 'path.ts']
+    const pathSegments = [cwdPath, 'src', 'utils', 'path.ts']
     const path = new Path(pathSegments)
 
     it('should return the correct absolute path', () => {
-      const relativePath = pathSegments.join(Path.separator)
-      const absolutePath = [cwdPath, relativePath].join(Path.separator)
+      const absolutePath = pathSegments.join(Path.separator)
       expect(path.absolutePath).toBe(absolutePath)
     })
 
@@ -67,7 +66,7 @@ describe('Teste Path', () => {
       expect(path.fileExtension).toBe('.ts')
     })
 
-    it('should return FILE type', () => {
+    it(`should return ${PathType.FILE} type`, () => {
       expect(path.type).toBe(PathType.FILE)
     })
   })
@@ -75,12 +74,11 @@ describe('Teste Path', () => {
 
   describe('Test Path for folders', () => {
 
-    const pathSegments = ['src', 'utils', '__tests__']
+    const pathSegments = [cwdPath, 'src', 'utils', '__tests__']
     const path = new Path(pathSegments)
 
     it('should return the correct absolute path', () => {
-      const relativePath = pathSegments.join(Path.separator)
-      const absolutePath = [cwdPath, relativePath].join(Path.separator)
+      const absolutePath = pathSegments.join(Path.separator)
       expect(path.absolutePath).toBe(absolutePath)
     })
 
@@ -92,7 +90,7 @@ describe('Teste Path', () => {
       expect(path.fileExtension).toBe(null)
     })
 
-    it('should return DIR type', () => {
+    it(`should return ${PathType.DIR} type`, () => {
       expect(path.type).toBe(PathType.DIR)
     })
   })
