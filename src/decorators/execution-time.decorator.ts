@@ -13,7 +13,8 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
 
 
   return (
-    target: object,
+    // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
+    target: Object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ): PropertyDescriptor => {
@@ -31,8 +32,14 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
 
       const logExecution = () => {
         const endTime = performance.now()
+
+        const targetClassName = target.constructor.name
+        const targetPropertyName = String(propertyKey)
+        const targetPropertyPath = `${targetClassName}.${targetPropertyName}`
+
         const fixedExecutionTime = (endTime - startTime).toFixed(2)
-        console.log(`[ExecutionTime] ${String(propertyKey)} executed in ${fixedExecutionTime}ms`)
+
+        console.log(`[${ExecutionTime.name}] ${targetPropertyPath} executed in ${fixedExecutionTime}ms`)
       }
 
 
