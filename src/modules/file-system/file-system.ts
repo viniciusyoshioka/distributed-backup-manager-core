@@ -4,8 +4,16 @@ import { Path, PathType } from '../../utils'
 
 
 export class FileSystem {
+  // TODO: Assert path is absolute
+  // TODO: Use Path class and avoid circular dependency
+  exists(path: string): boolean {
+    return fs.existsSync(path)
+  }
+
+
   readDirectory(path: Path): string[] | null {
-    if (!path.exists()) {
+    const pathExists = this.exists(path.absolutePath)
+    if (!pathExists) {
       return []
     }
     if (path.type !== PathType.DIR) {
