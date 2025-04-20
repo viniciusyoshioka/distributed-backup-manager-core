@@ -1,8 +1,7 @@
 import './configs/env-validation'
 
-import { LocalFileSystem } from './modules/file-system'
+import { LocalFileSystem, Path } from './modules/file-system'
 import { LocalSyncer } from './modules/syncer'
-import { Path } from './utils'
 
 
 function exceptionsToPath(sourcePath: Path, exceptions: string[]): Path[] {

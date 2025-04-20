@@ -1,5 +1,4 @@
-import { Path } from '../../utils'
-import { FileSystem } from '../file-system'
+import { FileSystem, Path } from '../file-system'
 import { Diffs } from './syncer.types'
 
 

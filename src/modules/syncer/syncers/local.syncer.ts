@@ -2,7 +2,8 @@ import { stdin, stdout } from 'node:process'
 import readline from 'node:readline/promises'
 
 import { ExecutionTime } from '../../../decorators'
-import { Path, PathType, Queue } from '../../../utils'
+import { Queue } from '../../../utils'
+import { Path, PathType } from '../../file-system'
 import { Syncer } from '../syncer'
 import { Diffs } from '../syncer.types'
 

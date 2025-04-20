@@ -1,6 +1,6 @@
 import fs, { CopySyncOptions, RmOptions } from 'node:fs'
 
-import { Path, PathType } from '../../utils'
+import { Path, PathType } from './path'
 
 
 export class FileSystem {
