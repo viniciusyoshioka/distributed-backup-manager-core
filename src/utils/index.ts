@@ -1,6 +1,4 @@
 export * from './assert'
-export * from './ip'
-export * from './network-address'
 export * from './path'
 export * from './queue'
 export * from './validators'
