@@ -1,4 +1,4 @@
-import { NetworkAddress } from '../../utils'
+import { NetworkAddress } from '../network'
 import { PathSubClient, SyncSubClient } from './sub-clients'
 
 

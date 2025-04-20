@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
-import { NetworkAddress } from '../../../utils'
+import { NetworkAddress } from '../../network'
 
 
 export class SyncSubClient {
