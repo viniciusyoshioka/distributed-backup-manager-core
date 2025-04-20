@@ -86,9 +86,9 @@ export class LocalSyncer extends Syncer {
 
   @ExecutionTime()
   async syncDiffs(diffs: Diffs): Promise<void> {
-    await this.deletePathsInDestination(diffs.pathsToDelete)
-    await this.updatePathsInDestination(diffs.pathsToUpdate)
-    await this.createPathsInDestination(diffs.pathsToCreate)
+    this.deletePathsInDestination(diffs.pathsToDelete)
+    this.updatePathsInDestination(diffs.pathsToUpdate)
+    this.createPathsInDestination(diffs.pathsToCreate)
   }
 
 
@@ -111,12 +111,12 @@ export class LocalSyncer extends Syncer {
     const destinationPath = new Path([this.destination.absolutePath, path])
 
 
-    const sourceChildren = await this.fileSystem.readDirectory(sourcePath)
+    const sourceChildren = this.fileSystem.readDirectory(sourcePath)
     if (!sourceChildren) {
       throw new Error(`Source path "${sourcePath.absolutePath}" is not a directory`)
     }
 
-    const destinationChildren = await this.fileSystem.readDirectory(destinationPath)
+    const destinationChildren = this.fileSystem.readDirectory(destinationPath)
     if (!destinationChildren) {
       throw new Error(`Destination path "${destinationPath.absolutePath}" is not a directory`)
     }
@@ -285,7 +285,7 @@ export class LocalSyncer extends Syncer {
   }
 
 
-  private async createPathsInDestination(pathsToCreate: Queue<string>): Promise<void> {
+  private createPathsInDestination(pathsToCreate: Queue<string>): void {
     if (pathsToCreate.isEmpty()) return
 
     console.log('Creating in destination:')
@@ -297,11 +297,11 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.copy(pathFromSource, pathFromDestination)
+      this.fileSystem.copy(pathFromSource, pathFromDestination)
     }
   }
 
-  private async updatePathsInDestination(pathsToUpdate: Queue<string>): Promise<void> {
+  private updatePathsInDestination(pathsToUpdate: Queue<string>): void {
     if (pathsToUpdate.isEmpty()) return
 
     console.log('Updating in destination:')
@@ -313,12 +313,12 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.delete(pathFromDestination)
-      await this.fileSystem.copy(pathFromSource, pathFromDestination)
+      this.fileSystem.delete(pathFromDestination)
+      this.fileSystem.copy(pathFromSource, pathFromDestination)
     }
   }
 
-  private async deletePathsInDestination(pathsToDelete: Queue<string>): Promise<void> {
+  private deletePathsInDestination(pathsToDelete: Queue<string>): void {
     if (pathsToDelete.isEmpty()) return
 
     console.log('Deleting from destination:')
@@ -329,7 +329,7 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.delete(pathFromDestination)
+      this.fileSystem.delete(pathFromDestination)
     }
   }
 }
