@@ -6,13 +6,13 @@
     "type": "commonjs",
     "scripts": {
         "postinstall": "npx patch-package",
-        "lint": "eslint 'src/**/*.{js,ts,tsx}'",
+        "lint": "eslint './src/**/*.{js,ts,tsx}'",
         "typecheck": "tsc --noEmit",
         "test": "jest",
         "build": "tsc",
-        "start": "node --env-file='.env' dist/index.js",
-        "sync-server:start:prod": "node --env-file='.env' dist/modules/sync-server/index.js",
-        "sync-server:start:dev": "nodemon --env-file='.env' dist/modules/sync-server/index.js"
+        "start": "node --env-file='.env' ./dist/index.js",
+        "sync-server:start:prod": "node --env-file='.env' ./dist/modules/sync-server/index.js",
+        "sync-server:start:dev": "nodemon -r ./src/configs/env-loader.ts ./src/modules/sync-server/index.ts"
     },
     "dependencies": {
         "axios": "^1.8.4",
@@ -26,10 +26,12 @@
         "@types/jest": "^29.5.14",
         "@vinicius1313/eslint-config": "^2.0.1",
         "@vinicius1313/tsconfig": "^1.0.0",
+        "dotenv": "^16.5.0",
         "eslint": "^9.23.0",
         "jest": "^29.7.0",
         "nodemon": "^3.1.9",
         "ts-jest": "^29.3.0",
+        "ts-node": "^10.9.2",
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.28.0"
     },
