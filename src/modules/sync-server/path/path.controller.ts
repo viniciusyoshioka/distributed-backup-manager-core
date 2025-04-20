@@ -12,10 +12,10 @@ export class PathController {
   build(): Router {
     const router = Router()
 
-    router.get('/', this.get)
-    router.post('/', this.post)
-    router.put('/', this.put)
-    router.delete('/', this.delete)
+    router.get('/', this.get.bind(this))
+    router.post('/', this.post.bind(this))
+    router.put('/', this.put.bind(this))
+    router.delete('/', this.delete.bind(this))
 
     return router
   }
