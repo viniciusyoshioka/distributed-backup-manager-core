@@ -11,11 +11,14 @@ export function createServer(): Express {
   app.use(express.urlencoded({ extended: true }))
 
 
+  const apiRoute = express.Router()
+  app.use('/api', apiRoute)
+
   const pathRouter = createPathRouterV1()
-  app.use('/path/v1', pathRouter)
+  apiRoute.use('/path/v1', pathRouter)
 
   const syncRouter = createSyncRouterV1()
-  app.use('/sync/v1', syncRouter)
+  apiRoute.use('/sync/v1', syncRouter)
 
 
   return app
