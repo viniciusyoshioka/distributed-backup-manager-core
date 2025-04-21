@@ -1,10 +1,12 @@
-import express, { Express } from 'express'
+import '../../configs/env-validation'
 
-import { createPathRouterV1 } from './path'
-import { createSyncRouterV1 } from './sync'
+import express from 'express'
+
+import { createPathRouterV1 } from './path/utils'
+import { createSyncRouterV1 } from './sync/utils'
 
 
-export function createServer(): Express {
+function createAndStartServer(): void {
   const app = express()
 
   app.use(express.json())
@@ -21,5 +23,11 @@ export function createServer(): Express {
   apiRoute.use('/sync/v1', syncRouter)
 
 
-  return app
+  const port = process.env.PORT
+  app.listen(port, () => {
+    console.log(`sync-server listening at port ${port}`)
+  })
 }
+
+
+createAndStartServer()
