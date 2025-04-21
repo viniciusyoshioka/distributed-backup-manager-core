@@ -15,34 +15,26 @@ export async function hash(path: Path, hashType = HashType.SHA_256): Promise<str
   }
 
 
-  const hashStream = createHash(hashType)
   const fileStream = createReadStream(path.absolutePath)
+  const hashStream = createHash(hashType)
 
+  try {
+    for await (const chunk of fileStream) {
+      hashStream.update(chunk as string | Buffer)
+    }
 
-  return await new Promise<string>((resolve, reject) => {
-    hashStream.on('error', error => {
-      hashStream.destroy()
-      fileStream.destroy()
-      reject(error)
-    })
+    const digestedHash = hashStream.digest('hex')
+    hashStream.destroy()
+    fileStream.destroy()
+    return digestedHash
+  } catch (error) {
+    hashStream.destroy()
+    fileStream.destroy()
 
-
-    fileStream.on('data', chunk => {
-      hashStream.update(chunk)
-    })
-
-    fileStream.on('end', () => {
-      const digestedHash = hashStream.digest('hex')
-
-      hashStream.destroy()
-      fileStream.destroy()
-      resolve(digestedHash)
-    })
-
-    fileStream.on('error', error => {
-      hashStream.destroy()
-      fileStream.destroy()
-      reject(error)
-    })
-  })
+    if (error instanceof Error) {
+      throw error
+    }
+    const errorMessage = String(error)
+    throw new Error(errorMessage)
+  }
 }

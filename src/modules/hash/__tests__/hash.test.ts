@@ -1,7 +1,7 @@
 import process from 'node:process'
 
 import { hash, HashType } from '..'
-import { Path, PathType } from '../../file-system'
+import { LocalFileSystem, Path, PathType } from '../../file-system'
 
 
 describe('Test Hash module', () => {
@@ -9,7 +9,9 @@ describe('Test Hash module', () => {
 
   const cwd = process.cwd()
 
+  const localFileSystem = new LocalFileSystem()
   const path = new Path([cwd, 'src/modules/hash/__tests__/test_file.txt'])
+
   const expectedSha256 = '04d2f0aa6d6415cd1671b56695b9417fce416afb0e9106f08f752f86839e3ad3'
 
   const mockPath = {
@@ -19,6 +21,7 @@ describe('Test Hash module', () => {
 
 
   it('should use sha-256 algorithm by default', async () => {
+    localFileSystem.resolvePathType(path)
     const checksum = await hash(path)
     expect(checksum).toBe(expectedSha256)
   })
@@ -31,11 +34,13 @@ describe('Test Hash module', () => {
 
   it('should return null if the path is not a file', async () => {
     const folderPath = new Path([cwd, 'src/modules/hash/__tests__'])
+    localFileSystem.resolvePathType(folderPath)
     const checksum = await hash(folderPath)
     expect(checksum).toBe(null)
   })
 
   it('should return the correct hash when using SHA-256 hash type', async () => {
+    localFileSystem.resolvePathType(path)
     const checksum = await hash(path, HashType.SHA_256)
     expect(checksum).toBe(expectedSha256)
   })
