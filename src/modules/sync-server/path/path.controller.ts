@@ -24,10 +24,7 @@ export class PathController {
     const router = Router()
 
     router.get('/exists', this.getPathExists.bind(this))
-    router.get('/', this.get.bind(this))
-    router.post('/', this.post.bind(this))
-    router.put('/', this.put.bind(this))
-    router.delete('/', this.delete.bind(this))
+    router.get('/path-type', this.resolvePathType.bind(this))
 
     return router
   }
@@ -47,11 +44,18 @@ export class PathController {
     }
   }
 
-  private get(req: Request, res: Response): void {}
 
-  private post(req: Request, res: Response): void {}
+  private async resolvePathType(req: Request, res: Response): Promise<void> {
+    try {
+      const query = PathMapper.fromQueryObjectToResolvePathTypeDto(req.query)
 
-  private put(req: Request, res: Response): void {}
+      const pathType = await this.pathService.resolvePathType(query.path)
 
-  private delete(req: Request, res: Response): void {}
+      res.json(pathType)
+    } catch (error) {
+      console.error(`Error in ${PathController.name}.${this.resolvePathType.name}`)
+      console.error(error)
+      res.status(500).send()
+    }
+  }
 }

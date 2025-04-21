@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
+import { PathType } from '../../file-system'
 import { NetworkAddress } from '../../network'
 
 
@@ -21,6 +22,17 @@ export class PathSubClient {
 
   async exists(absolutePath: string): Promise<boolean> {
     const { data } = await this.client.get<boolean>('/exists', {
+      params: {
+        path: absolutePath,
+      },
+    })
+
+    return data
+  }
+
+
+  async resolvePathType(absolutePath: string): Promise<PathType> {
+    const { data } = await this.client.get<PathType>('/path-type', {
       params: {
         path: absolutePath,
       },

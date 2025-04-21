@@ -1,4 +1,4 @@
-import { FileSystem, Path } from '../../file-system'
+import { FileSystem, Path, PathType } from '../../file-system'
 
 
 export interface PathServiceParams {
@@ -6,6 +6,7 @@ export interface PathServiceParams {
 }
 
 
+// TODO: Check if path is contained in root directory that is synced
 export class PathService {
 
 
@@ -17,9 +18,14 @@ export class PathService {
   }
 
 
-  // TODO: Check if path is contained in root directory that is synced
   async getPathExists(path: string): Promise<boolean> {
     const pathInstance = new Path(path)
     return await this.fileSystem.exists(pathInstance)
+  }
+
+
+  async resolvePathType(path: string): Promise<PathType> {
+    const pathInstance = new Path(path)
+    return await this.fileSystem.resolvePathType(pathInstance)
   }
 }
