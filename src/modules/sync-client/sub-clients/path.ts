@@ -1,7 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
 import { NetworkAddress } from '../../network'
-import { GetPathExistsResponseDTO } from '../../sync-server'
 
 
 export class PathSubClient {
@@ -21,12 +20,12 @@ export class PathSubClient {
 
 
   async exists(absolutePath: string): Promise<boolean> {
-    const { data } = await this.client.get<GetPathExistsResponseDTO>('/exists', {
+    const { data } = await this.client.get<boolean>('/exists', {
       params: {
         path: absolutePath,
       },
     })
 
-    return data.exists
+    return data
   }
 }

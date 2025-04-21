@@ -1,6 +1,5 @@
 import { Request, Response, Router } from 'express'
 
-import { GetPathExistsResponseDTO } from './dto'
 import { PathMapper } from './path.mapper'
 import { PathService } from './path.service'
 
@@ -40,10 +39,7 @@ export class PathController {
 
       const pathExists = await this.pathService.getPathExists(query.path)
 
-      const response = new GetPathExistsResponseDTO()
-      response.exists = pathExists
-
-      res.json(response)
+      res.json(pathExists)
     } catch (error) {
       console.error(`Error in ${PathController.name}.${this.getPathExists.name}`)
       console.error(error)
