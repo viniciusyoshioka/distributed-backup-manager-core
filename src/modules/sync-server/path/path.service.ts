@@ -18,8 +18,8 @@ export class PathService {
 
 
   // TODO: Check if path is contained in root directory that is synced
-  getPathExists(path: string): boolean {
+  async getPathExists(path: string): Promise<boolean> {
     const pathInstance = new Path(path)
-    return this.fileSystem.exists(pathInstance)
+    return await this.fileSystem.exists(pathInstance)
   }
 }

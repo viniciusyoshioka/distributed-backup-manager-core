@@ -2,19 +2,19 @@ import { Path, PathType } from '../path'
 
 
 export interface FileSystem {
-  exists(path: Path): boolean
+  exists(path: Path): Promise<boolean>
 
-  resolvePathType(path: Path): PathType
+  resolvePathType(path: Path): Promise<PathType>
 
-  readDirectory(path: Path): string[] | null
+  readDirectory(path: Path): Promise<string[] | null>
 
-  createDirectory(path: Path): void
+  createDirectory(path: Path): Promise<void>
 
-  delete(path: Path): void
-  deleteFile(path: Path): void
-  deleteDirectory(path: Path): void
+  delete(path: Path): Promise<void>
+  deleteFile(path: Path): Promise<void>
+  deleteDirectory(path: Path): Promise<void>
 
-  copy(fromPath: Path, toPath: Path): void
-  copyFile(fromPath: Path, toPath: Path): void
-  copyDirectory(fromPath: Path, toPath: Path): void
+  copy(fromPath: Path, toPath: Path): Promise<void>
+  copyFile(fromPath: Path, toPath: Path): Promise<void>
+  copyDirectory(fromPath: Path, toPath: Path): Promise<void>
 }

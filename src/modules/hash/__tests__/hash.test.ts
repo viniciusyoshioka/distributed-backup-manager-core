@@ -21,7 +21,7 @@ describe('Test Hash module', () => {
 
 
   it('should use sha-256 algorithm by default', async () => {
-    localFileSystem.resolvePathType(path)
+    await localFileSystem.resolvePathType(path)
     const checksum = await hash(path)
     expect(checksum).toBe(expectedSha256)
   })
@@ -34,13 +34,13 @@ describe('Test Hash module', () => {
 
   it('should return null if the path is not a file', async () => {
     const folderPath = new Path([cwd, 'src/modules/hash/__tests__'])
-    localFileSystem.resolvePathType(folderPath)
+    await localFileSystem.resolvePathType(folderPath)
     const checksum = await hash(folderPath)
     expect(checksum).toBe(null)
   })
 
   it('should return the correct hash when using SHA-256 hash type', async () => {
-    localFileSystem.resolvePathType(path)
+    await localFileSystem.resolvePathType(path)
     const checksum = await hash(path, HashType.SHA_256)
     expect(checksum).toBe(expectedSha256)
   })

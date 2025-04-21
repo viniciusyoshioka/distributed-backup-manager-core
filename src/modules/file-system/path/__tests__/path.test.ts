@@ -1,5 +1,6 @@
 import process from 'node:process'
 
+import { LocalFileSystem } from '../../file-system'
 import { Path } from '../path'
 import { PathType } from '../path.types'
 
@@ -10,6 +11,7 @@ describe('Test Path', () => {
 
 
   const cwd = process.cwd()
+  const localFileSystem = new LocalFileSystem()
 
 
   it('should create Path correctly', () => {
@@ -32,12 +34,13 @@ describe('Test Path', () => {
     expect(() => new Path(pathSegments)).not.toThrow()
   })
 
-  it(`should set Path.type to ${PathType.UNKNOWN} when the path does not exists`, () => {
+  it(`should set Path.type to ${PathType.NULL} when the path does not exists`, async () => {
     const pathSegments = [cwd, 'path', 'to', 'nowhere']
 
     const path = new Path(pathSegments)
+    await localFileSystem.resolvePathType(path)
 
-    expect(path.type).toBe(PathType.UNKNOWN)
+    expect(path.type).toBe(PathType.NULL)
   })
 
   it('should return the relative path relative to the current working directory', () => {
@@ -69,7 +72,8 @@ describe('Test Path', () => {
       expect(path.fileExtension).toBe('.ts')
     })
 
-    it(`should return ${PathType.FILE} type`, () => {
+    it(`should return ${PathType.FILE} type`, async () => {
+      await localFileSystem.resolvePathType(path)
       expect(path.type).toBe(PathType.FILE)
     })
   })
@@ -93,7 +97,8 @@ describe('Test Path', () => {
       expect(path.fileExtension).toBe(null)
     })
 
-    it(`should return ${PathType.DIR} type`, () => {
+    it(`should return ${PathType.DIR} type`, async () => {
+      await localFileSystem.resolvePathType(path)
       expect(path.type).toBe(PathType.DIR)
     })
   })

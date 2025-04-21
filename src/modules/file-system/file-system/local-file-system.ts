@@ -1,98 +1,107 @@
-import fs, { CopySyncOptions, RmOptions } from 'node:fs'
+import fs, { CopyOptions, RmOptions } from 'node:fs'
 
 import { Path, PathType } from '../path'
 import { FileSystem } from './file-system'
 
 
 export class LocalFileSystem implements FileSystem {
-  exists(path: Path): boolean {
-    return fs.existsSync(path.absolutePath)
+  async exists(path: Path): Promise<boolean> {
+    try {
+      await fs.promises.access(path.absolutePath, fs.constants.F_OK)
+      return true
+    } catch (error) {
+      return false
+    }
   }
 
 
-  private getPathType(path: Path): PathType {
-    const pathExists = this.exists(path)
+  private async getPathType(path: Path): Promise<PathType> {
+    const pathExists = await this.exists(path)
     if (!pathExists) {
       return PathType.NULL
     }
 
-    const lStats = fs.lstatSync(path.absolutePath)
-    if (lStats.isFile()) {
-      return PathType.FILE
-    }
-    if (lStats.isDirectory()) {
-      return PathType.DIR
-    }
-
-    if (lStats.isSymbolicLink()) {
-      const stats = fs.statSync(path.absolutePath)
-      if (stats.isFile()) {
-        return PathType.SYMLINK_FILE
+    try {
+      const lStats = await fs.promises.lstat(path.absolutePath)
+      if (lStats.isFile()) {
+        return PathType.FILE
       }
-      if (stats.isDirectory()) {
-        return PathType.SYMLINK_DIR
+      if (lStats.isDirectory()) {
+        return PathType.DIR
       }
-      return PathType.SYMLINK_OTHER
-    }
 
-    return PathType.OTHER
+      if (lStats.isSymbolicLink()) {
+        const stats = await fs.promises.stat(path.absolutePath)
+        if (stats.isFile()) {
+          return PathType.SYMLINK_FILE
+        }
+        if (stats.isDirectory()) {
+          return PathType.SYMLINK_DIR
+        }
+        return PathType.SYMLINK_OTHER
+      }
+
+      return PathType.OTHER
+    } catch (error) {
+      return PathType.NULL
+    }
   }
 
-  resolvePathType(path: Path): PathType {
-    const type = this.getPathType(path)
+  async resolvePathType(path: Path): Promise<PathType> {
+    const type = await this.getPathType(path)
     path.updateType(type)
     return type
   }
 
 
-  readDirectory(path: Path): string[] | null {
-    const pathExists = this.exists(path)
+  async readDirectory(path: Path): Promise<string[] | null> {
+    const pathExists = await this.exists(path)
     if (!pathExists) {
       return []
     }
 
-    this.resolvePathType(path)
+    await this.resolvePathType(path)
     if (path.type !== PathType.DIR) {
       return null
     }
 
-    return fs.readdirSync(path.absolutePath)
+    return await fs.promises.readdir(path.absolutePath)
   }
 
 
-  createDirectory(path: Path): void {
-    const pathExists = this.exists(path)
-    if (!pathExists) {
+  async createDirectory(path: Path): Promise<void> {
+    const pathExists = await this.exists(path)
+    if (pathExists) {
       throw new Error('Cannot create directory because path already exists')
     }
 
-    fs.mkdirSync(path.absolutePath, { recursive: true })
+    await fs.promises.mkdir(path.absolutePath, { recursive: true })
   }
 
 
-  delete(path: Path): void {
-    this.resolvePathType(path)
+  async delete(path: Path): Promise<void> {
+    await this.resolvePathType(path)
 
     if (path.type === PathType.FILE) {
-      this.deleteFile(path)
+      await this.deleteFile(path)
       return
     }
 
     if (path.type === PathType.DIR) {
-      this.deleteDirectory(path)
+      await this.deleteDirectory(path)
       return
     }
 
     throw new Error(`Path type ${path.type} is not supported by delete`)
   }
 
-  deleteFile(path: Path): void {
-    const pathExists = this.exists(path)
+  async deleteFile(path: Path): Promise<void> {
+    const pathExists = await this.exists(path)
     if (!pathExists) {
       throw new Error('Cannot delete file because it does not exists')
     }
 
-    this.resolvePathType(path)
+    await this.resolvePathType(path)
     if (path.type !== PathType.FILE) {
       throw new Error('Cannot delete path because it is not a file')
     }
@@ -102,16 +111,16 @@ export class LocalFileSystem implements FileSystem {
       recursive: true,
     }
 
-    fs.rmSync(path.absolutePath, rmOptions)
+    await fs.promises.rm(path.absolutePath, rmOptions)
   }
 
-  deleteDirectory(path: Path): void {
-    const pathExists = this.exists(path)
+  async deleteDirectory(path: Path): Promise<void> {
+    const pathExists = await this.exists(path)
     if (!pathExists) {
       throw new Error('Cannot delete directory because it does not exists')
     }
 
-    this.resolvePathType(path)
+    await this.resolvePathType(path)
     if (path.type !== PathType.DIR) {
       throw new Error('Cannot delete path because it is not a directory')
     }
@@ -121,72 +130,72 @@ export class LocalFileSystem implements FileSystem {
       recursive: true,
     }
 
-    fs.rmSync(path.absolutePath, rmOptions)
+    await fs.promises.rm(path.absolutePath, rmOptions)
   }
 
 
-  copy(fromPath: Path, toPath: Path): void {
-    this.resolvePathType(fromPath)
+  async copy(fromPath: Path, toPath: Path): Promise<void> {
+    await this.resolvePathType(fromPath)
 
     if (fromPath.type === PathType.FILE) {
-      this.copyFile(fromPath, toPath)
+      await this.copyFile(fromPath, toPath)
       return
     }
 
     if (fromPath.type === PathType.DIR) {
-      this.copyDirectory(fromPath, toPath)
+      await this.copyDirectory(fromPath, toPath)
       return
     }
 
     throw new Error(`Path type ${fromPath.type} is not supported by copy`)
   }
 
-  copyFile(fromPath: Path, toPath: Path): void {
-    const fromPathExists = this.exists(fromPath)
+  async copyFile(fromPath: Path, toPath: Path): Promise<void> {
+    const fromPathExists = await this.exists(fromPath)
     if (!fromPathExists) {
       throw new Error('Cannot copy file from fromPath to toPath because fromPath does not exists')
     }
 
-    this.resolvePathType(fromPath)
+    await this.resolvePathType(fromPath)
     if (fromPath.type !== PathType.FILE) {
       throw new Error('Cannot copy fromPath because it is not a file')
     }
 
-    const toPathExists = this.exists(toPath)
+    const toPathExists = await this.exists(toPath)
     if (toPathExists) {
-      this.delete(toPath)
+      await this.delete(toPath)
     }
 
     const parentPath = new Path(toPath.parentAbsolutePath)
-    const parentPathExists = this.exists(parentPath)
+    const parentPathExists = await this.exists(parentPath)
     if (!parentPathExists) {
-      this.createDirectory(parentPath)
+      await this.createDirectory(parentPath)
     }
 
-    fs.copyFileSync(fromPath.absolutePath, toPath.absolutePath)
+    await fs.promises.copyFile(fromPath.absolutePath, toPath.absolutePath)
   }
 
-  copyDirectory(fromPath: Path, toPath: Path): void {
-    const fromPathExists = this.exists(fromPath)
+  async copyDirectory(fromPath: Path, toPath: Path): Promise<void> {
+    const fromPathExists = await this.exists(fromPath)
     if (!fromPathExists) {
       throw new Error('Cannot copy directory from fromPath to toPath because fromPath does not exists')
     }
 
-    this.resolvePathType(fromPath)
+    await this.resolvePathType(fromPath)
     if (fromPath.type !== PathType.DIR) {
       throw new Error('Cannot copy fromPath because it is not a directory')
     }
 
-    const toPathExists = this.exists(toPath)
+    const toPathExists = await this.exists(toPath)
     if (toPathExists) {
-      this.delete(toPath)
+      await this.delete(toPath)
     }
 
-    const copySyncOptions: CopySyncOptions = {
+    const copyOptions: CopyOptions = {
       force: true,
       recursive: true,
     }
 
-    fs.cpSync(fromPath.absolutePath, toPath.absolutePath, copySyncOptions)
+    await fs.promises.cp(fromPath.absolutePath, toPath.absolutePath, copyOptions)
   }
 }

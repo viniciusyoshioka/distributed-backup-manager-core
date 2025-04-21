@@ -33,11 +33,11 @@ export class PathController {
   }
 
 
-  private getPathExists(req: Request, res: Response): void {
+  private async getPathExists(req: Request, res: Response): Promise<void> {
     try {
       const query = PathMapper.fromQueryObjectToGetPathExistsDto(req.query)
 
-      const pathExists = this.pathService.getPathExists(query.path)
+      const pathExists = await this.pathService.getPathExists(query.path)
 
       res.json(pathExists)
     } catch (error) {
