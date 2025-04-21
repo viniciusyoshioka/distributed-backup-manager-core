@@ -1,0 +1,12 @@
+export enum PathType {
+  UNKNOWN = 'UNKNOWN',
+  NULL = 'NULL',
+
+  FILE = 'FILE',
+  DIR = 'DIR',
+  OTHER = 'OTHER',
+
+  SYMLINK_FILE = 'SYMLINK_FILE',
+  SYMLINK_DIR = 'SYMLINK_DIR',
+  SYMLINK_OTHER = 'SYMLINK_OTHER',
+}

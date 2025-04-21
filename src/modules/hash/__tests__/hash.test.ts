@@ -13,7 +13,7 @@ describe('Test Hash module', () => {
   const expectedSha256 = '04d2f0aa6d6415cd1671b56695b9417fce416afb0e9106f08f752f86839e3ad3'
 
   const mockPath = {
-    absolutePath: [cwd, './src/modules/hash/__tests__/not_existent_file.txt'].join(Path.separator),
+    absolutePath: Path.join([cwd, './src/modules/hash/__tests__/not_existent_file.txt']),
     type: PathType.FILE,
   } as Path
 

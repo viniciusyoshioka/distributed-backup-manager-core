@@ -1,4 +1,4 @@
-import { FileSystem } from '../../file-system'
+import { FileSystem, Path } from '../../file-system'
 
 
 export interface PathServiceParams {
@@ -17,10 +17,9 @@ export class PathService {
   }
 
 
-  // TODO: Use Path class
-  // TODO: Check if path is absolute
   // TODO: Check if path is contained in root directory that is synced
   getPathExists(path: string): boolean {
-    return this.fileSystem.exists(path)
+    const pathInstance = new Path(path)
+    return this.fileSystem.exists(pathInstance)
   }
 }

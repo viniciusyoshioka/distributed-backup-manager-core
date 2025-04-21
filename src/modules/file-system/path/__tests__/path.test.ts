@@ -1,17 +1,20 @@
 import process from 'node:process'
 
-import { Path, PathType } from '../path'
+import { Path } from '../path'
+import { PathType } from '../path.types'
 
 
-describe('Teste Path', () => {
+// TODO: Test other path types
+// TODO: Test other Path properties and methods
+describe('Test Path', () => {
 
 
-  const cwdPath = process.cwd()
+  const cwd = process.cwd()
 
 
   it('should create Path correctly', () => {
-    const pathSegments = ['', 'path', 'to', 'nowhere']
-    const absolutePath = pathSegments.join(Path.separator)
+    const pathSegments = [cwd, 'src', 'modules', 'file-system', 'path', '__tests__', 'path.test.ts']
+    const absolutePath = Path.join(pathSegments)
     const path = new Path(absolutePath)
 
     expect(Path.isAbsolute(absolutePath)).toBe(true)
@@ -19,18 +22,18 @@ describe('Teste Path', () => {
   })
 
   it('should throw when the given path is not absolute', () => {
-    const pathSegments = ['src', 'utils', 'path.ts']
+    const pathSegments = ['src', 'modules', 'file-system', 'path', '__tests__', 'path.test.ts']
     expect(() => new Path(pathSegments)).toThrow('Path must be absolute')
   })
 
   it('should not throw when the path does not exists', () => {
-    const pathSegments = [cwdPath, 'path', 'to', 'nowhere']
+    const pathSegments = [cwd, 'path', 'to', 'nowhere']
 
     expect(() => new Path(pathSegments)).not.toThrow()
   })
 
   it(`should set Path.type to ${PathType.UNKNOWN} when the path does not exists`, () => {
-    const pathSegments = [cwdPath, 'path', 'to', 'nowhere']
+    const pathSegments = [cwd, 'path', 'to', 'nowhere']
 
     const path = new Path(pathSegments)
 
@@ -38,28 +41,28 @@ describe('Teste Path', () => {
   })
 
   it('should return the relative path relative to the current working directory', () => {
-    const relativePathSegments = ['src', 'utils', 'path.ts']
-    const absolutePathSegments = [cwdPath, ...relativePathSegments]
+    const relativePathSegments = ['src', 'modules', 'file-system', 'path', '__tests__', 'path.test.ts']
+    const absolutePathSegments = [cwd, ...relativePathSegments]
     const path = new Path(absolutePathSegments)
 
-    const relativePathExpected = relativePathSegments.join(Path.separator)
+    const relativePathExpected = Path.join(relativePathSegments)
 
-    expect(path.getRelativePathToRoot(cwdPath)).toBe(relativePathExpected)
+    expect(path.getRelativePathToRoot(cwd)).toBe(relativePathExpected)
   })
 
 
   describe('Test with files', () => {
 
-    const pathSegments = [cwdPath, 'src', 'utils', 'path.ts']
+    const pathSegments = [cwd, 'src', 'modules', 'file-system', 'path', '__tests__', 'path.test.ts']
     const path = new Path(pathSegments)
 
     it('should return the correct absolute path', () => {
-      const absolutePath = pathSegments.join(Path.separator)
+      const absolutePath = Path.join(pathSegments)
       expect(path.absolutePath).toBe(absolutePath)
     })
 
     it('should return the file name', () => {
-      expect(path.baseName).toBe('path.ts')
+      expect(path.baseName).toBe('path.test.ts')
     })
 
     it('should return the file extension', () => {
@@ -74,11 +77,11 @@ describe('Teste Path', () => {
 
   describe('Test Path for folders', () => {
 
-    const pathSegments = [cwdPath, 'src', 'utils', '__tests__']
+    const pathSegments = [cwd, 'src', 'modules', 'file-system', 'path', '__tests__']
     const path = new Path(pathSegments)
 
     it('should return the correct absolute path', () => {
-      const absolutePath = pathSegments.join(Path.separator)
+      const absolutePath = Path.join(pathSegments)
       expect(path.absolutePath).toBe(absolutePath)
     })
 
@@ -94,7 +97,4 @@ describe('Teste Path', () => {
       expect(path.type).toBe(PathType.DIR)
     })
   })
-
-
-  // TODO: Test other path types
 })

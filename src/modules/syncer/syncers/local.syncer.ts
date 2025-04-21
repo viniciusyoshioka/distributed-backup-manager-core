@@ -147,6 +147,9 @@ export class LocalSyncer extends Syncer {
     for (const sourceChildName of sourceChildrenNames) {
       const sourceChildPath = new Path([sourceParentPath.absolutePath, sourceChildName])
       const destinationChildPath = new Path([destinationParentPath.absolutePath, sourceChildName])
+
+      this.fileSystem.resolvePathType(sourceChildPath)
+      this.fileSystem.resolvePathType(destinationChildPath)
       const sourceRelativePath = sourceChildPath.getRelativePathToRoot(this.source.absolutePath)
 
 
