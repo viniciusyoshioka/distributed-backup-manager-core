@@ -1,8 +1,6 @@
 import fs from 'node:fs'
 import nodePath from 'node:path'
 
-import { hash } from '../hash'
-
 
 export enum PathType {
   FILE = 'FILE',
@@ -25,7 +23,6 @@ export class Path {
   readonly fileExtension: string | null
 
   private _type: PathType
-  private _hash: string | null | undefined = undefined
 
 
   constructor(path: string | string[]) {
@@ -47,10 +44,6 @@ export class Path {
     return this._type
   }
 
-  get hash(): string | null | undefined {
-    return this._hash
-  }
-
 
   static isAbsolute(path: string): boolean {
     return nodePath.isAbsolute(path)
@@ -60,11 +53,6 @@ export class Path {
     return fs.existsSync(path)
   }
 
-
-  async calculateHash(): Promise<string | null> {
-    this._hash = await hash(this)
-    return this._hash
-  }
 
   exists(): boolean {
     const pathExists = Path.exists(this.absolutePath)

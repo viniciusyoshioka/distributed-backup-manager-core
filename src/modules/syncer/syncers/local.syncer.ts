@@ -4,6 +4,7 @@ import readline from 'node:readline/promises'
 import { ExecutionTime } from '../../../decorators'
 import { Queue } from '../../../utils'
 import { Path, PathType } from '../../file-system'
+import { hash } from '../../hash'
 import { Syncer } from '../syncer'
 import { Diffs } from '../syncer.types'
 
@@ -181,8 +182,8 @@ export class LocalSyncer extends Syncer {
 
       if (sourceChildPath.type === PathType.FILE) {
         const [sourceHash, destinationHash] = await Promise.all([
-          sourceChildPath.calculateHash(),
-          destinationChildPath.calculateHash(),
+          hash(sourceChildPath),
+          hash(destinationChildPath),
         ])
 
         if (sourceHash !== destinationHash) {
