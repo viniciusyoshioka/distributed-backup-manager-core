@@ -1,19 +1,11 @@
-import { GetPathExistsDTO, ResolvePathTypeDTO } from './dto'
+import { PathParamDTO } from './dto'
 
 
 export class PathMapper {
-  static fromQueryObjectToGetPathExistsDto(query: object): GetPathExistsDTO {
+  static fromQueryObjectToPathParamDto(query: object): PathParamDTO {
     const { path } = query as Record<string, string>
 
-    const dto = new GetPathExistsDTO()
-    dto.path = path
-    return dto
-  }
-
-  static fromQueryObjectToResolvePathTypeDto(query: object): ResolvePathTypeDTO {
-    const { path } = query as Record<string, string>
-
-    const dto = new ResolvePathTypeDTO()
+    const dto = new PathParamDTO()
     dto.path = path
     return dto
   }

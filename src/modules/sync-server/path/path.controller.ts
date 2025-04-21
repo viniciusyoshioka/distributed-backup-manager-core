@@ -32,7 +32,7 @@ export class PathController {
 
   private async getPathExists(req: Request, res: Response): Promise<void> {
     try {
-      const query = PathMapper.fromQueryObjectToGetPathExistsDto(req.query)
+      const query = PathMapper.fromQueryObjectToPathParamDto(req.query)
 
       const pathExists = await this.pathService.getPathExists(query.path)
 
@@ -47,7 +47,7 @@ export class PathController {
 
   private async resolvePathType(req: Request, res: Response): Promise<void> {
     try {
-      const query = PathMapper.fromQueryObjectToResolvePathTypeDto(req.query)
+      const query = PathMapper.fromQueryObjectToPathParamDto(req.query)
 
       const pathType = await this.pathService.resolvePathType(query.path)
 

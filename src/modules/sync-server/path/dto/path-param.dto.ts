@@ -1,7 +1,7 @@
 import { IsString } from 'class-validator'
 
 
-export class GetPathExistsDTO {
+export class PathParamDTO {
   @IsString()
   path!: string
 }
