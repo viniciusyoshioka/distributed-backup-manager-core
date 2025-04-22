@@ -2,7 +2,7 @@ import { PathParamDTO } from './dto'
 
 
 export class PathMapper {
-  static fromQueryObjectToPathParamDto(query: object): PathParamDTO {
+  static fromObjectToPathParamDto(query: object): PathParamDTO {
     const { path } = query as Record<string, string>
 
     const dto = new PathParamDTO()

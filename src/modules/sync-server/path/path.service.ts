@@ -24,8 +24,38 @@ export class PathService {
   }
 
 
-  async resolvePathType(path: string): Promise<PathType> {
+  async getPathType(path: string): Promise<PathType> {
     const pathInstance = new Path(path)
     return await this.fileSystem.resolvePathType(pathInstance)
+  }
+
+
+  async readDirectory(path: string): Promise<string[] | null> {
+    const pathInstance = new Path(path)
+    return await this.fileSystem.readDirectory(pathInstance)
+  }
+
+
+  async createDirectory(path: string): Promise<void> {
+    const pathInstance = new Path(path)
+    await this.fileSystem.createDirectory(pathInstance)
+  }
+
+
+  async deleteFile(path: string): Promise<void> {
+    const pathInstance = new Path(path)
+    await this.fileSystem.deleteFile(pathInstance)
+  }
+
+  async deleteDirectory(path: string): Promise<void> {
+    const pathInstance = new Path(path)
+    await this.fileSystem.deleteDirectory(pathInstance)
+  }
+
+
+  async copyFile(fromPath: string, toPath: string): Promise<void> {
+    const fromPathInstance = new Path(fromPath)
+    const toPathInstance = new Path(toPath)
+    await this.fileSystem.moveFile(fromPathInstance, toPathInstance)
   }
 }

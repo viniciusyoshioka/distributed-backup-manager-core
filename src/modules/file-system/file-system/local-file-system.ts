@@ -1,4 +1,4 @@
-import fs, { CopyOptions, RmOptions } from 'node:fs'
+import fs, { RmOptions } from 'node:fs'
 
 import { Path, PathType } from '../path'
 import { FileSystem } from './file-system'
@@ -79,7 +79,7 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async delete(path: Path): Promise<void> {
+  private async delete(path: Path): Promise<void> {
     await this.resolvePathType(path)
 
     if (path.type === PathType.FILE) {
@@ -134,22 +134,6 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async copy(fromPath: Path, toPath: Path): Promise<void> {
-    await this.resolvePathType(fromPath)
-
-    if (fromPath.type === PathType.FILE) {
-      await this.copyFile(fromPath, toPath)
-      return
-    }
-
-    if (fromPath.type === PathType.DIR) {
-      await this.copyDirectory(fromPath, toPath)
-      return
-    }
-
-    throw new Error(`Path type ${fromPath.type} is not supported by copy`)
-  }
-
   async copyFile(fromPath: Path, toPath: Path): Promise<void> {
     const fromPathExists = await this.exists(fromPath)
     if (!fromPathExists) {
@@ -175,15 +159,16 @@ export class LocalFileSystem implements FileSystem {
     await fs.promises.copyFile(fromPath.absolutePath, toPath.absolutePath)
   }
 
-  async copyDirectory(fromPath: Path, toPath: Path): Promise<void> {
+
+  async moveFile(fromPath: Path, toPath: Path): Promise<void> {
     const fromPathExists = await this.exists(fromPath)
     if (!fromPathExists) {
-      throw new Error('Cannot copy directory from fromPath to toPath because fromPath does not exists')
+      throw new Error('Cannot move file from fromPath to toPath because fromPath does not exists')
     }
 
     await this.resolvePathType(fromPath)
-    if (fromPath.type !== PathType.DIR) {
-      throw new Error('Cannot copy fromPath because it is not a directory')
+    if (fromPath.type !== PathType.FILE) {
+      throw new Error('Cannot move fromPath because it is not a file')
     }
 
     const toPathExists = await this.exists(toPath)
@@ -191,11 +176,12 @@ export class LocalFileSystem implements FileSystem {
       await this.delete(toPath)
     }
 
-    const copyOptions: CopyOptions = {
-      force: true,
-      recursive: true,
+    const parentPath = new Path(toPath.parentAbsolutePath)
+    const parentPathExists = await this.exists(parentPath)
+    if (!parentPathExists) {
+      await this.createDirectory(parentPath)
     }
 
-    await fs.promises.cp(fromPath.absolutePath, toPath.absolutePath, copyOptions)
+    await fs.promises.rename(fromPath.absolutePath, toPath.absolutePath)
   }
 }

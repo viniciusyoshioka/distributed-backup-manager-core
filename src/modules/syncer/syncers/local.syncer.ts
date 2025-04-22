@@ -302,7 +302,7 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.copy(pathFromSource, pathFromDestination)
+      await this.fileSystem.copyFile(pathFromSource, pathFromDestination)
     }
   }
 
@@ -318,8 +318,8 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.delete(pathFromDestination)
-      await this.fileSystem.copy(pathFromSource, pathFromDestination)
+      await this.fileSystem.deleteFile(pathFromDestination)
+      await this.fileSystem.copyFile(pathFromSource, pathFromDestination)
     }
   }
 
@@ -334,7 +334,7 @@ export class LocalSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.delete(pathFromDestination)
+      await this.fileSystem.deleteFile(pathFromDestination)
     }
   }
 }

@@ -20,7 +20,7 @@ export class PathSubClient {
   }
 
 
-  async exists(absolutePath: string): Promise<boolean> {
+  async getPathExists(absolutePath: string): Promise<boolean> {
     const { data } = await this.client.get<boolean>('/exists', {
       params: {
         path: absolutePath,
@@ -31,7 +31,7 @@ export class PathSubClient {
   }
 
 
-  async resolvePathType(absolutePath: string): Promise<PathType> {
+  async getPathType(absolutePath: string): Promise<PathType> {
     const { data } = await this.client.get<PathType>('/path-type', {
       params: {
         path: absolutePath,
@@ -39,5 +39,49 @@ export class PathSubClient {
     })
 
     return data
+  }
+
+
+  async readDirectory(absolutePath: string): Promise<string[] | null> {
+    const { data } = await this.client.get<string[] | null>('/directory/read', {
+      params: {
+        path: absolutePath,
+      },
+    })
+
+    return data
+  }
+
+
+  async createDirectory(absolutePath: string): Promise<void> {
+    await this.client.post('/directory', {
+      path: absolutePath,
+    })
+  }
+
+
+  async deleteFile(absolutePath: string): Promise<void> {
+    await this.client.delete('/file', {
+      params: {
+        path: absolutePath,
+      },
+    })
+  }
+
+  async deleteDirectory(absolutePath: string): Promise<void> {
+    await this.client.delete('/directory', {
+      params: {
+        path: absolutePath,
+      },
+    })
+  }
+
+
+  // TODO: Implement file upload. `fromPath` is uploaded and saved in
+  // `toPath` on destination machine
+  async copyFile(fromAbsolutePath: string, toAbsolutePath: string): Promise<void> {
+    await this.client.post('/file/copy', {
+      path: toAbsolutePath,
+    })
   }
 }
