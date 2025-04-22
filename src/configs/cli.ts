@@ -149,6 +149,7 @@ export class Cli {
   private validateExceptions() {
     const exceptions = this.args['--exception'] as string[] | undefined
     if (!exceptions?.length) {
+      this.args['--exception'] = []
       return
     }
 
