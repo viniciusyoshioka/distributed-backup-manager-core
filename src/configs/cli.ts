@@ -119,7 +119,7 @@ export class Cli {
   private validateSource() {
     const source = this.args['--source'] as string | undefined
     if (!source) {
-      console.log("Param '--source' is required")
+      console.log('Param "--source" is required')
       process.exit(0)
     }
 
@@ -127,14 +127,14 @@ export class Cli {
     if (!sourceIsAbsolutePath) {
       const absoluteSourcePath = path.join(this.cwd, source)
       this.args['--source'] = absoluteSourcePath
-      console.log(`Param '--source' is not an absolute path. Using "${absoluteSourcePath}" instead`)
+      console.log(`Param "--source" is not an absolute path. Using "${absoluteSourcePath}" instead`)
     }
   }
 
   private validateDestination() {
     const destination = this.args['--destination'] as string | undefined
     if (!destination) {
-      console.log("Param '--destination' is required")
+      console.log('Param "--destination" is required')
       process.exit(0)
     }
 
@@ -142,7 +142,7 @@ export class Cli {
     if (!destinationIsAbsolutePath) {
       const absoluteDestinationPath = path.join(this.cwd, destination)
       this.args['--destination'] = absoluteDestinationPath
-      console.log(`Param '--destination' is not an absolute path. Using "${absoluteDestinationPath}" instead`)
+      console.log(`Param "--destination" is not an absolute path. Using "${absoluteDestinationPath}" instead`)
     }
   }
 
@@ -165,7 +165,7 @@ export class Cli {
     const sourcePath = this.args['--source']
     const exceptionPathIsSubPathOfSource = this.isSubpathOf(exceptionPath, sourcePath)
     if (!exceptionPathIsSubPathOfSource) {
-      console.log(`Path "${exceptionPath}" from '--exception' param is not a subpath of '--source' ("${sourcePath}")`)
+      console.log(`Path "${exceptionPath}" from "--exception" param is not a subpath of "--source" ("${sourcePath}")`)
       process.exit(0)
     }
   }
@@ -185,7 +185,7 @@ export class Cli {
       }
 
       const absoluteExceptionPath = path.join(this.cwd, exception)
-      console.log(`A '--exception' param is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exception}"`)
+      console.log(`A "--exception" param is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exception}"`)
 
       this.validateExceptionPathIsSubPathOfSource(absoluteExceptionPath)
 
