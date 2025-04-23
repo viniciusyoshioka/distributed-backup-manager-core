@@ -1,4 +1,5 @@
 import arg, { Handler, Spec } from 'arg'
+import { isIP } from 'node:net'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -9,7 +10,7 @@ interface ArgsConfig extends Spec {
   '--source': Handler
   '--destination': Handler
   '--exception': Handler
-  '--remote': Handler
+  '--destination-address': Handler
   '--skip-confirmation': Handler
 }
 
@@ -21,20 +22,19 @@ export interface ParsedArgs {
   '--source': string
   '--destination': string
   '--exception': string[]
-  '--remote': boolean
+  '--destination-address': string | null
   '--skip-confirmation': boolean
 }
 
 
 // TODO: Add exception mode argument
-// TODO: Add network address params for remote sync
 const argConfig: ArgsConfig = {
   '--help': Boolean,
   '--version': Boolean,
   '--source': String,
   '--destination': String,
   '--exception': [String] as unknown as Handler,
-  '--remote': Boolean,
+  '--destination-address': String,
   '--skip-confirmation': Boolean,
 
   '-h': '--help',
@@ -42,7 +42,7 @@ const argConfig: ArgsConfig = {
   '-s': '--source',
   '-d': '--destination',
   '-e': '--exception',
-  '-r': '--remote',
+  '-a': '--destination-address',
   '-c': '--skip-confirmation',
 }
 
@@ -86,13 +86,13 @@ export class Cli {
     -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
     -d, --destination <path>        Path to a folder that will be synced with --source (required)
     -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
-    -r, --remote                    Sync to a remote folder instead of local
+    -a, --destination-address       IP Address for the machine that will receive the sync (default is no address, the sync is local between the two folders)
     -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
     Examples:
     ${this.SHORT_NAME} -s /home/user/src -d /backup/dest                       # Sync local folders
     ${this.SHORT_NAME} -s /home/user/src -d /backup -e node_modules -e .git    # Sync excluding patterns
-    ${this.SHORT_NAME} -s /home/user/src -d /backup -r -c                      # Remote sync with no confirmation
+    ${this.SHORT_NAME} -s /home/user/src -d /backup -a 192.168.1.1 -c          # Remote sync with no confirmation
     `
 
     console.log(helpMessage)
@@ -111,7 +111,7 @@ export class Cli {
     this.validateSource()
     this.validateDestination()
     this.validateExceptions()
-    this.validateRemote()
+    this.parseDestinationAddress()
     this.validateSkipConfirmation()
   }
 
@@ -195,11 +195,18 @@ export class Cli {
     this.args['--exception'] = normalizedExceptions
   }
 
-  private validateRemote() {
-    const remote = this.args['--remote'] as boolean | undefined
-    if (typeof remote !== 'boolean') {
-      const defaultRemoteValue = false
-      this.args['--remote'] = defaultRemoteValue
+  // TODO: Check if address is localhost. If so, remove address in favor of local sync
+  private parseDestinationAddress() {
+    const destinationAddress = this.args['--destination-address'] as string | undefined
+    if (!destinationAddress) {
+      this.args['--destination-address'] = null
+      return
+    }
+
+    const destinationAddressIsValid = !!isIP(destinationAddress)
+    if (!destinationAddressIsValid) {
+      console.log(`IP address "${destinationAddress}" for param "--destination-address" is not a valid IP address`)
+      process.exit(0)
     }
   }
 
