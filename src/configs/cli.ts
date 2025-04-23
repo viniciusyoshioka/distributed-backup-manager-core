@@ -85,7 +85,7 @@ export class Cli {
     -v, --version                   Show program version
     -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
     -d, --destination <path>        Path that will be synced with --source (required)
-    -e, --exception <path>          Paths to exclude from sync (can be used multiple times)
+    -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
     -r, --remote                    Sync to a remote folder instead of local
     -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
@@ -146,6 +146,30 @@ export class Cli {
     }
   }
 
+  private isSubpathOf(subPath: string, basePath: string): boolean {
+    const subPathIsAbsolute = path.isAbsolute(subPath)
+    if (!subPathIsAbsolute) {
+      throw new Error(`Subpath "${subPath}" must be an absolute path`)
+    }
+
+    const basePathIsAbsolute = path.isAbsolute(basePath)
+    if (!basePathIsAbsolute) {
+      throw new Error(`Base path "${basePath}" must be an absolute path`)
+    }
+
+    const normalizedBasePath = basePath.replace(/(\\|\/)+$/, '')
+    return subPath.startsWith(normalizedBasePath)
+  }
+
+  private validateExceptionPathIsSubPathOfSource(exceptionPath: string): void {
+    const sourcePath = this.args['--source']
+    const exceptionPathIsSubPathOfSource = this.isSubpathOf(exceptionPath, sourcePath)
+    if (!exceptionPathIsSubPathOfSource) {
+      console.log(`Path "${exceptionPath}" from '--exception' param is not a subpath of '--source' ("${sourcePath}")`)
+      process.exit(0)
+    }
+  }
+
   private validateExceptions() {
     const exceptions = this.args['--exception'] as string[] | undefined
     if (!exceptions?.length) {
@@ -156,11 +180,15 @@ export class Cli {
     const normalizedExceptions = exceptions.map(exception => {
       const exceptionIsAbsolute = path.isAbsolute(exception)
       if (exceptionIsAbsolute) {
+        this.validateExceptionPathIsSubPathOfSource(exception)
         return exception
       }
 
       const absoluteExceptionPath = path.join(this.cwd, exception)
       console.log(`A '--exception' param is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exception}"`)
+
+      this.validateExceptionPathIsSubPathOfSource(absoluteExceptionPath)
+
       return absoluteExceptionPath
     })
 
