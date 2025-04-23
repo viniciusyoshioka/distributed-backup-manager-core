@@ -86,7 +86,7 @@ export class Cli {
     -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
     -d, --destination <path>        Path to a folder that will be synced with --source (required)
     -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
-    -a, --destination-address       IP Address for the machine that will receive the sync (default is no address, the sync is local between the two folders)
+    -a, --destination-address <ip>  IP Address for the machine that will receive the sync. Default is no address, then the sync is local between the two folders. (requires --destination-port)
     -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
     Examples:
