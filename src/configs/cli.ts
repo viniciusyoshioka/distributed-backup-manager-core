@@ -84,7 +84,7 @@ export class Cli {
     -h, --help                      Show this help message
     -v, --version                   Show program version
     -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
-    -d, --destination <path>        Path that will be synced with --source (required)
+    -d, --destination <path>        Path to a folder that will be synced with --source (required)
     -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
     -r, --remote                    Sync to a remote folder instead of local
     -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
