@@ -1,4 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
+import FormData from 'form-data'
+import fs from 'node:fs'
 
 import { PathType } from '../../file-system'
 import { NetworkAddress } from '../../network'
@@ -77,11 +79,17 @@ export class PathSubClient {
   }
 
 
-  // TODO: Implement file upload. `fromPath` is uploaded and saved in
-  // `toPath` on destination machine
   async copyFile(fromAbsolutePath: string, toAbsolutePath: string): Promise<void> {
-    await this.client.post('/file/copy', {
-      path: toAbsolutePath,
+    const form = new FormData()
+
+    const fileStream = fs.createReadStream(fromAbsolutePath)
+    form.append('file', fileStream)
+    form.append('path', toAbsolutePath)
+
+    await this.client.post('/file/copy', form, {
+      headers: form.getHeaders(),
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     })
   }
 }
