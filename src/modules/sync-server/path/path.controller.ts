@@ -1,5 +1,7 @@
 import { Request, Response, Router } from 'express'
+import multer from 'multer'
 
+import { Path } from '../../file-system'
 import { PathMapper } from './path.mapper'
 import { PathService } from './path.service'
 
@@ -22,6 +24,9 @@ export class PathController {
 
   build(): Router {
     const router = Router()
+    // TODO: Create a temporary folder to receive uploads in a place the user doesn't have access to
+    // TODO: Receive the absolute path from .env or cli argument (when subcommands were implemented)
+    const upload = multer({ dest: 'uploads/' })
 
 
     // Path
@@ -30,7 +35,7 @@ export class PathController {
 
     // File
     router.delete('/file', this.deleteFile.bind(this))
-    router.post('/file/copy', this.copyFile.bind(this))
+    router.post('/file/copy', upload.single('uploadFile'), this.copyFile.bind(this))
 
     // Directory
     router.post('/directory', this.createDirectory.bind(this))
@@ -132,14 +137,17 @@ export class PathController {
   }
 
 
-  // TODO: Implement file upload. File copy is a file upload from
-  // client to server, saving it in given path
   private async copyFile(req: Request, res: Response): Promise<void> {
     try {
       const query = PathMapper.fromObjectToPathParamDto(req.body as object)
 
-      const pathWhereFileWasUploaded = ''
-      await this.pathService.copyFile(pathWhereFileWasUploaded, query.path)
+      if (req.file?.path) {
+        const cwd = process.cwd()
+        const uploadRelativePath = req.file.path
+        const pathWhereFileWasUploaded = Path.join([cwd, uploadRelativePath])
+
+        await this.pathService.moveFile(pathWhereFileWasUploaded, query.path)
+      }
 
       res.status(200).send()
     } catch (error) {

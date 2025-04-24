@@ -53,7 +53,7 @@ export class PathService {
   }
 
 
-  async copyFile(fromPath: string, toPath: string): Promise<void> {
+  async moveFile(fromPath: string, toPath: string): Promise<void> {
     const fromPathInstance = new Path(fromPath)
     const toPathInstance = new Path(toPath)
     await this.fileSystem.moveFile(fromPathInstance, toPathInstance)
