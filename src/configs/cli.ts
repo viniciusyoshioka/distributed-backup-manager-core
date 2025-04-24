@@ -96,7 +96,7 @@ export class Cli {
       -d, --destination <path>        Path to a folder that will be synced with --source (required)
       -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
       -a, --destination-address <ip>  Machine's IP address for remote sync. If not provided, a local sync will be performed
-      -p, --destination-port <port>   Port on the remote machine to connect for sync. Used with --destination-address. Defaults to ${process.env.PORT}
+      -p, --destination-port <port>   Port on the remote machine to connect for sync. Used with --destination-address. Defaults to "${process.env.PORT}"
       -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
     Examples:
