@@ -1,28 +1,73 @@
-import './configs/env-validation'
+import { Cli, assertDotEnvIsValid } from './configs'
+import { LocalFileSystem, Path, RemoteFileSystem } from './modules/file-system'
+import { NetworkAddress } from './modules/network'
+import { SyncClient } from './modules/sync-client'
+import { LocalSyncer, RemoteSyncer, Syncer } from './modules/syncer'
 
-import { LocalFileSystem, Path } from './modules/file-system'
-import { LocalSyncer } from './modules/syncer'
+
+function createLocalSyncer(params: {
+  sourcePath: Path
+  destinationPath: Path
+  exceptions: Path[]
+}): Syncer {
+  const localFileSystem = new LocalFileSystem()
+
+  return new LocalSyncer({
+    source: params.sourcePath,
+    destination: params.destinationPath,
+    exceptions: params.exceptions,
+    fileSystem: localFileSystem,
+  })
+}
 
 
-function exceptionsToPath(sourcePath: Path, exceptions: string[]): Path[] {
-  return exceptions.map(path => new Path([sourcePath.absolutePath, path]))
+function createRemoteSyncer(params: {
+  sourcePath: Path
+  destinationPath: Path
+  exceptions: Path[]
+  destinationAddress: string
+  destinationPort: string
+}): Syncer {
+  const destinationAddress = new NetworkAddress(params.destinationAddress, params.destinationPort)
+  const syncClient = new SyncClient(destinationAddress)
+  const remoteFileSystem = new RemoteFileSystem({ syncClient })
+
+  return new RemoteSyncer({
+    source: params.sourcePath,
+    destination: params.destinationPath,
+    exceptions: params.exceptions,
+    fileSystem: remoteFileSystem,
+  })
 }
 
 
 async function main() {
-  try {
-    const cwd = process.cwd()
-    const sourcePath = new Path([cwd, ''])
-    const destinationPath = new Path([cwd, ''])
-    const exceptions: string[] = [
-    ]
+  assertDotEnvIsValid()
 
-    const syncer = new LocalSyncer({
-      source: sourcePath,
-      destination: destinationPath,
-      exceptions: exceptionsToPath(sourcePath, exceptions),
-      fileSystem: new LocalFileSystem(),
-    })
+
+  try {
+    const cli = new Cli()
+    const args = cli.getArgs()
+
+
+    const sourcePath = new Path(args['--source'])
+    const destinationPath = new Path(args['--destination'])
+    const exceptions = args['--exception'].map(exception => new Path(exception))
+
+    const syncer = args['--destination-address'] && args['--destination-port']
+      ? createRemoteSyncer({
+          sourcePath: sourcePath,
+          destinationPath: destinationPath,
+          exceptions,
+          destinationAddress: args['--destination-address'],
+          destinationPort: args['--destination-port'],
+        })
+      : createLocalSyncer({
+          sourcePath: sourcePath,
+          destinationPath: destinationPath,
+          exceptions,
+        })
+
 
     const pathsToConfirm = await syncer.scanDiffs()
     if (!pathsToConfirm) {
@@ -30,13 +75,17 @@ async function main() {
       process.exit(0)
     }
 
-    const pathsToSync = await syncer.confirmDiffsToSync(pathsToConfirm)
-    if (!pathsToSync) {
-      console.log('No path with diffs was confirmed to be synced')
-      process.exit(0)
-    }
+    if (!args['--skip-confirmation']) {
+      const pathsToSync = await syncer.confirmDiffsToSync(pathsToConfirm)
+      if (!pathsToSync) {
+        console.log('No path with diffs was confirmed to be synced')
+        process.exit(0)
+      }
 
-    await syncer.syncDiffs(pathsToSync)
+      await syncer.syncDiffs(pathsToSync)
+    } else {
+      await syncer.syncDiffs(pathsToConfirm)
+    }
   } catch (error) {
     console.error(error)
   }
