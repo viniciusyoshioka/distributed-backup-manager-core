@@ -1,4 +1,5 @@
 import arg, { Handler, Spec } from 'arg'
+import dedent from 'dedent'
 import { isIP } from 'node:net'
 import path from 'node:path'
 import process from 'node:process'
@@ -86,23 +87,23 @@ export class Cli {
 
 
   private showHelpAndExit() {
-    const helpMessage = `Usage: ${this.SHORT_NAME} [options]
+    const helpMessage = dedent(`Usage: ${this.SHORT_NAME} [options]
 
     Options:
-    -h, --help                      Show this help message
-    -v, --version                   Show program version
-    -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
-    -d, --destination <path>        Path to a folder that will be synced with --source (required)
-    -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
-    -a, --destination-address <ip>  Machine's IP address for remote sync. If not provided, a local sync will be performed
-    -p, --destination-port <port>   Port on the remote machine to connect for sync. Used with --destination-address. Defaults to ${process.env.PORT}
-    -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
+      -h, --help                      Show this help message
+      -v, --version                   Show program version
+      -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
+      -d, --destination <path>        Path to a folder that will be synced with --source (required)
+      -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
+      -a, --destination-address <ip>  Machine's IP address for remote sync. If not provided, a local sync will be performed
+      -p, --destination-port <port>   Port on the remote machine to connect for sync. Used with --destination-address. Defaults to ${process.env.PORT}
+      -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
     Examples:
-    ${this.SHORT_NAME} -s /home/user/src -d /backup/dest                       # Sync local folders
-    ${this.SHORT_NAME} -s /home/user/src -d /backup -e node_modules -e .git    # Sync excluding patterns
-    ${this.SHORT_NAME} -s /home/user/src -d /backup -a 192.168.1.1 -p 1234 -c  # Remote sync with no confirmation
-    `
+      ${this.SHORT_NAME} -s /home/user/src -d /backup/dest                       # Sync local folders
+      ${this.SHORT_NAME} -s /home/user/src -d /backup -e node_modules -e .git    # Sync excluding patterns
+      ${this.SHORT_NAME} -s /home/user/src -d /backup -a 192.168.1.1 -p 1234 -c  # Remote sync with no confirmation
+    `)
 
     console.log(helpMessage)
     process.exit(0)
