@@ -3,6 +3,9 @@ import { isIP } from 'node:net'
 import path from 'node:path'
 import process from 'node:process'
 
+import { NetworkAddress } from '../modules/network'
+import { assertDotEnvIsValid } from './assert-dotenv-is-valid'
+
 
 interface ArgsConfig extends Spec {
   '--help': Handler
@@ -11,6 +14,7 @@ interface ArgsConfig extends Spec {
   '--destination': Handler
   '--exception': Handler
   '--destination-address': Handler
+  '--destination-port': Handler
   '--skip-confirmation': Handler
 }
 
@@ -23,6 +27,7 @@ export interface ParsedArgs {
   '--destination': string
   '--exception': string[]
   '--destination-address': string | null
+  '--destination-port': string | null
   '--skip-confirmation': boolean
 }
 
@@ -35,6 +40,7 @@ const argConfig: ArgsConfig = {
   '--destination': String,
   '--exception': [String] as unknown as Handler,
   '--destination-address': String,
+  '--destination-port': String,
   '--skip-confirmation': Boolean,
 
   '-h': '--help',
@@ -43,6 +49,7 @@ const argConfig: ArgsConfig = {
   '-d': '--destination',
   '-e': '--exception',
   '-a': '--destination-address',
+  '-p': '--destination-port',
   '-c': '--skip-confirmation',
 }
 
@@ -59,6 +66,7 @@ export class Cli {
 
 
   constructor(argv?: string[]) {
+    assertDotEnvIsValid()
     this.args = arg(argConfig, { argv }) as ParsedArgs
 
     if (this.args['--help']) {
@@ -86,13 +94,14 @@ export class Cli {
     -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
     -d, --destination <path>        Path to a folder that will be synced with --source (required)
     -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
-    -a, --destination-address <ip>  IP Address for the machine that will receive the sync. Default is no address, then the sync is local between the two folders. (requires --destination-port)
+    -a, --destination-address <ip>  Machine's IP address for remote sync. If not provided, a local sync will be performed
+    -p, --destination-port <port>   Port on the remote machine to connect for sync. Used with --destination-address. Defaults to ${process.env.PORT}
     -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
     Examples:
     ${this.SHORT_NAME} -s /home/user/src -d /backup/dest                       # Sync local folders
     ${this.SHORT_NAME} -s /home/user/src -d /backup -e node_modules -e .git    # Sync excluding patterns
-    ${this.SHORT_NAME} -s /home/user/src -d /backup -a 192.168.1.1 -c          # Remote sync with no confirmation
+    ${this.SHORT_NAME} -s /home/user/src -d /backup -a 192.168.1.1 -p 1234 -c  # Remote sync with no confirmation
     `
 
     console.log(helpMessage)
@@ -112,6 +121,7 @@ export class Cli {
     this.validateDestination()
     this.validateExceptions()
     this.parseDestinationAddress()
+    this.parseDestinationPort()
     this.validateSkipConfirmation()
   }
 
@@ -208,6 +218,31 @@ export class Cli {
       console.log(`IP address "${destinationAddress}" for param "--destination-address" is not a valid IP address`)
       process.exit(0)
     }
+  }
+
+  private parseDestinationPort() {
+    const hasDestinationAddress = !!this.args['--destination-address']
+    const destinationPort = this.args['--destination-port'] as string | undefined
+
+    if (hasDestinationAddress) {
+      if (!destinationPort) {
+        this.args['--destination-port'] = process.env.PORT
+        return
+      }
+
+      const destinationPortIsValid = NetworkAddress.isPortValid(destinationPort)
+      if (!destinationPortIsValid) {
+        console.log(`Port "${destinationPort}" for param "--destination-port" is not a valid port`)
+        process.exit(0)
+      }
+
+      return
+    }
+
+    if (destinationPort) {
+      console.log(`Param "--destination-port" was given without "--destination-address". Ignoring it`)
+    }
+    this.args['--destination-port'] = null
   }
 
   private validateSkipConfirmation() {

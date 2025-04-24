@@ -18,20 +18,22 @@ const envSchema = z
   })
 
 
-const parsedEnv = envSchema.safeParse(process.env)
-if (!parsedEnv.success) {
-  console.error('Invalid environment variables')
+export function assertDotEnvIsValid() {
+  const parsedEnv = envSchema.safeParse(process.env)
+  if (!parsedEnv.success) {
+    console.error('Invalid environment variables')
 
-  const { fieldErrors } = parsedEnv.error.formErrors
-  const fields = Object.keys(fieldErrors) as (keyof typeof fieldErrors)[]
-  fields.forEach(field => {
-    console.error(field)
+    const { fieldErrors } = parsedEnv.error.formErrors
+    const fields = Object.keys(fieldErrors) as (keyof typeof fieldErrors)[]
+    fields.forEach(field => {
+      console.error(field)
 
-    const fieldMessages = parsedEnv.error.formErrors.fieldErrors[field]
-    fieldMessages?.forEach(fieldMessage => {
-      console.error(`\t- ${fieldMessage}`)
+      const fieldMessages = parsedEnv.error.formErrors.fieldErrors[field]
+      fieldMessages?.forEach(fieldMessage => {
+        console.error(`\t- ${fieldMessage}`)
+      })
     })
-  })
 
-  process.exit(1)
+    process.exit(1)
+  }
 }

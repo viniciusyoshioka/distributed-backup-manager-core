@@ -1,12 +1,13 @@
-import '../../configs/env-validation'
-
 import express from 'express'
 
+import { assertDotEnvIsValid } from '../../configs'
 import { createPathRouterV1 } from './path/utils'
 import { createSyncRouterV1 } from './sync/utils'
 
 
 function createAndStartServer(): void {
+  assertDotEnvIsValid()
+
   const app = express()
 
   app.use(express.json())
