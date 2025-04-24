@@ -11,8 +11,8 @@
         "test": "jest",
         "build": "tsc",
         "start": "node --env-file='.env' ./dist/index.js",
-        "sync-server:start:prod": "node --env-file='.env' ./dist/modules/sync-server/server.js",
-        "sync-server:start:dev": "nodemon -r ./src/configs/env-loader.ts ./src/modules/sync-server/server.ts"
+        "sync-server:start:dev": "nodemon -r ./src/configs/env-loader.ts ./src/modules/sync-server/server.ts",
+        "sync-server:start:prod": "node --env-file='.env' ./dist/modules/sync-server/server.js"
     },
     "dependencies": {
         "arg": "^5.0.2",
@@ -20,6 +20,7 @@
         "class-validator": "^0.14.1",
         "dedent": "^1.5.3",
         "express": "^5.1.0",
+        "form-data": "^4.0.2",
         "multer": "^1.4.5-lts.2",
         "zod": "^3.24.2"
     },
