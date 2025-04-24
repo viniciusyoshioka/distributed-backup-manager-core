@@ -180,6 +180,21 @@ export class Cli {
     }
   }
 
+  private relativeExceptionPathToAbsolutePath(exceptionPath: string): string {
+    const exceptionPathIsAbsolute = path.isAbsolute(exceptionPath)
+    if (exceptionPathIsAbsolute) {
+      return exceptionPath
+    }
+
+    const sourcePath = this.args['--source']
+    const sourcePathIsAbsolutePath = path.isAbsolute(sourcePath)
+    if (!sourcePathIsAbsolutePath) {
+      throw new Error(`Source path "${sourcePath}" must be an absolute path`)
+    }
+
+    return path.join(sourcePath, exceptionPath)
+  }
+
   private parseExceptions() {
     const exceptionPaths = this.args['--exception'] as string[] | undefined
     if (!exceptionPaths?.length) {
@@ -194,7 +209,7 @@ export class Cli {
         return exceptionPath
       }
 
-      const absoluteExceptionPath = path.join(this.cwd, exceptionPath)
+      const absoluteExceptionPath = this.relativeExceptionPathToAbsolutePath(exceptionPath)
       console.log(`A "--exception" param is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exceptionPath}"`)
 
       this.assertExceptionPathIsSubPathOfSource(absoluteExceptionPath)
