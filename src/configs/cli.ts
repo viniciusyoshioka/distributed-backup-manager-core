@@ -117,92 +117,91 @@ export class Cli {
 
 
   private validateAndSetDefaultValuesToArgs() {
-    this.validateSource()
-    this.validateDestination()
-    this.validateExceptions()
+    this.parseSource()
+    this.parseDestination()
+    this.parseExceptions()
     this.parseDestinationAddress()
     this.parseDestinationPort()
-    this.validateSkipConfirmation()
+    this.parseSkipConfirmation()
   }
 
 
-  private validateSource() {
-    const source = this.args['--source'] as string | undefined
-    if (!source) {
+  private parseSource() {
+    const sourcePath = this.args['--source'] as string | undefined
+    if (!sourcePath) {
       console.log('Param "--source" is required')
       process.exit(0)
     }
 
-    const sourceIsAbsolutePath = path.isAbsolute(source)
-    if (!sourceIsAbsolutePath) {
-      const absoluteSourcePath = path.join(this.cwd, source)
+    const sourcePathIsAbsolutePath = path.isAbsolute(sourcePath)
+    if (!sourcePathIsAbsolutePath) {
+      const absoluteSourcePath = path.join(this.cwd, sourcePath)
       this.args['--source'] = absoluteSourcePath
       console.log(`Param "--source" is not an absolute path. Using "${absoluteSourcePath}" instead`)
     }
   }
 
-  private validateDestination() {
-    const destination = this.args['--destination'] as string | undefined
-    if (!destination) {
+  private parseDestination() {
+    const destinationPath = this.args['--destination'] as string | undefined
+    if (!destinationPath) {
       console.log('Param "--destination" is required')
       process.exit(0)
     }
 
-    const destinationIsAbsolutePath = path.isAbsolute(destination)
-    if (!destinationIsAbsolutePath) {
-      const absoluteDestinationPath = path.join(this.cwd, destination)
+    const destinationPathIsAbsolutePath = path.isAbsolute(destinationPath)
+    if (!destinationPathIsAbsolutePath) {
+      const absoluteDestinationPath = path.join(this.cwd, destinationPath)
       this.args['--destination'] = absoluteDestinationPath
       console.log(`Param "--destination" is not an absolute path. Using "${absoluteDestinationPath}" instead`)
     }
   }
 
-  private isSubpathOf(subPath: string, basePath: string): boolean {
-    const subPathIsAbsolute = path.isAbsolute(subPath)
-    if (!subPathIsAbsolute) {
-      throw new Error(`Subpath "${subPath}" must be an absolute path`)
-    }
-
+  private isSubPathOf(basePath: string, subPath: string): boolean {
     const basePathIsAbsolute = path.isAbsolute(basePath)
     if (!basePathIsAbsolute) {
       throw new Error(`Base path "${basePath}" must be an absolute path`)
+    }
+
+    const subPathIsAbsolute = path.isAbsolute(subPath)
+    if (!subPathIsAbsolute) {
+      throw new Error(`Subpath "${subPath}" must be an absolute path`)
     }
 
     const normalizedBasePath = basePath.replace(/(\\|\/)+$/, '')
     return subPath.startsWith(normalizedBasePath)
   }
 
-  private validateExceptionPathIsSubPathOfSource(exceptionPath: string): void {
+  private assertExceptionPathIsSubPathOfSource(exceptionPath: string) {
     const sourcePath = this.args['--source']
-    const exceptionPathIsSubPathOfSource = this.isSubpathOf(exceptionPath, sourcePath)
+    const exceptionPathIsSubPathOfSource = this.isSubPathOf(sourcePath, exceptionPath)
     if (!exceptionPathIsSubPathOfSource) {
       console.log(`Path "${exceptionPath}" from "--exception" param is not a subpath of "--source" ("${sourcePath}")`)
       process.exit(0)
     }
   }
 
-  private validateExceptions() {
-    const exceptions = this.args['--exception'] as string[] | undefined
-    if (!exceptions?.length) {
+  private parseExceptions() {
+    const exceptionPaths = this.args['--exception'] as string[] | undefined
+    if (!exceptionPaths?.length) {
       this.args['--exception'] = []
       return
     }
 
-    const normalizedExceptions = exceptions.map(exception => {
-      const exceptionIsAbsolute = path.isAbsolute(exception)
-      if (exceptionIsAbsolute) {
-        this.validateExceptionPathIsSubPathOfSource(exception)
-        return exception
+    const normalizedExceptionPaths = exceptionPaths.map(exceptionPath => {
+      const exceptionPathIsAbsolute = path.isAbsolute(exceptionPath)
+      if (exceptionPathIsAbsolute) {
+        this.assertExceptionPathIsSubPathOfSource(exceptionPath)
+        return exceptionPath
       }
 
-      const absoluteExceptionPath = path.join(this.cwd, exception)
-      console.log(`A "--exception" param is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exception}"`)
+      const absoluteExceptionPath = path.join(this.cwd, exceptionPath)
+      console.log(`A "--exception" param is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exceptionPath}"`)
 
-      this.validateExceptionPathIsSubPathOfSource(absoluteExceptionPath)
-
+      this.assertExceptionPathIsSubPathOfSource(absoluteExceptionPath)
       return absoluteExceptionPath
     })
 
-    this.args['--exception'] = normalizedExceptions
+    this.args['--exception'] = normalizedExceptionPaths
   }
 
   // TODO: Check if address is localhost. If so, remove address in favor of local sync
@@ -245,11 +244,10 @@ export class Cli {
     this.args['--destination-port'] = null
   }
 
-  private validateSkipConfirmation() {
+  private parseSkipConfirmation() {
     const skipConfirmation = this.args['--skip-confirmation'] as boolean | undefined
     if (typeof skipConfirmation !== 'boolean') {
-      const defaultSkipConfirmationValue = false
-      this.args['--skip-confirmation'] = defaultSkipConfirmationValue
+      this.args['--skip-confirmation'] = false
     }
   }
 }
