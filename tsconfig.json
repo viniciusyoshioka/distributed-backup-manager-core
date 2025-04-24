@@ -4,7 +4,7 @@
         "baseUrl": ".",
         "outDir": "dist",
         "declaration": true,
-        "declarationDir": "libs/types",
+        "declarationDir": "dist",
         "incremental": true,
         "lib": [
             "ESNext",
