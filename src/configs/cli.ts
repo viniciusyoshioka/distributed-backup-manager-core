@@ -241,7 +241,13 @@ export class Cli {
 
     if (hasDestinationAddress) {
       if (!destinationPort) {
-        this.args['--destination-port'] = process.env.PORT
+        const defaultPort = process.env.PORT
+        if (!defaultPort) {
+          console.log('No "PORT" variable was found in .env file. This should not happen')
+          process.exit(0)
+        }
+
+        this.args['--destination-port'] = defaultPort
         return
       }
 
