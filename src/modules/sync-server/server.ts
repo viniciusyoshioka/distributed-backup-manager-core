@@ -2,7 +2,6 @@ import express from 'express'
 
 import { assertDotEnvIsValid } from '../../configs'
 import { createPathRouterV1 } from './path/utils'
-import { createSyncRouterV1 } from './sync/utils'
 
 
 function createAndStartServer(): void {
@@ -19,9 +18,6 @@ function createAndStartServer(): void {
 
   const pathRouter = createPathRouterV1()
   apiRoute.use('/path/v1', pathRouter)
-
-  const syncRouter = createSyncRouterV1()
-  apiRoute.use('/sync/v1', syncRouter)
 
 
   const port = process.env.PORT
