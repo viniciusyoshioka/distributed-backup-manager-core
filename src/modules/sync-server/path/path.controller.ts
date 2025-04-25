@@ -2,7 +2,8 @@ import { Request, RequestHandler, Response, Router } from 'express'
 import multer from 'multer'
 
 import { Path, PathType } from '../../file-system'
-import { Get } from '../decorators'
+import { Get, Post } from '../decorators'
+import { BadRequestException } from '../errors'
 import { PathMapper } from './path.mapper'
 import { PathService } from './path.service'
 
@@ -36,10 +37,10 @@ export class PathController {
 
     // File
     router.delete('/file', this.deleteFile.bind(this))
-    router.post('/file/copy', upload.single('uploadFile'), this.copyFile.bind(this))
+    router.post('/file/copy', upload.single('uploadFile'), this.copyFile.bind(this) as unknown as RequestHandler)
 
     // Directory
-    router.post('/directory', this.createDirectory.bind(this))
+    router.post('/directory', this.createDirectory.bind(this) as unknown as RequestHandler)
     router.delete('/directory', this.deleteDirectory.bind(this))
 
     router.get('/directory/read', this.readDirectory.bind(this) as unknown as RequestHandler)
@@ -72,18 +73,10 @@ export class PathController {
   }
 
 
-  private async createDirectory(req: Request, res: Response): Promise<void> {
-    try {
-      const query = PathMapper.fromObjectToPathParamDto(req.body as object)
-
-      await this.pathService.createDirectory(query.path)
-
-      res.status(200).send()
-    } catch (error) {
-      console.error(`Error in ${PathController.name}.${this.createDirectory.name}`)
-      console.error(error)
-      res.status(500).send()
-    }
+  @Post()
+  private async createDirectory(req: Request): Promise<void> {
+    const query = PathMapper.fromObjectToPathParamDto(req.body as object)
+    await this.pathService.createDirectory(query.path)
   }
 
 
@@ -116,23 +109,18 @@ export class PathController {
   }
 
 
-  private async copyFile(req: Request, res: Response): Promise<void> {
-    try {
-      const query = PathMapper.fromObjectToPathParamDto(req.body as object)
-
-      if (req.file?.path) {
-        const cwd = process.cwd()
-        const uploadRelativePath = req.file.path
-        const pathWhereFileWasUploaded = Path.join([cwd, uploadRelativePath])
-
-        await this.pathService.moveFile(pathWhereFileWasUploaded, query.path)
-      }
-
-      res.status(200).send()
-    } catch (error) {
-      console.error(`Error in ${PathController.name}.${this.copyFile.name}`)
-      console.error(error)
-      res.status(500).send()
+  @Post()
+  private async copyFile(req: Request): Promise<void> {
+    if (!req.file?.path) {
+      throw new BadRequestException('File path not received')
     }
+
+    const query = PathMapper.fromObjectToPathParamDto(req.body as object)
+
+    const cwd = process.cwd()
+    const uploadRelativePath = req.file.path
+    const pathWhereFileWasUploaded = Path.join([cwd, uploadRelativePath])
+
+    await this.pathService.moveFile(pathWhereFileWasUploaded, query.path)
   }
 }
