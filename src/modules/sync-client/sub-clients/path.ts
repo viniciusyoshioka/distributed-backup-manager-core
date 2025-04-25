@@ -83,7 +83,7 @@ export class PathSubClient {
     const form = new FormData()
 
     const fileStream = fs.createReadStream(fromAbsolutePath)
-    form.append('file', fileStream)
+    form.append('uploadFile', fileStream)
     form.append('path', toAbsolutePath)
 
     await this.client.post('/file/copy', form, {
