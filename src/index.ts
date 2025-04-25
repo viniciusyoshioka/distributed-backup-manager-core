@@ -30,13 +30,16 @@ function createRemoteSyncer(params: {
 }): Syncer {
   const destinationAddress = new NetworkAddress(params.destinationAddress, params.destinationPort)
   const syncClient = new SyncClient(destinationAddress)
+
+  const localFileSystem = new LocalFileSystem()
   const remoteFileSystem = new RemoteFileSystem({ syncClient })
 
   return new RemoteSyncer({
     source: params.sourcePath,
     destination: params.destinationPath,
     exceptions: params.exceptions,
-    fileSystem: remoteFileSystem,
+    localFileSystem,
+    remoteFileSystem,
   })
 }
 

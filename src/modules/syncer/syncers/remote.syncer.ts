@@ -3,9 +3,9 @@ import readline from 'node:readline/promises'
 
 import { ExecutionTime } from '../../../decorators'
 import { Queue } from '../../../utils'
-import { Path, PathType } from '../../file-system'
+import { FileSystem, Path, PathType } from '../../file-system'
 import { hash } from '../../hash'
-import { Syncer } from '../syncer'
+import { Syncer, SyncerParams } from '../syncer'
 import { Diffs } from '../syncer.types'
 
 
@@ -30,7 +30,28 @@ enum SyncOperation {
 }
 
 
+export interface RemoteSyncerParams extends Omit<SyncerParams, 'fileSystem'> {
+  localFileSystem: FileSystem
+  remoteFileSystem: FileSystem
+}
+
+
 export class RemoteSyncer extends Syncer {
+
+
+  private readonly remoteFileSystem: FileSystem
+
+
+  constructor(params: RemoteSyncerParams) {
+    super({
+      source: params.source,
+      destination: params.destination,
+      exceptions: params.exceptions,
+      fileSystem: params.localFileSystem,
+    })
+
+    this.remoteFileSystem = params.remoteFileSystem
+  }
 
 
   @ExecutionTime()
@@ -118,7 +139,7 @@ export class RemoteSyncer extends Syncer {
       throw new Error(`Source path "${sourcePath.absolutePath}" is not a directory`)
     }
 
-    const destinationChildren = await this.fileSystem.readDirectory(destinationPath)
+    const destinationChildren = await this.remoteFileSystem.readDirectory(destinationPath)
     if (!destinationChildren) {
       throw new Error(`Destination path "${destinationPath.absolutePath}" is not a directory`)
     }
@@ -149,7 +170,7 @@ export class RemoteSyncer extends Syncer {
       const destinationChildPath = new Path([destinationParentPath.absolutePath, sourceChildName])
 
       await this.fileSystem.resolvePathType(sourceChildPath)
-      await this.fileSystem.resolvePathType(destinationChildPath)
+      await this.remoteFileSystem.resolvePathType(destinationChildPath)
       const sourceRelativePath = sourceChildPath.getRelativePathToRoot(this.source.absolutePath)
 
 
@@ -302,7 +323,7 @@ export class RemoteSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.copyFile(pathFromSource, pathFromDestination)
+      await this.remoteFileSystem.copyFile(pathFromSource, pathFromDestination)
     }
   }
 
@@ -318,8 +339,8 @@ export class RemoteSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.deleteFile(pathFromDestination)
-      await this.fileSystem.copyFile(pathFromSource, pathFromDestination)
+      await this.remoteFileSystem.deleteFile(pathFromDestination)
+      await this.remoteFileSystem.copyFile(pathFromSource, pathFromDestination)
     }
   }
 
@@ -334,7 +355,7 @@ export class RemoteSyncer extends Syncer {
       const pathFromDestination = new Path([this.destination.absolutePath, path])
 
       // TODO: Add try/catch
-      await this.fileSystem.deleteFile(pathFromDestination)
+      await this.remoteFileSystem.deleteFile(pathFromDestination)
     }
   }
 }
