@@ -1,7 +1,8 @@
-import { Request, Response, Router } from 'express'
+import { Request, RequestHandler, Response, Router } from 'express'
 import multer from 'multer'
 
-import { Path } from '../../file-system'
+import { Path, PathType } from '../../file-system'
+import { Get } from '../decorators'
 import { PathMapper } from './path.mapper'
 import { PathService } from './path.service'
 
@@ -30,8 +31,8 @@ export class PathController {
 
 
     // Path
-    router.get('/exists', this.getPathExists.bind(this))
-    router.get('/path-type', this.getPathType.bind(this))
+    router.get('/exists', this.getPathExists.bind(this) as unknown as RequestHandler)
+    router.get('/path-type', this.getPathType.bind(this) as unknown as RequestHandler)
 
     // File
     router.delete('/file', this.deleteFile.bind(this))
@@ -41,55 +42,33 @@ export class PathController {
     router.post('/directory', this.createDirectory.bind(this))
     router.delete('/directory', this.deleteDirectory.bind(this))
 
-    router.get('/directory/read', this.readDirectory.bind(this))
+    router.get('/directory/read', this.readDirectory.bind(this) as unknown as RequestHandler)
 
 
     return router
   }
 
 
-  private async getPathExists(req: Request, res: Response): Promise<void> {
-    try {
-      const query = PathMapper.fromObjectToPathParamDto(req.query)
-
-      const pathExists = await this.pathService.getPathExists(query.path)
-
-      res.json(pathExists)
-    } catch (error) {
-      console.error(`Error in ${PathController.name}.${this.getPathExists.name}`)
-      console.error(error)
-      res.status(500).send()
-    }
+  @Get()
+  private async getPathExists(req: Request): Promise<boolean> {
+    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const pathExists = await this.pathService.getPathExists(query.path)
+    return pathExists
   }
 
 
-  private async getPathType(req: Request, res: Response): Promise<void> {
-    try {
-      const query = PathMapper.fromObjectToPathParamDto(req.query)
-
-      const pathType = await this.pathService.getPathType(query.path)
-
-      res.json(pathType)
-    } catch (error) {
-      console.error(`Error in ${PathController.name}.${this.getPathType.name}`)
-      console.error(error)
-      res.status(500).send()
-    }
+  @Get()
+  private async getPathType(req: Request): Promise<PathType> {
+    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const pathType = await this.pathService.getPathType(query.path)
+    return pathType
   }
 
-
-  private async readDirectory(req: Request, res: Response): Promise<void> {
-    try {
-      const query = PathMapper.fromObjectToPathParamDto(req.query)
-
-      const pathChildren = await this.pathService.readDirectory(query.path)
-
-      res.json(pathChildren)
-    } catch (error) {
-      console.error(`Error in ${PathController.name}.${this.readDirectory.name}`)
-      console.error(error)
-      res.status(500).send()
-    }
+  @Get()
+  private async readDirectory(req: Request): Promise<string[] | null> {
+    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const pathChildren = await this.pathService.readDirectory(query.path)
+    return pathChildren
   }
 
 
