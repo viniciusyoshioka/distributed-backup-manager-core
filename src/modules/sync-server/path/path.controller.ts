@@ -1,8 +1,8 @@
-import { Request, RequestHandler, Response, Router } from 'express'
+import { Request, RequestHandler, Router } from 'express'
 import multer from 'multer'
 
 import { Path, PathType } from '../../file-system'
-import { Get, Post } from '../decorators'
+import { Delete, Get, Post } from '../decorators'
 import { BadRequestException } from '../errors'
 import { PathMapper } from './path.mapper'
 import { PathService } from './path.service'
@@ -36,12 +36,12 @@ export class PathController {
     router.get('/path-type', this.getPathType.bind(this) as unknown as RequestHandler)
 
     // File
-    router.delete('/file', this.deleteFile.bind(this))
+    router.delete('/file', this.deleteFile.bind(this) as unknown as RequestHandler)
     router.post('/file/copy', upload.single('uploadFile'), this.copyFile.bind(this) as unknown as RequestHandler)
 
     // Directory
     router.post('/directory', this.createDirectory.bind(this) as unknown as RequestHandler)
-    router.delete('/directory', this.deleteDirectory.bind(this))
+    router.delete('/directory', this.deleteDirectory.bind(this) as unknown as RequestHandler)
 
     router.get('/directory/read', this.readDirectory.bind(this) as unknown as RequestHandler)
 
@@ -80,32 +80,16 @@ export class PathController {
   }
 
 
-  private async deleteFile(req: Request, res: Response): Promise<void> {
-    try {
-      const query = PathMapper.fromObjectToPathParamDto(req.params)
-
-      await this.pathService.deleteFile(query.path)
-
-      res.status(200).send()
-    } catch (error) {
-      console.error(`Error in ${PathController.name}.${this.deleteFile.name}`)
-      console.error(error)
-      res.status(500).send()
-    }
+  @Delete()
+  private async deleteFile(req: Request): Promise<void> {
+    const query = PathMapper.fromObjectToPathParamDto(req.params)
+    await this.pathService.deleteFile(query.path)
   }
 
-  private async deleteDirectory(req: Request, res: Response): Promise<void> {
-    try {
-      const query = PathMapper.fromObjectToPathParamDto(req.params)
-
-      await this.pathService.deleteDirectory(query.path)
-
-      res.status(200).send()
-    } catch (error) {
-      console.error(`Error in ${PathController.name}.${this.deleteDirectory.name}`)
-      console.error(error)
-      res.status(500).send()
-    }
+  @Delete()
+  private async deleteDirectory(req: Request): Promise<void> {
+    const query = PathMapper.fromObjectToPathParamDto(req.params)
+    await this.pathService.deleteDirectory(query.path)
   }
 
 
