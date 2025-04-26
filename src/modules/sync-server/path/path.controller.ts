@@ -88,7 +88,7 @@ export class PathController {
 
   @Delete()
   private async deleteDirectory(req: Request): Promise<void> {
-    const query = PathMapper.fromObjectToPathParamDto(req.params)
+    const query = PathMapper.fromObjectToPathParamDto(req.query)
     await this.pathService.deleteDirectory(query.path)
   }
 
