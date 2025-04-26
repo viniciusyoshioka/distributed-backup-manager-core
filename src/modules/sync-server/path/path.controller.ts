@@ -82,7 +82,7 @@ export class PathController {
 
   @Delete()
   private async deleteFile(req: Request): Promise<void> {
-    const query = PathMapper.fromObjectToPathParamDto(req.params)
+    const query = PathMapper.fromObjectToPathParamDto(req.query)
     await this.pathService.deleteFile(query.path)
   }
 
