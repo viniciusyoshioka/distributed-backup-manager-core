@@ -3,7 +3,7 @@ import readline from 'node:readline/promises'
 
 import { ExecutionTime } from '../../../decorators'
 import { Queue } from '../../../utils'
-import { FileSystem, Path, PathType } from '../../file-system'
+import { FileSystem, Path, PathType, RemoteFileSystem } from '../../file-system'
 import { hash } from '../../hash'
 import { Syncer, SyncerParams } from '../syncer'
 import { Diffs } from '../syncer.types'
@@ -32,14 +32,14 @@ enum SyncOperation {
 
 export interface RemoteSyncerParams extends Omit<SyncerParams, 'fileSystem'> {
   localFileSystem: FileSystem
-  remoteFileSystem: FileSystem
+  remoteFileSystem: RemoteFileSystem
 }
 
 
 export class RemoteSyncer extends Syncer {
 
 
-  private readonly remoteFileSystem: FileSystem
+  private readonly remoteFileSystem: RemoteFileSystem
 
 
   constructor(params: RemoteSyncerParams) {
@@ -207,7 +207,7 @@ export class RemoteSyncer extends Syncer {
       if (sourceChildPath.type === PathType.FILE) {
         const [sourceHash, destinationHash] = await Promise.all([
           hash(sourceChildPath),
-          hash(destinationChildPath),
+          this.remoteFileSystem.getFileHash(destinationChildPath),
         ])
 
         if (sourceHash !== destinationHash) {

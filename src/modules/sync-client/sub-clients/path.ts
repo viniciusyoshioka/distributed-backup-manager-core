@@ -3,6 +3,7 @@ import FormData from 'form-data'
 import fs from 'node:fs'
 
 import { PathType } from '../../file-system'
+import { HashType } from '../../hash'
 import { NetworkAddress } from '../../network'
 
 
@@ -78,6 +79,17 @@ export class PathSubClient {
     })
   }
 
+
+  async getFileHash(absolutePath: string, hashType = HashType.SHA_256): Promise<string | null> {
+    const { data } = await this.client.get<string | null>('/file/hash', {
+      params: {
+        path: absolutePath,
+        hashType,
+      },
+    })
+
+    return data
+  }
 
   async copyFile(fromAbsolutePath: string, toAbsolutePath: string): Promise<void> {
     const form = new FormData()

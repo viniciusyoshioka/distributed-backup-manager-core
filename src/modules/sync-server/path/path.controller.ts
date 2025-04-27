@@ -37,6 +37,7 @@ export class PathController {
 
     // File
     router.delete('/file', this.deleteFile.bind(this) as unknown as RequestHandler)
+    router.get('/file/hash', this.getFileHash.bind(this) as unknown as RequestHandler)
     router.post('/file/copy', upload.single('uploadFile'), this.copyFile.bind(this) as unknown as RequestHandler)
 
     // Directory
@@ -92,6 +93,13 @@ export class PathController {
     await this.pathService.deleteDirectory(query.path)
   }
 
+
+  @Get()
+  private async getFileHash(req: Request): Promise<string | null> {
+    const query = PathMapper.fromObjectToGetFileHashDto(req.query)
+    const fileHash = await this.pathService.getFileHash(query.path, query.hashType)
+    return fileHash
+  }
 
   @Post()
   private async copyFile(req: Request): Promise<void> {

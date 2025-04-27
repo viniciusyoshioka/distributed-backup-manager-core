@@ -1,4 +1,5 @@
 import { FileSystem, Path, PathType } from '../../file-system'
+import { hash, HashType } from '../../hash'
 
 
 export interface PathServiceParams {
@@ -52,6 +53,11 @@ export class PathService {
     await this.fileSystem.deleteDirectory(pathInstance)
   }
 
+
+  async getFileHash(path: string, hashType = HashType.SHA_256): Promise<string | null> {
+    const pathInstance = new Path(path)
+    return await hash(pathInstance, hashType)
+  }
 
   async moveFile(fromPath: string, toPath: string): Promise<void> {
     const fromPathInstance = new Path(fromPath)

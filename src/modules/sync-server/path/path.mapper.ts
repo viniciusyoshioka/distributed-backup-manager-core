@@ -1,4 +1,5 @@
-import { PathParamDTO } from './dto'
+import { HashType } from '../../hash'
+import { GetFileHashDTO, PathParamDTO } from './dto'
 
 
 export class PathMapper {
@@ -7,6 +8,15 @@ export class PathMapper {
 
     const dto = new PathParamDTO()
     dto.path = path
+    return dto
+  }
+
+  static fromObjectToGetFileHashDto(query: object): GetFileHashDTO {
+    const { path, hashType } = query as Record<string, string>
+
+    const dto = new GetFileHashDTO()
+    dto.path = path
+    dto.hashType = hashType as HashType
     return dto
   }
 }
