@@ -13,7 +13,6 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
 
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
     target: Object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
