@@ -4,7 +4,7 @@ import fs from 'node:fs'
 
 import { PathType } from '../../file-system'
 import { HashType } from '../../hash'
-import { NetworkAddress } from '../../network'
+import { IpVersion, NetworkAddress } from '../../network'
 
 
 export class PathSubClient {
@@ -14,12 +14,14 @@ export class PathSubClient {
 
 
   constructor(serverAddress: NetworkAddress) {
-    const { address } = serverAddress.ip
+    const { address, version } = serverAddress.ip
     const { port } = serverAddress
 
-    this.client = axios.create({
-      baseURL: `http://${address}:${port}/api/path/v1`,
-    })
+    const baseURL = version === IpVersion.IPv6
+      ? `http://[${address}]:${port}/api/path/v1`
+      : `http://${address}:${port}/api/path/v1`
+
+    this.client = axios.create({ baseURL })
   }
 
 
