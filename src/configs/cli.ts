@@ -65,7 +65,7 @@ export class Cli {
   private readonly cwd = process.cwd()
 
 
-  constructor(argv?: string[]) {
+  constructor(argv: string[] = process.argv) {
     assertDotEnvIsValid()
     this.args = arg(argConfig, { argv }) as ParsedArgs
 
@@ -171,13 +171,7 @@ export class Cli {
       return exceptionPath
     }
 
-    const sourcePath = this.args['--source']
-    const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
-    if (!sourcePathIsAbsolutePath) {
-      throw new Error(`Source path "${sourcePath}" must be an absolute path`)
-    }
-
-    return Path.join([sourcePath, exceptionPath])
+    return Path.join([this.cwd, exceptionPath])
   }
 
   private parseExceptions() {
