@@ -89,8 +89,8 @@ export class Cli {
     const helpMessage = dedent(`Usage: ${this.SHORT_NAME} [options]
 
     Options:
-      -h, --help                      Show this help message
-      -v, --version                   Show program version
+      -h, --help                      Show this help message and exit
+      -v, --version                   Show program version and exit
       -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
       -d, --destination <path>        Path to a folder that will be synced with --source (required)
       -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
