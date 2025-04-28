@@ -1,10 +1,9 @@
 import arg, { Handler, Spec } from 'arg'
 import dedent from 'dedent'
-import { isIP } from 'node:net'
 import process from 'node:process'
 
 import { Path } from '../modules/file-system'
-import { NetworkAddress } from '../modules/network'
+import { IP, NetworkAddress } from '../modules/network'
 import { assertDotEnvIsValid } from './assert-dotenv-is-valid'
 
 
@@ -213,7 +212,7 @@ export class Cli {
       return
     }
 
-    const destinationAddressIsValid = !!isIP(destinationAddress)
+    const destinationAddressIsValid = IP.isValid(destinationAddress)
     if (!destinationAddressIsValid) {
       console.log(`IP address "${destinationAddress}" for param "--destination-address" is not a valid IP address`)
       process.exit(0)
