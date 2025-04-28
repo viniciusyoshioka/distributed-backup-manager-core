@@ -2,9 +2,10 @@ import arg, { Handler, Spec } from 'arg'
 import dedent from 'dedent'
 import process from 'node:process'
 
+import { assertDotEnvIsValid } from '../configs'
 import { Path } from '../modules/file-system'
 import { IP, NetworkAddress } from '../modules/network'
-import { assertDotEnvIsValid } from './assert-dotenv-is-valid'
+import { ExitExecutionError, InvalidArgumentError } from './errors'
 
 
 interface ArgsConfig extends Spec {
@@ -54,9 +55,6 @@ const argConfig: ArgsConfig = {
 }
 
 
-// TODO: Improve testability - Remove `process.exit()` calls and throw errors instead.
-// The errors must be handled by the caller
-// TODO: Create custom errors for invalid arguments and for exit due to --help or --version
 export class Cli {
 
 
@@ -108,14 +106,14 @@ export class Cli {
     `)
 
     console.log(helpMessage)
-    process.exit(0)
+    throw new ExitExecutionError('Help message was shown, the program should exit now')
   }
 
   private showVersionAndExit() {
     const versionMessage = `${this.SHORT_NAME} (${this.NAME}) version: ${this.VERSION}`
 
     console.log(versionMessage)
-    process.exit(0)
+    throw new ExitExecutionError('Version was shown, the program should exit now')
   }
 
 
@@ -132,49 +130,29 @@ export class Cli {
   private parseSource() {
     const sourcePath = this.args['--source'] as string | undefined
     if (!sourcePath) {
-      console.log('Param "--source" is required')
-      process.exit(0)
+      throw new InvalidArgumentError('Argument "--source" is required')
     }
 
     const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
     if (!sourcePathIsAbsolutePath) {
       const absoluteSourcePath = Path.join([this.cwd, sourcePath])
       this.args['--source'] = absoluteSourcePath
-      console.log(`Param "--source" is not an absolute path. Using "${absoluteSourcePath}" instead`)
+      console.log(`Argument "--source" is not an absolute path. Using "${absoluteSourcePath}" instead`)
     }
   }
 
   private parseDestination() {
     const destinationPath = this.args['--destination'] as string | undefined
     if (!destinationPath) {
-      console.log('Param "--destination" is required')
-      process.exit(0)
+      throw new InvalidArgumentError('Argument "--destination" is required')
     }
 
     const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
     if (!destinationPathIsAbsolutePath) {
       const absoluteDestinationPath = Path.join([this.cwd, destinationPath])
       this.args['--destination'] = absoluteDestinationPath
-      console.log(`Param "--destination" is not an absolute path. Using "${absoluteDestinationPath}" instead`)
+      console.log(`Argument "--destination" is not an absolute path. Using "${absoluteDestinationPath}" instead`)
     }
-  }
-
-  private assertExceptionPathIsSubPathOfSource(exceptionPath: string) {
-    const sourcePath = this.args['--source']
-    const exceptionPathIsSubPathOfSource = Path.isPathSubPathOfBasePath(sourcePath, exceptionPath)
-    if (!exceptionPathIsSubPathOfSource) {
-      console.log(`Path "${exceptionPath}" from "--exception" param is not a subpath of "--source" ("${sourcePath}")`)
-      process.exit(0)
-    }
-  }
-
-  private relativeExceptionPathToAbsolutePath(exceptionPath: string): string {
-    const exceptionPathIsAbsolute = Path.isAbsolute(exceptionPath)
-    if (exceptionPathIsAbsolute) {
-      return exceptionPath
-    }
-
-    return Path.join([this.cwd, exceptionPath])
   }
 
   private parseExceptions() {
@@ -187,14 +165,11 @@ export class Cli {
     const normalizedExceptionPaths = exceptionPaths.map(exceptionPath => {
       const exceptionPathIsAbsolute = Path.isAbsolute(exceptionPath)
       if (exceptionPathIsAbsolute) {
-        this.assertExceptionPathIsSubPathOfSource(exceptionPath)
         return exceptionPath
       }
 
-      const absoluteExceptionPath = this.relativeExceptionPathToAbsolutePath(exceptionPath)
-      console.log(`A "--exception" param is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exceptionPath}"`)
-
-      this.assertExceptionPathIsSubPathOfSource(absoluteExceptionPath)
+      const absoluteExceptionPath = Path.join([this.cwd, exceptionPath])
+      console.log(`A "--exception" argument is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exceptionPath}"`)
       return absoluteExceptionPath
     })
 
@@ -210,8 +185,7 @@ export class Cli {
 
     const destinationAddressIsValid = IP.isValid(destinationAddress)
     if (!destinationAddressIsValid) {
-      console.log(`IP address "${destinationAddress}" for param "--destination-address" is not a valid IP address`)
-      process.exit(0)
+      throw new InvalidArgumentError(`IP address "${destinationAddress}" for argument "--destination-address" is not a valid IP address`)
     }
   }
 
@@ -223,8 +197,7 @@ export class Cli {
       if (!destinationPort) {
         const defaultPort = process.env.PORT
         if (!defaultPort) {
-          console.log('No "PORT" variable was found in .env file. This should not happen')
-          process.exit(0)
+          throw new InvalidArgumentError('No "PORT" variable was found in .env file. This should not happen')
         }
 
         this.args['--destination-port'] = defaultPort
@@ -233,15 +206,14 @@ export class Cli {
 
       const destinationPortIsValid = NetworkAddress.isPortValid(destinationPort)
       if (!destinationPortIsValid) {
-        console.log(`Port "${destinationPort}" for param "--destination-port" is not a valid port`)
-        process.exit(0)
+        throw new InvalidArgumentError(`Port "${destinationPort}" for argument "--destination-port" is not a valid port`)
       }
 
       return
     }
 
     if (destinationPort) {
-      console.log(`Param "--destination-port" was given without "--destination-address". Ignoring it`)
+      console.log(`Argument "--destination-port" was given without "--destination-address". Ignoring it`)
     }
     this.args['--destination-port'] = null
   }

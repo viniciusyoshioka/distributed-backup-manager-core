@@ -1,8 +1,30 @@
-import { Cli, assertDotEnvIsValid } from './configs'
+import { Cli, ExitExecutionError, InvalidArgumentError, ParsedArgs } from './cli'
+import { assertDotEnvIsValid } from './configs'
 import { LocalFileSystem, Path, RemoteFileSystem } from './modules/file-system'
 import { NetworkAddress } from './modules/network'
 import { SyncClient } from './modules/sync-client'
 import { LocalSyncer, RemoteSyncer, Syncer } from './modules/syncer'
+
+
+// eslint-disable-next-line @typescript-eslint/consistent-return
+function getCliArgsAndExitOnError(): ParsedArgs | undefined {
+  try {
+    const cli = new Cli()
+    return cli.getArgs()
+  } catch (error) {
+    if (error instanceof ExitExecutionError) {
+      process.exit(0)
+    }
+
+    if (error instanceof InvalidArgumentError) {
+      console.error(error.message)
+    } else {
+      console.error('An unexpected error occurred:', error)
+    }
+
+    process.exit(1)
+  }
+}
 
 
 function createLocalSyncer(params: {
@@ -49,8 +71,8 @@ async function main() {
 
 
   try {
-    const cli = new Cli()
-    const args = cli.getArgs()
+    const args = getCliArgsAndExitOnError()
+    if (!args) return
 
 
     const sourcePath = new Path(args['--source'])
