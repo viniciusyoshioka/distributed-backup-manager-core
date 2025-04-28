@@ -54,6 +54,9 @@ const argConfig: ArgsConfig = {
 }
 
 
+// TODO: Improve testability - Remove `process.exit()` calls and throw errors instead.
+// The errors must be handled by the caller
+// TODO: Create custom errors for invalid arguments and for exit due to --help or --version
 export class Cli {
 
 
