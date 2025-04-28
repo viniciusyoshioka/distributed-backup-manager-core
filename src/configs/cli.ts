@@ -201,7 +201,6 @@ export class Cli {
     this.args['--exception'] = normalizedExceptionPaths
   }
 
-  // TODO: Check if address is localhost. If so, remove address in favor of local sync
   private parseDestinationAddress() {
     const destinationAddress = this.args['--destination-address'] as string | undefined
     if (!destinationAddress) {
