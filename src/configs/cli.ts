@@ -1,9 +1,9 @@
 import arg, { Handler, Spec } from 'arg'
 import dedent from 'dedent'
 import { isIP } from 'node:net'
-import path from 'node:path'
 import process from 'node:process'
 
+import { Path } from '../modules/file-system'
 import { NetworkAddress } from '../modules/network'
 import { assertDotEnvIsValid } from './assert-dotenv-is-valid'
 
@@ -134,9 +134,9 @@ export class Cli {
       process.exit(0)
     }
 
-    const sourcePathIsAbsolutePath = path.isAbsolute(sourcePath)
+    const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
     if (!sourcePathIsAbsolutePath) {
-      const absoluteSourcePath = path.join(this.cwd, sourcePath)
+      const absoluteSourcePath = Path.join([this.cwd, sourcePath])
       this.args['--source'] = absoluteSourcePath
       console.log(`Param "--source" is not an absolute path. Using "${absoluteSourcePath}" instead`)
     }
@@ -149,32 +149,17 @@ export class Cli {
       process.exit(0)
     }
 
-    const destinationPathIsAbsolutePath = path.isAbsolute(destinationPath)
+    const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
     if (!destinationPathIsAbsolutePath) {
-      const absoluteDestinationPath = path.join(this.cwd, destinationPath)
+      const absoluteDestinationPath = Path.join([this.cwd, destinationPath])
       this.args['--destination'] = absoluteDestinationPath
       console.log(`Param "--destination" is not an absolute path. Using "${absoluteDestinationPath}" instead`)
     }
   }
 
-  private isSubPathOf(basePath: string, subPath: string): boolean {
-    const basePathIsAbsolute = path.isAbsolute(basePath)
-    if (!basePathIsAbsolute) {
-      throw new Error(`Base path "${basePath}" must be an absolute path`)
-    }
-
-    const subPathIsAbsolute = path.isAbsolute(subPath)
-    if (!subPathIsAbsolute) {
-      throw new Error(`Subpath "${subPath}" must be an absolute path`)
-    }
-
-    const normalizedBasePath = basePath.replace(/(\\|\/)+$/, '')
-    return subPath.startsWith(normalizedBasePath)
-  }
-
   private assertExceptionPathIsSubPathOfSource(exceptionPath: string) {
     const sourcePath = this.args['--source']
-    const exceptionPathIsSubPathOfSource = this.isSubPathOf(sourcePath, exceptionPath)
+    const exceptionPathIsSubPathOfSource = Path.isPathSubPathOfBasePath(sourcePath, exceptionPath)
     if (!exceptionPathIsSubPathOfSource) {
       console.log(`Path "${exceptionPath}" from "--exception" param is not a subpath of "--source" ("${sourcePath}")`)
       process.exit(0)
@@ -182,18 +167,18 @@ export class Cli {
   }
 
   private relativeExceptionPathToAbsolutePath(exceptionPath: string): string {
-    const exceptionPathIsAbsolute = path.isAbsolute(exceptionPath)
+    const exceptionPathIsAbsolute = Path.isAbsolute(exceptionPath)
     if (exceptionPathIsAbsolute) {
       return exceptionPath
     }
 
     const sourcePath = this.args['--source']
-    const sourcePathIsAbsolutePath = path.isAbsolute(sourcePath)
+    const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
     if (!sourcePathIsAbsolutePath) {
       throw new Error(`Source path "${sourcePath}" must be an absolute path`)
     }
 
-    return path.join(sourcePath, exceptionPath)
+    return Path.join([sourcePath, exceptionPath])
   }
 
   private parseExceptions() {
@@ -204,7 +189,7 @@ export class Cli {
     }
 
     const normalizedExceptionPaths = exceptionPaths.map(exceptionPath => {
-      const exceptionPathIsAbsolute = path.isAbsolute(exceptionPath)
+      const exceptionPathIsAbsolute = Path.isAbsolute(exceptionPath)
       if (exceptionPathIsAbsolute) {
         this.assertExceptionPathIsSubPathOfSource(exceptionPath)
         return exceptionPath
