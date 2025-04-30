@@ -11,7 +11,7 @@
         "test": "jest",
         "build": "tsc",
         "start": "node --env-file='.env' ./dist/index.js",
-        "sync-server:start:dev": "nodemon -r ./src/configs/env-loader.ts ./src/modules/sync-server/server.ts",
+        "sync-server:start:dev": "nodemon -r ./src/env/env-loader.ts ./src/modules/sync-server/server.ts",
         "sync-server:start:prod": "node --env-file='.env' ./dist/modules/sync-server/server.js"
     },
     "dependencies": {

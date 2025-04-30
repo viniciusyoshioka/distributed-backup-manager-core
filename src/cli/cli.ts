@@ -2,7 +2,7 @@ import arg, { Handler, Spec } from 'arg'
 import dedent from 'dedent'
 import process from 'node:process'
 
-import { assertDotEnvIsValid } from '../configs'
+import { assertDotEnvIsValid } from '../env'
 import { Path } from '../modules/file-system'
 import { IP, NetworkAddress } from '../modules/network'
 import { ExitExecutionError, InvalidArgumentError } from './errors'

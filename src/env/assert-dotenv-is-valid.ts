@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { InvalidEnvVariablesError } from './errors'
+
 
 const envSchema = z
   .object({
@@ -20,20 +22,23 @@ const envSchema = z
 
 export function assertDotEnvIsValid() {
   const parsedEnv = envSchema.safeParse(process.env)
-  if (!parsedEnv.success) {
-    console.error('Invalid environment variables')
-
-    const { fieldErrors } = parsedEnv.error.formErrors
-    const fields = Object.keys(fieldErrors) as (keyof typeof fieldErrors)[]
-    fields.forEach(field => {
-      console.error(field)
-
-      const fieldMessages = parsedEnv.error.formErrors.fieldErrors[field]
-      fieldMessages?.forEach(fieldMessage => {
-        console.error(`\t- ${fieldMessage}`)
-      })
-    })
-
-    process.exit(1)
+  if (parsedEnv.success) {
+    return
   }
+
+
+  const { fieldErrors } = parsedEnv.error.formErrors
+  let errorMessage = 'Invalid environment variables\n'
+
+  const fields = Object.keys(fieldErrors) as (keyof typeof fieldErrors)[]
+  fields.forEach(field => {
+    errorMessage += `${field}\n`
+
+    const fieldMessages = fieldErrors[field]
+    fieldMessages?.forEach(fieldMessage => {
+      errorMessage += `\t- ${fieldMessage}\n`
+    })
+  })
+
+  throw new InvalidEnvVariablesError(errorMessage)
 }

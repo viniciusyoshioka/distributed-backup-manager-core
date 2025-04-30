@@ -1,11 +1,18 @@
 import express from 'express'
 
-import { assertDotEnvIsValid } from '../../configs'
+import { assertDotEnvIsValid, InvalidEnvVariablesError } from '../../env'
 import { createPathRouterV1 } from './path/utils'
 
 
 function createAndStartServer(): void {
-  assertDotEnvIsValid()
+  try {
+    assertDotEnvIsValid()
+  } catch (error) {
+    const { message } = (error as InvalidEnvVariablesError)
+    console.error(message)
+    return
+  }
+
 
   const app = express()
 
