@@ -47,6 +47,8 @@ export class RemoteSyncer extends Syncer {
       source: params.source,
       destination: params.destination,
       exceptions: params.exceptions,
+      exceptionMode: params.exceptionMode,
+      skipConfirmation: params.skipConfirmation,
       fileSystem: params.localFileSystem,
     })
 
