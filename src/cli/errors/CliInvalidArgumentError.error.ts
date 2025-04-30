@@ -1,9 +1,9 @@
 import { BaseCliError } from './BaseCliError.error'
 
 
-export class InvalidArgumentError extends BaseCliError {
+export class CliInvalidArgumentError extends BaseCliError {
   constructor(message: string) {
     super(message)
-    this.name = 'InvalidArgumentError'
+    this.name = CliInvalidArgumentError.name
   }
 }

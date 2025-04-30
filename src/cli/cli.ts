@@ -5,7 +5,7 @@ import process from 'node:process'
 import { assertDotEnvIsValid } from '../env'
 import { Path } from '../modules/file-system'
 import { IP, NetworkAddress } from '../modules/network'
-import { ExitExecutionError, InvalidArgumentError } from './errors'
+import { CliExitExecutionError, CliInvalidArgumentError } from './errors'
 
 
 interface ArgsConfig extends Spec {
@@ -106,14 +106,14 @@ export class Cli {
     `)
 
     console.log(helpMessage)
-    throw new ExitExecutionError('Help message was shown, the program should exit now')
+    throw new CliExitExecutionError('Help message was shown, the program should exit now')
   }
 
   private showVersionAndExit() {
     const versionMessage = `${this.SHORT_NAME} (${this.NAME}) version: ${this.VERSION}`
 
     console.log(versionMessage)
-    throw new ExitExecutionError('Version was shown, the program should exit now')
+    throw new CliExitExecutionError('Version was shown, the program should exit now')
   }
 
 
@@ -130,7 +130,7 @@ export class Cli {
   private parseSource() {
     const sourcePath = this.args['--source'] as string | undefined
     if (!sourcePath) {
-      throw new InvalidArgumentError('Argument "--source" is required')
+      throw new CliInvalidArgumentError('Argument "--source" is required')
     }
 
     const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
@@ -144,7 +144,7 @@ export class Cli {
   private parseDestination() {
     const destinationPath = this.args['--destination'] as string | undefined
     if (!destinationPath) {
-      throw new InvalidArgumentError('Argument "--destination" is required')
+      throw new CliInvalidArgumentError('Argument "--destination" is required')
     }
 
     const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
@@ -185,7 +185,7 @@ export class Cli {
 
     const destinationAddressIsValid = IP.isValid(destinationAddress)
     if (!destinationAddressIsValid) {
-      throw new InvalidArgumentError(`IP address "${destinationAddress}" for argument "--destination-address" is not a valid IP address`)
+      throw new CliInvalidArgumentError(`IP address "${destinationAddress}" for argument "--destination-address" is not a valid IP address`)
     }
   }
 
@@ -197,7 +197,7 @@ export class Cli {
       if (!destinationPort) {
         const defaultPort = process.env.PORT
         if (!defaultPort) {
-          throw new InvalidArgumentError('No "PORT" variable was found in .env file. This should not happen')
+          throw new CliInvalidArgumentError('No "PORT" variable was found in .env file. This should not happen')
         }
 
         this.args['--destination-port'] = defaultPort
@@ -206,7 +206,7 @@ export class Cli {
 
       const destinationPortIsValid = NetworkAddress.isPortValid(destinationPort)
       if (!destinationPortIsValid) {
-        throw new InvalidArgumentError(`Port "${destinationPort}" for argument "--destination-port" is not a valid port`)
+        throw new CliInvalidArgumentError(`Port "${destinationPort}" for argument "--destination-port" is not a valid port`)
       }
 
       return

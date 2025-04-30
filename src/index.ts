@@ -1,4 +1,4 @@
-import { Cli, ExitExecutionError, InvalidArgumentError } from './cli'
+import { Cli, CliExitExecutionError, CliInvalidArgumentError } from './cli'
 import { assertDotEnvIsValid, InvalidEnvVariablesError } from './env'
 import { LocalFileSystem, Path, RemoteFileSystem } from './modules/file-system'
 import { NetworkAddress } from './modules/network'
@@ -98,10 +98,10 @@ async function main() {
       return
     }
 
-    if (error instanceof ExitExecutionError) {
+    if (error instanceof CliExitExecutionError) {
       return
     }
-    if (error instanceof InvalidArgumentError) {
+    if (error instanceof CliInvalidArgumentError) {
       console.error(error.message)
       return
     }

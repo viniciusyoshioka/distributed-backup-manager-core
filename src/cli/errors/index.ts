@@ -1,3 +1,3 @@
 export * from './BaseCliError.error'
-export * from './ExitExecutionError.error'
-export * from './InvalidArgumentError.error'
+export * from './CliExitExecutionError.error'
+export * from './CliInvalidArgumentError.error'
