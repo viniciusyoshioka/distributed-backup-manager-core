@@ -113,6 +113,6 @@ export class PathController {
     const uploadRelativePath = req.file.path
     const pathWhereFileWasUploaded = Path.join([cwd, uploadRelativePath])
 
-    await this.pathService.moveFile(pathWhereFileWasUploaded, query.path)
+    await this.pathService.moveUploadedFile(pathWhereFileWasUploaded, query.path)
   }
 }

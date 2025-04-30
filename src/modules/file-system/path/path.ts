@@ -49,10 +49,11 @@ export class Path {
     return path.isAbsolute(pathToCheck)
   }
 
-  private static assertPathIsAbsolute(pathToCheck: string): void {
+  private static assertPathIsAbsolute(pathToCheck: string, customErrorMessage?: string): void {
     const pathIsAbsolute = Path.isAbsolute(pathToCheck)
     if (!pathIsAbsolute) {
-      throw new Error('Path must be absolute')
+      const errorMessage = customErrorMessage ?? 'Path must be absolute'
+      throw new Error(errorMessage)
     }
   }
 
@@ -81,11 +82,25 @@ export class Path {
    * getRelativePathBetweenPaths(pathA, pathB) // './in/somewhere'
    */
   static getRelativePathBetweenPaths(fromPath: string, toPath: string): string {
-    Path.assertPathIsAbsolute(fromPath)
-    Path.assertPathIsAbsolute(toPath)
+    Path.assertPathIsAbsolute(fromPath, 'From path must be absolute')
+    Path.assertPathIsAbsolute(toPath, 'To path must be absolute')
     return path.relative(fromPath, toPath)
   }
 
+  static isPathSubPathOfBasePath(basePath: string, subPath: string): boolean {
+    Path.assertPathIsAbsolute(basePath, 'Base path must be absolute')
+    Path.assertPathIsAbsolute(subPath, 'Subpath must be absolute')
+
+    const possibleSeparatorsAtEndOfPathRegex = /(\\|\/)+$/
+    const normalizedBasePath = basePath.replace(possibleSeparatorsAtEndOfPathRegex, '')
+    const normalizedSubPath = subPath.replace(possibleSeparatorsAtEndOfPathRegex, '')
+    return normalizedSubPath.startsWith(normalizedBasePath)
+  }
+
+
+  isSubPathOf(rootPath: Path): boolean {
+    return Path.isPathSubPathOfBasePath(rootPath.absolutePath, this.absolutePath)
+  }
 
   getRelativePathToRoot(rootPath: string): string {
     return Path.getRelativePathBetweenPaths(rootPath, this.absolutePath)
