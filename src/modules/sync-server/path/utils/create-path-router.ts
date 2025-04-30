@@ -7,7 +7,7 @@ import { PathService } from '../path.service'
 
 // TODO: Add the user specific folder in rootPath before passing it to PathService
 export function createPathRouterV1(): Router {
-  const rootDestinationPath = process.env.SYNC_SERVER_ROOT_DESTINATION_PATH
+  const rootDestinationPath = String(process.env.SYNC_SERVER_ROOT_DESTINATION_PATH)
   const rootPath = new Path(rootDestinationPath)
 
   const fileSystem = new LocalFileSystem()
