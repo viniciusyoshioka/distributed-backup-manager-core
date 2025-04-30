@@ -55,7 +55,7 @@ export class RemoteSyncer extends Syncer {
 
 
   @ExecutionTime()
-  async scanDiffs(): Promise<Diffs | null> {
+  protected async scanDiffs(): Promise<Diffs | null> {
     const rootAbsolutePath = this.source.absolutePath
     const rootRelativePath = this.source.getRelativePathToRoot(rootAbsolutePath)
 
@@ -82,7 +82,7 @@ export class RemoteSyncer extends Syncer {
   }
 
   @ExecutionTime()
-  async confirmDiffsToSync(diffs: Diffs): Promise<Diffs | null> {
+  protected async confirmDiffsToSync(diffs: Diffs): Promise<Diffs | null> {
     if (!this.hasAnyDiffs(diffs)) {
       return null
     }
@@ -108,7 +108,7 @@ export class RemoteSyncer extends Syncer {
   }
 
   @ExecutionTime()
-  async syncDiffs(diffs: Diffs): Promise<void> {
+  protected async syncDiffs(diffs: Diffs): Promise<void> {
     await this.deletePathsInDestination(diffs.pathsToDelete)
     await this.updatePathsInDestination(diffs.pathsToUpdate)
     await this.createPathsInDestination(diffs.pathsToCreate)

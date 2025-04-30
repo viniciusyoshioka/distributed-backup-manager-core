@@ -1,4 +1,4 @@
-import { FileSystem, Path } from '../file-system'
+import { FileSystem, Path, PathType } from '../file-system'
 import { Diffs } from './syncer.types'
 
 
@@ -32,6 +32,7 @@ export interface SyncerParams {
    */
   exceptionMode?: SyncerExceptionMode
 
+  skipConfirmation?: boolean
   fileSystem: FileSystem
 }
 
@@ -43,6 +44,7 @@ export abstract class Syncer {
   protected readonly destination: Path
   protected readonly exceptions: Path[]
   protected readonly exceptionMode: SyncerExceptionMode
+  protected readonly skipConfirmation: boolean
   protected readonly fileSystem: FileSystem
 
 
@@ -51,15 +53,62 @@ export abstract class Syncer {
     this.destination = params.destination
     this.exceptions = params.exceptions ?? []
     this.exceptionMode = params.exceptionMode ?? SyncerExceptionMode.BLOCKLIST
+    this.skipConfirmation = params.skipConfirmation ?? false
     this.fileSystem = params.fileSystem
   }
 
 
-  abstract scanDiffs(): Promise<Diffs | null>
+  private async assertParamsAreValid(): Promise<void> {
+    await this.fileSystem.resolvePathType(this.source)
+    if (this.source.type !== PathType.DIR) {
+      throw new Error(`Source path "${this.source.absolutePath}" must be a directory`)
+    }
 
-  abstract confirmDiffsToSync(diffs: Diffs): Promise<Diffs | null>
+    await this.fileSystem.resolvePathType(this.destination)
+    if (this.destination.type !== PathType.DIR) {
+      throw new Error(`Destination path "${this.destination.absolutePath}" must be a directory`)
+    }
 
-  abstract syncDiffs(diffs: Diffs): Promise<void>
+    this.exceptions.forEach(exception => {
+      const exceptionPathIsSubPathOfSource = exception.isSubPathOf(this.source)
+      if (!exceptionPathIsSubPathOfSource) {
+        throw new Error(`Exception path "${exception.absolutePath}" is not a subpath of source path "${this.source.absolutePath}"`)
+      }
+    })
+  }
+
+
+  protected abstract scanDiffs(): Promise<Diffs | null>
+
+  protected abstract confirmDiffsToSync(diffs: Diffs): Promise<Diffs | null>
+
+  protected abstract syncDiffs(diffs: Diffs): Promise<void>
+
+  async startSync(): Promise<void> {
+    await this.assertParamsAreValid()
+
+
+    const pathsToConfirm = await this.scanDiffs()
+    if (!pathsToConfirm) {
+      // TODO: Add custom error
+      throw new Error('No path with diffs found on scan')
+    }
+
+
+    if (this.skipConfirmation) {
+      await this.syncDiffs(pathsToConfirm)
+      return
+    }
+
+
+    const pathsToSync = await this.confirmDiffsToSync(pathsToConfirm)
+    if (!pathsToSync) {
+      // TODO: Add custom error
+      throw new Error('No path with diffs found on confirmation')
+    }
+
+    await this.syncDiffs(pathsToSync)
+  }
 
 
   protected isPathInExceptionList(path: Path): boolean {

@@ -10,6 +10,7 @@ function createLocalSyncer(params: {
   sourcePath: Path
   destinationPath: Path
   exceptions: Path[]
+  skipConfirmation: boolean
 }): Syncer {
   const localFileSystem = new LocalFileSystem()
 
@@ -17,6 +18,7 @@ function createLocalSyncer(params: {
     source: params.sourcePath,
     destination: params.destinationPath,
     exceptions: params.exceptions,
+    skipConfirmation: params.skipConfirmation,
     fileSystem: localFileSystem,
   })
 }
@@ -26,6 +28,7 @@ function createRemoteSyncer(params: {
   sourcePath: Path
   destinationPath: Path
   exceptions: Path[]
+  skipConfirmation: boolean
   destinationAddress: string
   destinationPort: string
 }): Syncer {
@@ -39,6 +42,7 @@ function createRemoteSyncer(params: {
     source: params.sourcePath,
     destination: params.destinationPath,
     exceptions: params.exceptions,
+    skipConfirmation: params.skipConfirmation,
     localFileSystem,
     remoteFileSystem,
   })
@@ -63,6 +67,7 @@ async function main() {
           sourcePath: sourcePath,
           destinationPath: destinationPath,
           exceptions,
+          skipConfirmation: args['--skip-confirmation'],
           destinationAddress: args['--destination-address'],
           destinationPort: args['--destination-port'],
         })
@@ -70,28 +75,11 @@ async function main() {
           sourcePath: sourcePath,
           destinationPath: destinationPath,
           exceptions,
+          skipConfirmation: args['--skip-confirmation'],
         })
 
 
-    const pathsToConfirm = await syncer.scanDiffs()
-    if (!pathsToConfirm) {
-      console.log('No path with diffs found on scan')
-      return
-    }
-
-
-    if (args['--skip-confirmation']) {
-      await syncer.syncDiffs(pathsToConfirm)
-      return
-    }
-
-    const pathsToSync = await syncer.confirmDiffsToSync(pathsToConfirm)
-    if (!pathsToSync) {
-      console.log('No path with diffs was confirmed to be synced')
-      return
-    }
-
-    await syncer.syncDiffs(pathsToSync)
+    await syncer.startSync()
   } catch (error) {
     if (error instanceof InvalidEnvVariablesError) {
       console.error(error.message)
