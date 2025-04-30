@@ -80,6 +80,7 @@ export class PathService {
     const pathInstance = new Path(path)
     this.assertPathIsSubPathOfRoot(pathInstance)
 
+    await this.fileSystem.resolvePathType(pathInstance)
     return await hash(pathInstance, hashType)
   }
 
