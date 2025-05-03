@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 
+import { indent } from '../../../utils'
 import { handleErrorAndSendResponse } from './utils'
 
 
@@ -23,20 +24,26 @@ export function Post(): MethodDecorator {
       const body = JSON.stringify(request.body, null, 2)
 
       const requestLog = [
-        `[POST] "${endpointPath}"`,
-        `  - URL parameters: ${urlParams}`,
-        `  - Query parameters: ${queryParams}`,
-        `  - Body: ${body}`,
+        `[POST] Request: "${endpointPath}"`,
+        indent(`- URL parameters: ${urlParams}`),
+        indent(`- Query parameters: ${queryParams}`),
+        indent(`- Body: ${body}`),
       ].join('\n')
       console.log(requestLog)
 
 
       function handlePostSuccessResponse(returnValue: unknown): void {
-        if (returnValue === undefined || returnValue === null) {
-          response.status(201).send()
-        } else {
-          response.status(201).json(returnValue)
-        }
+        const stringifiedReturnValue = typeof returnValue === 'string'
+          ? returnValue
+          : JSON.stringify(returnValue, null, 2)
+
+        const responseLog = [
+          `[POST] Response: "${endpointPath}"`,
+          indent(`- ${stringifiedReturnValue}`),
+        ].join('\n')
+        console.log(responseLog)
+
+        response.status(201).json(returnValue)
       }
 
 

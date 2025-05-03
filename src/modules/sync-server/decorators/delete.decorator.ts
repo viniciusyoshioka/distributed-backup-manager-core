@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 
+import { indent } from '../../../utils'
 import { handleErrorAndSendResponse } from './utils'
 
 
@@ -22,19 +23,25 @@ export function Delete(): MethodDecorator {
       const queryParams = JSON.stringify(request.query, null, 2)
 
       const requestLog = [
-        `[DELETE] "${endpointPath}"`,
-        `  - URL parameters: ${urlParams}`,
-        `  - Query parameters: ${queryParams}`,
+        `[DELETE] Request: "${endpointPath}"`,
+        indent(`- URL parameters: ${urlParams}`),
+        indent(`- Query parameters: ${queryParams}`),
       ].join('\n')
       console.log(requestLog)
 
 
       function handlePostSuccessResponse(returnValue: unknown): void {
-        if (returnValue === undefined || returnValue === null) {
-          response.status(204).send()
-        } else {
-          response.status(200).json(returnValue)
-        }
+        const stringifiedReturnValue = typeof returnValue === 'string'
+          ? returnValue
+          : JSON.stringify(returnValue, null, 2)
+
+        const responseLog = [
+          `[DELETE] Response: "${endpointPath}"`,
+          indent(`- ${stringifiedReturnValue}`),
+        ].join('\n')
+        console.log(responseLog)
+
+        response.status(200).json(returnValue)
       }
 
 
