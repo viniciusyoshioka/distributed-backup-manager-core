@@ -1,5 +1,5 @@
-import { FileSystem, Path, PathType } from '../../file-system'
-import { hash, HashType } from '../../hash'
+import { FileSystem, Path, PathType } from '../../../file-system'
+import { hash, HashType } from '../../../hash'
 
 
 export interface PathServiceParams {

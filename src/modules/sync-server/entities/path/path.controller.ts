@@ -1,9 +1,9 @@
 import { Request, RequestHandler, Router } from 'express'
 import multer from 'multer'
 
-import { Path, PathType } from '../../file-system'
-import { Delete, Get, Post } from '../decorators'
-import { BadRequestException } from '../errors'
+import { Path, PathType } from '../../../file-system'
+import { Delete, Get, Post } from '../../decorators'
+import { BadRequestException } from '../../errors'
 import { PathMapper } from './path.mapper'
 import { PathService } from './path.service'
 

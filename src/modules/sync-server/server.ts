@@ -2,7 +2,7 @@ import express from 'express'
 import 'reflect-metadata'
 
 import { assertDotEnvIsValid, InvalidEnvVariablesError } from '../../env'
-import { createPathRouterV1 } from './path/utils'
+import { createPathRouterV1 } from './entities/path'
 
 
 function createAndStartServer(): void {

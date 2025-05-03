@@ -1,4 +1,4 @@
-import { HashType } from '../../hash'
+import { HashType } from '../../../hash'
 import { GetFileHashDTO, PathParamDTO } from './dto'
 
 

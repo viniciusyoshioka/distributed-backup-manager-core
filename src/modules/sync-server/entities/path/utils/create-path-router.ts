@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { LocalFileSystem, Path } from '../../../file-system'
+import { LocalFileSystem, Path } from '../../../../file-system'
 import { PathController } from '../path.controller'
 import { PathService } from '../path.service'
 
