@@ -8,9 +8,11 @@
         "incremental": true,
         "lib": [
             "ESNext",
-            "DOM"
+            "DOM",
+            "ES6"
         ],
         "module": "CommonJS",
+        "emitDecoratorMetadata": true,
         "experimentalDecorators": true
     },
     "include": [
