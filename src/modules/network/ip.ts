@@ -7,8 +7,6 @@ export enum IpVersion {
 }
 
 
-// TODO: Add static method that checks if an address is localhost
-// TODO: Convert localhost address to IP address
 export class IP {
 
 
