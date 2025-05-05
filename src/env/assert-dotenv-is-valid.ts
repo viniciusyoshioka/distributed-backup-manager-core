@@ -13,6 +13,10 @@ const envSchema = z
       (destinationRootPath: string) => path.isAbsolute(destinationRootPath),
       { message: 'SYNC_SERVER_ROOT_DESTINATION_PATH must be an absolute path' },
     ),
+    SYNC_SERVER_DATABASE_PATH: z.string().refine(
+      (databasePath: string) => path.isAbsolute(databasePath),
+      { message: 'SYNC_SERVER_DATABASE_PATH must be an absolute path' },
+    ),
   })
   .superRefine((arg, ctx) => {
     if (arg.EXECUTION_TIME_ENABLED === 'true' && arg.STAGE !== 'development') {
