@@ -10,6 +10,7 @@
         "typecheck": "tsc --noEmit",
         "test": "jest",
         "build": "tsc",
+        "typeorm:migration:create": "yarn typeorm migration:create",
         "start": "node --env-file='.env' ./dist/index.js",
         "sync-server:start:dev": "nodemon -r ./src/env/env-loader.ts ./src/modules/sync-server/server.ts",
         "sync-server:start:prod": "node --env-file='.env' ./dist/modules/sync-server/server.js"
