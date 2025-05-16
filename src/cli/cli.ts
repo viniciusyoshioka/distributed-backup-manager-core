@@ -3,73 +3,82 @@ import dedent from 'dedent'
 import process from 'node:process'
 
 import { assertDotEnvIsValid } from '../env'
-import { Path } from '../modules/file-system'
-import { IP, NetworkAddress } from '../modules/network'
 import { CliExitExecutionError, CliInvalidArgumentError } from './errors'
+import { SubCommand } from './sub-command.interface'
+import { AuthSubCommand, SyncSubCommand } from './sub-commands'
+import { getSubCommandArgument } from './utils'
 
 
-interface ArgsConfig extends Spec {
-  '--help': Handler
-  '--version': Handler
-  '--source': Handler
-  '--destination': Handler
-  '--exception': Handler
-  '--destination-address': Handler
-  '--destination-port': Handler
-  '--skip-confirmation': Handler
-}
-
-
-export interface ParsedArgs {
+export interface CliArgs {
   _: string[]
   '--help': boolean
   '--version': boolean
-  '--source': string
-  '--destination': string
-  '--exception': string[]
-  '--destination-address': string | null
-  '--destination-port': string | null
-  '--skip-confirmation': boolean
 }
 
 
-// TODO: Add exception mode argument
-const argConfig: ArgsConfig = {
+interface CliArgsSpec extends Spec {
+  '--help': Handler
+  '--version': Handler
+}
+
+const cliArgsSpec: CliArgsSpec = {
   '--help': Boolean,
   '--version': Boolean,
-  '--source': String,
-  '--destination': String,
-  '--exception': [String] as unknown as Handler,
-  '--destination-address': String,
-  '--destination-port': String,
-  '--skip-confirmation': Boolean,
 
   '-h': '--help',
   '-v': '--version',
-  '-s': '--source',
-  '-d': '--destination',
-  '-e': '--exception',
-  '-a': '--destination-address',
-  '-p': '--destination-port',
-  '-c': '--skip-confirmation',
 }
 
 
 export class Cli {
 
 
-  private readonly NAME = 'distributed-backup-manager-core'
-  private readonly SHORT_NAME = 'dbmc'
-  private readonly VERSION = '0.0.1'
-  private readonly args: ParsedArgs
+  static readonly NAME = 'distributed-backup-manager-core'
+  static readonly SHORT_NAME = 'dbmc'
+  static readonly VERSION = '0.0.1'
 
-  private readonly cwd = process.cwd()
+  private readonly argv: string[]
+  private readonly args: CliArgs
+
+  private subCommand: SubCommand | null = null
+  private subCommandArgs: object | null = null
 
 
   constructor(argv: string[] = process.argv) {
     assertDotEnvIsValid()
-    this.args = arg(argConfig, { argv }) as ParsedArgs
 
+    this.argv = argv
+    this.args = arg(cliArgsSpec, { argv }) as CliArgs
+
+    this.parseSubCommandArgs()
+  }
+
+
+  getArgs(): CliArgs {
+    return this.args
+  }
+
+  getSubCommandName(): string | null {
+    return this.subCommand ? this.subCommand.getSubCommandName() : null
+  }
+
+  getSubCommandArgs(): object | null {
+    return this.subCommandArgs
+  }
+
+
+  private parseSubCommandArgs() {
+    const subCommandArgument = getSubCommandArgument(this.argv)
+    if (!subCommandArgument) {
+      this.parseCliOptions()
+      return
+    }
+
+    this.subCommand = this.createSubCommand(subCommandArgument)
+    this.subCommandArgs = this.subCommand.getArgs()
+  }
+
+  private parseCliOptions() {
     if (this.args['--help']) {
       this.showHelpAndExit()
     }
@@ -77,32 +86,25 @@ export class Cli {
       this.showVersionAndExit()
     }
 
-    this.validateAndSetDefaultValuesToArgs()
+    // No sub command or option was provided
+    this.showHelpAndExit()
   }
-
-
-  getArgs(): ParsedArgs {
-    return this.args
-  }
-
 
   private showHelpAndExit() {
-    const helpMessage = dedent(`Usage: ${this.SHORT_NAME} [options]
+    const helpMessage = dedent(`Usage:
 
-    Options:
-      -h, --help                      Show this help message and exit
-      -v, --version                   Show program version and exit
-      -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
-      -d, --destination <path>        Path to a folder that will be synced with --source (required)
-      -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
-      -a, --destination-address <ip>  Machine's IP address for remote sync. If not provided, a local sync will be performed
-      -p, --destination-port <port>   Port on the remote machine to connect for sync. Used with --destination-address. Defaults to "${process.env.PORT}"
-      -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
+      ${Cli.SHORT_NAME} [options]
+      ${Cli.SHORT_NAME} <subcommand> [options]
 
-    Examples:
-      ${this.SHORT_NAME} -s /home/user/src -d /backup/dest                       # Sync local folders
-      ${this.SHORT_NAME} -s /home/user/src -d /backup -e node_modules -e .git    # Sync excluding patterns
-      ${this.SHORT_NAME} -s /home/user/src -d /backup -a 192.168.1.1 -p 1234 -c  # Remote sync with no confirmation
+      Options:
+        -h, --help      Show this help message and exit
+        -v, --version   Show program version and exit
+
+      Subcommands:
+        auth            Manage authentication operations between machines
+        sync            Perform synchronization operations between local and remote directories
+
+      Run '${Cli.SHORT_NAME} <subcommand> --help' for specific subcommand options
     `)
 
     console.log(helpMessage)
@@ -110,118 +112,20 @@ export class Cli {
   }
 
   private showVersionAndExit() {
-    const versionMessage = `${this.SHORT_NAME} (${this.NAME}) version: ${this.VERSION}`
+    const versionMessage = `${Cli.SHORT_NAME} (${Cli.NAME}) version: ${Cli.VERSION}`
 
     console.log(versionMessage)
     throw new CliExitExecutionError('Version was shown, the program should exit now')
   }
 
-
-  private validateAndSetDefaultValuesToArgs() {
-    this.parseSource()
-    this.parseDestination()
-    this.parseExceptions()
-    this.parseDestinationAddress()
-    this.parseDestinationPort()
-    this.parseSkipConfirmation()
-  }
-
-
-  private parseSource() {
-    const sourcePath = this.args['--source'] as string | undefined
-    if (!sourcePath) {
-      throw new CliInvalidArgumentError('Argument "--source" is required')
-    }
-
-    const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
-    if (!sourcePathIsAbsolutePath) {
-      const absoluteSourcePath = Path.join([this.cwd, sourcePath])
-      this.args['--source'] = absoluteSourcePath
-      console.log(`Argument "--source" is not an absolute path. Using "${absoluteSourcePath}" instead`)
-    }
-  }
-
-  private parseDestination() {
-    const destinationPath = this.args['--destination'] as string | undefined
-    if (!destinationPath) {
-      throw new CliInvalidArgumentError('Argument "--destination" is required')
-    }
-
-    const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
-    if (!destinationPathIsAbsolutePath) {
-      const absoluteDestinationPath = Path.join([this.cwd, destinationPath])
-      this.args['--destination'] = absoluteDestinationPath
-      console.log(`Argument "--destination" is not an absolute path. Using "${absoluteDestinationPath}" instead`)
-    }
-  }
-
-  private parseExceptions() {
-    const exceptionPaths = this.args['--exception'] as string[] | undefined
-    if (!exceptionPaths?.length) {
-      this.args['--exception'] = []
-      return
-    }
-
-    const normalizedExceptionPaths = exceptionPaths.map(exceptionPath => {
-      const exceptionPathIsAbsolute = Path.isAbsolute(exceptionPath)
-      if (exceptionPathIsAbsolute) {
-        return exceptionPath
-      }
-
-      const absoluteExceptionPath = Path.join([this.cwd, exceptionPath])
-      console.log(`A "--exception" argument is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exceptionPath}"`)
-      return absoluteExceptionPath
-    })
-
-    this.args['--exception'] = normalizedExceptionPaths
-  }
-
-  private parseDestinationAddress() {
-    const destinationAddress = this.args['--destination-address'] as string | undefined
-    if (!destinationAddress) {
-      this.args['--destination-address'] = null
-      return
-    }
-
-    const destinationAddressIsValid = IP.isValid(destinationAddress)
-    if (!destinationAddressIsValid) {
-      throw new CliInvalidArgumentError(`IP address "${destinationAddress}" for argument "--destination-address" is not a valid IP address`)
-    }
-  }
-
-  private parseDestinationPort() {
-    const hasDestinationAddress = !!this.args['--destination-address']
-    const destinationPort = this.args['--destination-port'] as string | undefined
-
-    if (hasDestinationAddress) {
-      if (!destinationPort) {
-        const defaultPort = process.env.PORT
-        if (!defaultPort) {
-          throw new CliInvalidArgumentError('No "PORT" variable was found in .env file. This should not happen')
-        }
-
-        this.args['--destination-port'] = defaultPort
-        return
-      }
-
-      const destinationPortIsValid = NetworkAddress.isPortValid(destinationPort)
-      if (!destinationPortIsValid) {
-        throw new CliInvalidArgumentError(`Port "${destinationPort}" for argument "--destination-port" is not a valid port`)
-      }
-
-      return
-    }
-
-    if (destinationPort) {
-      console.log(`Argument "--destination-port" was given without "--destination-address". Ignoring it`)
-    }
-    this.args['--destination-port'] = null
-  }
-
-  private parseSkipConfirmation() {
-    const skipConfirmation = this.args['--skip-confirmation'] as boolean | undefined
-    if (typeof skipConfirmation !== 'boolean') {
-      this.args['--skip-confirmation'] = false
+  private createSubCommand(subCommandArgument: string): SubCommand {
+    switch (subCommandArgument) {
+      case AuthSubCommand.SUBCOMMAND_NAME:
+        return new AuthSubCommand(this.argv)
+      case SyncSubCommand.SUBCOMMAND_NAME:
+        return new SyncSubCommand(this.argv)
+      default:
+        throw new CliInvalidArgumentError(`"${subCommandArgument}" is not a valid sub command`)
     }
   }
 }

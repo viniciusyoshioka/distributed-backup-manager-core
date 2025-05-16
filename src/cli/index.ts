@@ -1,2 +1,4 @@
 export * from './cli'
 export * from './errors'
+export type * from './sub-command.interface'
+export * from './sub-commands'
