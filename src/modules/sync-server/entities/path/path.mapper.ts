@@ -3,16 +3,16 @@ import { GetFileHashDTO, PathParamDTO } from './dto'
 
 
 export class PathMapper {
-  static fromObjectToPathParamDto(query: object): PathParamDTO {
-    const { path } = query as Record<string, string>
+  static fromObjectToPathParamDto(obj: object): PathParamDTO {
+    const { path } = obj as Record<string, string>
 
     const dto = new PathParamDTO()
     dto.path = path
     return dto
   }
 
-  static fromObjectToGetFileHashDto(query: object): GetFileHashDTO {
-    const { path, hashType } = query as Record<string, string>
+  static fromObjectToGetFileHashDto(obj: object): GetFileHashDTO {
+    const { path, hashType } = obj as Record<string, string>
 
     const dto = new GetFileHashDTO()
     dto.path = path
