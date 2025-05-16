@@ -38,7 +38,7 @@ export class Cli {
   static readonly VERSION = '0.0.1'
 
   private readonly argv: string[]
-  private readonly args: CliArgs
+  private args: CliArgs | null = null
 
   private subCommand: SubCommand | null = null
   private subCommandArgs: object | null = null
@@ -48,13 +48,11 @@ export class Cli {
     assertDotEnvIsValid()
 
     this.argv = argv
-    this.args = arg(cliArgsSpec, { argv }) as CliArgs
-
-    this.parseSubCommandArgs()
+    this.parseArgs()
   }
 
 
-  getArgs(): CliArgs {
+  getArgs(): CliArgs | null {
     return this.args
   }
 
@@ -67,9 +65,10 @@ export class Cli {
   }
 
 
-  private parseSubCommandArgs() {
+  private parseArgs() {
     const subCommandArgument = getSubCommandArgument(this.argv)
     if (!subCommandArgument) {
+      this.args = arg(cliArgsSpec, { argv: this.argv }) as CliArgs
       this.parseCliOptions()
       return
     }
@@ -79,6 +78,8 @@ export class Cli {
   }
 
   private parseCliOptions() {
+    if (!this.args) return
+
     if (this.args['--help']) {
       this.showHelpAndExit()
     }
