@@ -89,7 +89,9 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
 
 
   private showHelpAndExit() {
-    const helpMessage = dedent(`Usage: ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} [options]
+    const helpMessage = dedent(`Usage:
+
+      ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} [options]
 
       Options:
         -h, --help                      Show this help message and exit
