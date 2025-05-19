@@ -58,6 +58,7 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
 
 
   static readonly SUBCOMMAND_NAME = 'sync'
+  static readonly SUBCOMMAND_ACTIONS: string[] = []
   private readonly args: SyncArgs
 
   private readonly cwd = process.cwd()
