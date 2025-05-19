@@ -90,8 +90,8 @@ export abstract class Syncer {
 
     const pathsToConfirm = await this.scanDiffs()
     if (!pathsToConfirm) {
-      // TODO: Add custom error
-      throw new Error('No path with diffs found on scan')
+      console.log('No paths with diffs found')
+      return
     }
 
 
@@ -103,8 +103,8 @@ export abstract class Syncer {
 
     const pathsToSync = await this.confirmDiffsToSync(pathsToConfirm)
     if (!pathsToSync) {
-      // TODO: Add custom error
-      throw new Error('No path with diffs found on confirmation')
+      console.log('No path with diffs ware confirmed to sync')
+      return
     }
 
     await this.syncDiffs(pathsToSync)
