@@ -1,4 +1,4 @@
-import { CreateUserDTO, UserDTO } from './dto'
+import { CreateUserDTO, UserDTO, UserWithoutPasswordDTO } from './dto'
 import { UserEntity } from './user.entity'
 
 
@@ -15,6 +15,17 @@ export class UserMapper {
 
   static fromEntityToDto(entity: UserEntity): UserDTO {
     const dto = new UserDTO()
+    dto.id = entity.id
+    dto.name = entity.name
+    dto.email = entity.email
+    dto.password = entity.password
+    dto.createdAt = entity.createdAt
+    dto.updatedAt = entity.updatedAt
+    return dto
+  }
+
+  static fromEntityToDtoWithoutPassword(entity: UserEntity): UserWithoutPasswordDTO {
+    const dto = new UserWithoutPasswordDTO()
     dto.id = entity.id
     dto.name = entity.name
     dto.email = entity.email

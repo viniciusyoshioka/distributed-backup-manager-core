@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Router } from 'express'
 
 import { Delete, Get, Post, Put } from '../../decorators'
-import { UserDTO } from './dto'
+import { UserWithoutPasswordDTO } from './dto'
 import { UserMapper } from './user.mapper'
 import { UserService } from './user.service'
 
@@ -43,10 +43,10 @@ export class UserController {
   }
 
   @Post()
-  private async createUser(req: Request): Promise<UserDTO> {
+  private async createUser(req: Request): Promise<UserWithoutPasswordDTO> {
     const createUserDto = UserMapper.fromObjectToCreateUserDto(req.body as object)
     const createdUser = await this.userService.createUser(createUserDto)
-    return createdUser
+    return UserMapper.fromEntityToDtoWithoutPassword(createdUser)
   }
 
   @Put()
@@ -55,10 +55,10 @@ export class UserController {
   }
 
   @Delete()
-  private async deleteUser(req: Request): Promise<UserDTO> {
+  private async deleteUser(req: Request): Promise<UserWithoutPasswordDTO> {
     const { id } = req.params
     const deletedUser = await this.userService.deleteUser(id)
-    return deletedUser
+    return UserMapper.fromEntityToDtoWithoutPassword(deletedUser)
   }
 
   @Post()

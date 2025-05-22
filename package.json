@@ -16,6 +16,8 @@
         "sync-server:start:prod": "node --env-file='.env' ./dist/modules/sync-server/server.js"
     },
     "dependencies": {
+        "@nestjs/common": "^11.1.1",
+        "@nestjs/swagger": "^11.2.0",
         "arg": "^5.0.2",
         "axios": "^1.8.4",
         "bcryptjs": "^3.0.2",
