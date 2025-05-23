@@ -1,3 +1,6 @@
 export * from './create-user.dto'
+export * from './user-credentials.dto'
+export * from './user-payload.dto'
+export * from './user-token.dto'
 export * from './user-without-password.dto'
 export * from './user.dto'

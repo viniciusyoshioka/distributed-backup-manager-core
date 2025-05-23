@@ -1,4 +1,4 @@
-import { CreateUserDTO, UserDTO, UserWithoutPasswordDTO } from './dto'
+import { CreateUserDTO, UserCredentialsDTO, UserDTO, UserWithoutPasswordDTO } from './dto'
 import { UserEntity } from './user.entity'
 
 
@@ -31,6 +31,15 @@ export class UserMapper {
     dto.email = entity.email
     dto.createdAt = entity.createdAt
     dto.updatedAt = entity.updatedAt
+    return dto
+  }
+
+  static fromObjectToUserCredentialsDto(obj: object): UserCredentialsDTO {
+    const { email, password } = obj as Record<string, string>
+
+    const dto = new UserCredentialsDTO()
+    dto.email = email
+    dto.password = password
     return dto
   }
 }

@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Router } from 'express'
 
 import { Delete, Get, Post, Put } from '../../decorators'
-import { UserWithoutPasswordDTO } from './dto'
+import { UserTokenDTO, UserWithoutPasswordDTO } from './dto'
 import { UserMapper } from './user.mapper'
 import { UserService } from './user.service'
 
@@ -29,7 +29,7 @@ export class UserController {
     router.get('', this.getUser.bind(this) as unknown as RequestHandler)
     router.post('', this.createUser.bind(this) as unknown as RequestHandler)
     router.put('', this.updateUser.bind(this) as unknown as RequestHandler)
-    router.delete('', this.deleteUser.bind(this) as unknown as RequestHandler)
+    router.delete('/:id', this.deleteUser.bind(this) as unknown as RequestHandler)
     router.post('/login', this.loginUser.bind(this) as unknown as RequestHandler)
 
 
@@ -62,7 +62,9 @@ export class UserController {
   }
 
   @Post()
-  private async loginUser(req: Request): Promise<void> {
-    // TODO: Implement
+  private async loginUser(req: Request): Promise<UserTokenDTO> {
+    const userCredentialsDto = UserMapper.fromObjectToUserCredentialsDto(req.body as object)
+    const userToken = await this.userService.loginUser(userCredentialsDto)
+    return userToken
   }
 }

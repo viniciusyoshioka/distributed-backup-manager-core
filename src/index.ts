@@ -1,9 +1,14 @@
+import dedent from 'dedent'
 import {
   AuthArgs,
+  AuthLoginUserArgs,
+  AuthRegisterUserArgs,
   AuthSubCommand,
+  AuthSubCommandAction,
   Cli,
   CliExitExecutionError,
   CliInvalidArgumentError,
+  getSubCommandAction,
   SyncArgs,
   SyncSubCommand,
 } from './cli'
@@ -14,7 +19,59 @@ import { SyncClient } from './modules/sync-client'
 import { LocalSyncer, RemoteSyncer, Syncer } from './modules/syncer'
 
 
-async function auth(args: AuthArgs) {}
+async function registerUser(args: AuthRegisterUserArgs) {
+  try {
+    const machineAddress = args['--machine-address']
+    const machinePort = args['--machine-port']
+    const machineNetworkAddress = new NetworkAddress(machineAddress, machinePort)
+    const syncClient = new SyncClient(machineNetworkAddress)
+
+    await syncClient.user.createUser({
+      name: args['--name'],
+      email: args['--email'],
+      password: args['--password'],
+    })
+
+    console.log('User created successfully')
+  } catch (error) {
+    console.error('Error creating user.', error)
+  }
+}
+
+async function loginUser(args: AuthLoginUserArgs) {
+  try {
+    const machineAddress = args['--machine-address']
+    const machinePort = args['--machine-port']
+    const machineNetworkAddress = new NetworkAddress(machineAddress, machinePort)
+    const syncClient = new SyncClient(machineNetworkAddress)
+
+    const { token } = await syncClient.user.loginUser({
+      email: args['--email'],
+      password: args['--password'],
+    })
+
+    console.log(dedent(`
+      User logged in successfully.
+
+      Token: ${token}\n
+    `))
+  } catch (error) {
+    console.error('Error logging in user.', error)
+  }
+}
+
+// TODO: Improve how Cli and SubCommands handle subCommands and actions
+async function auth(args: AuthArgs | AuthRegisterUserArgs | AuthLoginUserArgs) {
+  const subCommandAction = getSubCommandAction(args['_']) as AuthSubCommandAction
+  switch (subCommandAction) {
+    case AuthSubCommandAction.REGISTER:
+      await registerUser(args as AuthRegisterUserArgs)
+      break
+    case AuthSubCommandAction.LOGIN:
+      await loginUser(args as AuthLoginUserArgs)
+      break
+  }
+}
 
 
 function createLocalSyncer(params: {

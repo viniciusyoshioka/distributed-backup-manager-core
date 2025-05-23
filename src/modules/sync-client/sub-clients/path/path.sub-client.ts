@@ -2,9 +2,9 @@ import axios, { AxiosInstance } from 'axios'
 import FormData from 'form-data'
 import fs from 'node:fs'
 
-import { PathType } from '../../file-system'
-import { HashType } from '../../hash'
-import { IpVersion, NetworkAddress } from '../../network'
+import { PathType } from '../../../file-system'
+import { HashType } from '../../../hash'
+import { IpVersion, NetworkAddress } from '../../../network'
 
 
 export class PathSubClient {

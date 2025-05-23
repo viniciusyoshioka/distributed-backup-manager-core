@@ -17,6 +17,8 @@
     },
     "dependencies": {
         "@nestjs/common": "^11.1.1",
+        "@nestjs/core": "^11.1.1",
+        "@nestjs/platform-express": "^11.1.1",
         "@nestjs/swagger": "^11.2.0",
         "arg": "^5.0.2",
         "axios": "^1.8.4",
@@ -25,8 +27,10 @@
         "dedent": "^1.5.3",
         "express": "^5.1.0",
         "form-data": "^4.0.2",
+        "jose": "^6.0.11",
         "multer": "^2.0.0",
         "reflect-metadata": "^0.2.2",
+        "rxjs": "^7.8.2",
         "sqlite3": "^5.1.7",
         "typeorm": "^0.3.22",
         "zod": "^3.24.2"
