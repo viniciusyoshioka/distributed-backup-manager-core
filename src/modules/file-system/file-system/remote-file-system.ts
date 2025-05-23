@@ -1,7 +1,7 @@
-import { HashType } from '../../hash'
-import { SyncClient } from '../../sync-client'
-import { Path, PathType } from '../path'
-import { FileSystem } from './file-system'
+import { HashType } from '../../hash/index.js'
+import { SyncClient } from '../../sync-client/index.js'
+import { Path, PathType } from '../path/index.js'
+import { FileSystem } from './file-system.js'
 
 
 export interface RemoteFileSystemParams {

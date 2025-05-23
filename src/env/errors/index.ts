@@ -1,3 +1,3 @@
-export * from './BaseEnvVariablesError.error'
-export * from './InvalidEnvVariablesError.error'
-export * from './UnexpectedEnvLoadingError.error'
+export * from './BaseEnvVariablesError.error.js'
+export * from './InvalidEnvVariablesError.error.js'
+export * from './UnexpectedEnvLoadingError.error.js'

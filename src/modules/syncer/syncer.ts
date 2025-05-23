@@ -1,5 +1,5 @@
-import { FileSystem, Path, PathType } from '../file-system'
-import { Diffs } from './syncer.types'
+import { FileSystem, Path, PathType } from '../file-system/index.js'
+import type { Diffs } from './syncer.types.js'
 
 
 export enum SyncerExceptionMode {

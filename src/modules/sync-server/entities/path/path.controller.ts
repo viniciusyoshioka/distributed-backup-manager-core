@@ -1,11 +1,12 @@
-import { Request, RequestHandler, Router } from 'express'
+import type { Request } from 'express'
+import { RequestHandler, Router } from 'express'
 import multer from 'multer'
 
-import { Path, PathType } from '../../../file-system'
-import { Delete, Get, Post } from '../../decorators'
-import { BadRequestException } from '../../errors'
-import { PathMapper } from './path.mapper'
-import { PathService } from './path.service'
+import { Path, PathType } from '../../../file-system/index.js'
+import { Delete, Get, Post } from '../../decorators/index.js'
+import { BadRequestException } from '../../errors/index.js'
+import { PathMapper } from './path.mapper.js'
+import { PathService } from './path.service.js'
 
 
 export interface PathControllerParams {

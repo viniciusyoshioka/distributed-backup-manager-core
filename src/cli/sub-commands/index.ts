@@ -1,2 +1,2 @@
-export * from './auth'
-export * from './sync'
+export * from './auth.js'
+export * from './sync.js'

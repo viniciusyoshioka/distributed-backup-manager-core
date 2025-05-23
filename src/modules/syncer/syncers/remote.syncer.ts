@@ -1,12 +1,12 @@
 import { stdin, stdout } from 'node:process'
 import readline from 'node:readline/promises'
 
-import { ExecutionTime } from '../../../decorators'
-import { Queue } from '../../../utils'
-import { FileSystem, Path, PathType, RemoteFileSystem } from '../../file-system'
-import { hash } from '../../hash'
-import { Syncer, SyncerParams } from '../syncer'
-import { Diffs } from '../syncer.types'
+import { ExecutionTime } from '../../../decorators/index.js'
+import { Queue } from '../../../utils/index.js'
+import { FileSystem, Path, PathType, RemoteFileSystem } from '../../file-system/index.js'
+import { hash } from '../../hash/index.js'
+import { Syncer, SyncerParams } from '../syncer.js'
+import type { Diffs } from '../syncer.types.js'
 
 
 interface GetDiffsParams {

@@ -1,2 +1,2 @@
-export * from './get-file-hash.dto'
-export * from './path-param.dto'
+export * from './get-file-hash.dto.js'
+export * from './path-param.dto.js'

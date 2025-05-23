@@ -1,4 +1,4 @@
-import { Path, PathType } from '../path'
+import { Path, PathType } from '../path/index.js'
 
 
 export interface FileSystem {

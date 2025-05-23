@@ -1,6 +1,6 @@
 import { Response } from 'express'
 
-import { BaseException } from '../../errors'
+import { BaseException } from '../../errors/index.js'
 
 
 // TODO: Improve logging

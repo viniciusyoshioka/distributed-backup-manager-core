@@ -1,8 +1,8 @@
 import { Router } from 'express'
 
-import { LocalFileSystem, Path } from '../../../../file-system'
-import { PathController } from '../path.controller'
-import { PathService } from '../path.service'
+import { LocalFileSystem, Path } from '../../../../file-system/index.js'
+import { PathController } from '../path.controller.js'
+import { PathService } from '../path.service.js'
 
 
 // TODO: Add the user specific folder in rootPath before passing it to PathService

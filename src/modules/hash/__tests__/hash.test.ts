@@ -1,7 +1,7 @@
 import process from 'node:process'
 
-import { hash, HashType } from '..'
-import { LocalFileSystem, Path, PathType } from '../../file-system'
+import { LocalFileSystem, Path, PathType } from '../../file-system/index.js'
+import { hash, HashType } from '../index.js'
 
 
 describe('Test Hash module', () => {

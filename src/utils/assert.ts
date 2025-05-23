@@ -1,4 +1,4 @@
-import { isEnum } from './validators'
+import { isEnum } from './validators.js'
 
 
 export function assertIsEnum<T>(enumObject: T, value: unknown): asserts value is T[keyof T] {

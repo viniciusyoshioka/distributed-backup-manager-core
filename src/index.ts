@@ -1,4 +1,5 @@
 import dedent from 'dedent'
+
 import {
   AuthArgs,
   AuthLoginUserArgs,
@@ -11,12 +12,12 @@ import {
   getSubCommandAction,
   SyncArgs,
   SyncSubCommand,
-} from './cli'
-import { assertDotEnvIsValid, InvalidEnvVariablesError } from './env'
-import { LocalFileSystem, Path, RemoteFileSystem } from './modules/file-system'
-import { NetworkAddress } from './modules/network'
-import { SyncClient } from './modules/sync-client'
-import { LocalSyncer, RemoteSyncer, Syncer } from './modules/syncer'
+} from './cli/index.js'
+import { assertDotEnvIsValid, InvalidEnvVariablesError } from './env/index.js'
+import { LocalFileSystem, Path, RemoteFileSystem } from './modules/file-system/index.js'
+import { NetworkAddress } from './modules/network/index.js'
+import { SyncClient } from './modules/sync-client/index.js'
+import { LocalSyncer, RemoteSyncer, Syncer } from './modules/syncer/index.js'
 
 
 async function registerUser(args: AuthRegisterUserArgs) {

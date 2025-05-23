@@ -1,4 +1,4 @@
-import { BaseCliError } from './BaseCliError.error'
+import { BaseCliError } from './BaseCliError.error.js'
 
 
 export class CliExitExecutionError extends BaseCliError {

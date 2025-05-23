@@ -1,9 +1,10 @@
-import { Request, RequestHandler, Router } from 'express'
+import type { Request } from 'express'
+import { RequestHandler, Router } from 'express'
 
-import { Delete, Get, Post, Put } from '../../decorators'
-import { UserTokenDTO, UserWithoutPasswordDTO } from './dto'
-import { UserMapper } from './user.mapper'
-import { UserService } from './user.service'
+import { Delete, Get, Post, Put } from '../../decorators/index.js'
+import { UserTokenDTO, UserWithoutPasswordDTO } from './dto/index.js'
+import { UserMapper } from './user.mapper.js'
+import { UserService } from './user.service.js'
 
 
 export interface UserControllerParams {

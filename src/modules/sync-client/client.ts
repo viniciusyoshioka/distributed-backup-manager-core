@@ -1,5 +1,5 @@
-import { NetworkAddress } from '../network'
-import { PathSubClient, UserSubClient } from './sub-clients'
+import { NetworkAddress } from '../network/index.js'
+import { PathSubClient, UserSubClient } from './sub-clients/index.js'
 
 
 export class SyncClient {

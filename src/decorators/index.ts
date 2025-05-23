@@ -1,1 +1,1 @@
-export * from './execution-time.decorator'
+export * from './execution-time.decorator.js'

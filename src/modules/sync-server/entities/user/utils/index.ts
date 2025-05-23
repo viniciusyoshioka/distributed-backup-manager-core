@@ -1,1 +1,1 @@
-export * from './create-user-router'
+export * from './create-user-router.js'

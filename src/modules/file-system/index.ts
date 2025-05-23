@@ -1,2 +1,2 @@
-export * from './file-system'
-export * from './path'
+export * from './file-system/index.js'
+export * from './path/index.js'

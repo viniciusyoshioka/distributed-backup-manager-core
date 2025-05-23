@@ -1,4 +1,4 @@
-import { BaseException, ExceptionResponse } from './base.exception'
+import { BaseException, ExceptionResponse } from './base.exception.js'
 
 
 export class InternalServerErrorException extends BaseException {

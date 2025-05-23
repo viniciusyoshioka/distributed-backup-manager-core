@@ -1,1 +1,1 @@
-export * from './handle-error-and-send-response'
+export * from './handle-error-and-send-response.js'

@@ -1,3 +1,3 @@
-export type * from './file-system'
-export * from './local-file-system'
-export * from './remote-file-system'
+export type * from './file-system.js'
+export * from './local-file-system.js'
+export * from './remote-file-system.js'

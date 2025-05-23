@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { z } from 'zod'
 
-import { InvalidEnvVariablesError } from './errors'
+import { InvalidEnvVariablesError } from './errors/index.js'
 
 
 const envSchema = z

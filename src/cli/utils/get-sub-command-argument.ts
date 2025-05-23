@@ -1,4 +1,4 @@
-import { AuthSubCommand, SyncSubCommand } from '../sub-commands'
+import { AuthSubCommand, SyncSubCommand } from '../sub-commands/index.js'
 
 
 export function getSubCommandArgument(argv: string[]): string | undefined {

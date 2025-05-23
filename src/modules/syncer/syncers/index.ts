@@ -1,2 +1,2 @@
-export * from './local.syncer'
-export * from './remote.syncer'
+export * from './local.syncer.js'
+export * from './remote.syncer.js'

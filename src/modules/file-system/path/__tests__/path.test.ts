@@ -1,8 +1,8 @@
 import process from 'node:process'
 
-import { LocalFileSystem } from '../../file-system'
-import { Path } from '../path'
-import { PathType } from '../path.types'
+import { LocalFileSystem } from '../../file-system/index.js'
+import { Path } from '../path.js'
+import { PathType } from '../path.types.js'
 
 
 // TODO: Test other path types

@@ -1,1 +1,1 @@
-export * from './create-path-router'
+export * from './create-path-router.js'

@@ -1,4 +1,4 @@
-import { AuthSubCommand, SyncSubCommand } from '../sub-commands'
+import { AuthSubCommand, SyncSubCommand } from '../sub-commands/index.js'
 
 
 /**

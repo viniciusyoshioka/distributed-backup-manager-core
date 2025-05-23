@@ -1,4 +1,4 @@
-import { BaseException, ExceptionResponse } from './base.exception'
+import { BaseException, ExceptionResponse } from './base.exception.js'
 
 
 export class NotFoundException extends BaseException {

@@ -2,13 +2,13 @@ import arg, { Handler, Spec } from 'arg'
 import dedent from 'dedent'
 import process from 'node:process'
 
-import { assertDotEnvIsValid } from '../../env'
-import { Path } from '../../modules/file-system'
-import { IP, NetworkAddress } from '../../modules/network'
-import { Cli } from '../cli'
-import { CliExitExecutionError, CliInvalidArgumentError } from '../errors'
-import { SubCommand } from '../sub-command.interface'
-import { getSubCommandArgument } from '../utils'
+import { assertDotEnvIsValid } from '../../env/index.js'
+import { Path } from '../../modules/file-system/index.js'
+import { IP, NetworkAddress } from '../../modules/network/index.js'
+import { Cli } from '../cli.js'
+import { CliExitExecutionError, CliInvalidArgumentError } from '../errors/index.js'
+import type { SubCommand } from '../sub-command.interface'
+import { getSubCommandArgument } from '../utils/index.js'
 
 
 export interface SyncArgs {

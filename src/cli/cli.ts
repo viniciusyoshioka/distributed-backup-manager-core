@@ -2,11 +2,11 @@ import arg, { Handler, Spec } from 'arg'
 import dedent from 'dedent'
 import process from 'node:process'
 
-import { assertDotEnvIsValid } from '../env'
-import { CliExitExecutionError, CliInvalidArgumentError } from './errors'
-import { SubCommand } from './sub-command.interface'
-import { AuthSubCommand, SyncSubCommand } from './sub-commands'
-import { getSubCommandArgument } from './utils'
+import { assertDotEnvIsValid } from '../env/index.js'
+import { CliExitExecutionError, CliInvalidArgumentError } from './errors/index.js'
+import type { SubCommand } from './sub-command.interface.js'
+import { AuthSubCommand, SyncSubCommand } from './sub-commands/index.js'
+import { getSubCommandArgument } from './utils/index.js'
 
 
 export interface CliArgs {

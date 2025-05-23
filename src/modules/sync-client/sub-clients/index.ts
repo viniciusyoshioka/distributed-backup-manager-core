@@ -1,2 +1,2 @@
-export * from './path'
-export * from './user'
+export * from './path/index.js'
+export * from './user/index.js'

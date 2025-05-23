@@ -3,12 +3,12 @@ import { isEmail, isStrongPassword } from 'class-validator'
 import dedent from 'dedent'
 import process from 'node:process'
 
-import { assertDotEnvIsValid } from '../../env'
-import { IP, NetworkAddress } from '../../modules/network'
-import { Cli } from '../cli'
-import { CliExitExecutionError, CliInvalidArgumentError } from '../errors'
-import { SubCommand } from '../sub-command.interface'
-import { getSubCommandAction, getSubCommandArgument } from '../utils'
+import { assertDotEnvIsValid } from '../../env/index.js'
+import { IP, NetworkAddress } from '../../modules/network/index.js'
+import { Cli } from '../cli.js'
+import { CliExitExecutionError, CliInvalidArgumentError } from '../errors/index.js'
+import type { SubCommand } from '../sub-command.interface.js'
+import { getSubCommandAction, getSubCommandArgument } from '../utils/index.js'
 
 
 export enum AuthSubCommandAction {

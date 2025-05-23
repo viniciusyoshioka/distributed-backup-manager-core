@@ -1,4 +1,4 @@
-import { Queue } from '../../utils'
+import { Queue } from '../../utils/index.js'
 
 
 export interface Diffs {

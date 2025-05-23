@@ -1,1 +1,1 @@
-export * from './path.sub-client'
+export * from './path.sub-client.js'

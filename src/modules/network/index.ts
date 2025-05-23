@@ -1,2 +1,2 @@
-export * from './ip'
-export * from './network-address'
+export * from './ip.js'
+export * from './network-address.js'

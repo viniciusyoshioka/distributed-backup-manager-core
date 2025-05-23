@@ -1,3 +1,3 @@
-export * from './syncer'
-export type * from './syncer.types'
-export * from './syncers'
+export * from './syncer.js'
+export type * from './syncer.types.js'
+export * from './syncers/index.js'

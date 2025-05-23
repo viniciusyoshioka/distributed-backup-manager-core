@@ -1,7 +1,7 @@
 import fs, { RmOptions } from 'node:fs'
 
-import { Path, PathType } from '../path'
-import { FileSystem } from './file-system'
+import { Path, PathType } from '../path/index.js'
+import { FileSystem } from './file-system.js'
 
 
 export class LocalFileSystem implements FileSystem {

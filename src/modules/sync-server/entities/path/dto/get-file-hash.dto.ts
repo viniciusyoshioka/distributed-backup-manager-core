@@ -1,6 +1,6 @@
 import { IsEnum, IsString } from 'class-validator'
 
-import { HashType } from '../../../../hash'
+import { HashType } from '../../../../hash/index.js'
 
 
 export class GetFileHashDTO {

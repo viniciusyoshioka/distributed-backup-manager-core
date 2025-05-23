@@ -1,2 +1,2 @@
-export * from './assert-dotenv-is-valid'
-export * from './errors'
+export * from './assert-dotenv-is-valid.js'
+export * from './errors/index.js'

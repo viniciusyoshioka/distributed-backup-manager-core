@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 
-import { IpVersion, NetworkAddress } from '../../../network'
-import { CreateUserDTO, UserCredentialsDTO, UserTokenDTO, UserWithoutPasswordDTO } from '../../../sync-server'
+import { IpVersion, NetworkAddress } from '../../../network/index.js'
+import { CreateUserDTO, UserCredentialsDTO, UserTokenDTO, UserWithoutPasswordDTO } from '../../../sync-server/index.js'
 
 
 export class UserSubClient {

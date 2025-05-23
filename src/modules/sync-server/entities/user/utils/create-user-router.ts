@@ -1,9 +1,9 @@
 import { Router } from 'express'
 import { DataSource } from 'typeorm'
 
-import { UserController } from '../user.controller'
-import { UserRepository } from '../user.repository'
-import { UserService } from '../user.service'
+import { UserController } from '../user.controller.js'
+import { UserRepository } from '../user.repository.js'
+import { UserService } from '../user.service.js'
 
 
 export function createUserRouterV1(dataSource: DataSource): Router {

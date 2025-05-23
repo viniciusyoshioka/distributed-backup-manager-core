@@ -1,5 +1,5 @@
-import { HashType } from '../../../hash'
-import { GetFileHashDTO, PathParamDTO } from './dto'
+import { HashType } from '../../../hash/index.js'
+import { GetFileHashDTO, PathParamDTO } from './dto/index.js'
 
 
 export class PathMapper {

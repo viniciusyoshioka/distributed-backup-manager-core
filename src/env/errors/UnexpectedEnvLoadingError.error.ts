@@ -1,4 +1,4 @@
-import { BaseEnvVariablesError } from './BaseEnvVariablesError.error'
+import { BaseEnvVariablesError } from './BaseEnvVariablesError.error.js'
 
 
 export class UnexpectedEnvLoadingError extends BaseEnvVariablesError {

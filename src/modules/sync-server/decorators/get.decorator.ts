@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
-import { indent } from '../../../utils'
-import { handleErrorAndSendResponse } from './utils'
+import { indent } from '../../../utils/index.js'
+import { handleErrorAndSendResponse } from './utils/index.js'
 
 
 export function Get(): MethodDecorator {

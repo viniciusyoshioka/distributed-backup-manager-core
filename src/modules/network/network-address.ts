@@ -1,4 +1,4 @@
-import { IP } from './ip'
+import { IP } from './ip.js'
 
 
 export class NetworkAddress {

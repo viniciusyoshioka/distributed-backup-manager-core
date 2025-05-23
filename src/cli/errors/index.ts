@@ -1,3 +1,3 @@
-export * from './BaseCliError.error'
-export * from './CliExitExecutionError.error'
-export * from './CliInvalidArgumentError.error'
+export * from './BaseCliError.error.js'
+export * from './CliExitExecutionError.error.js'
+export * from './CliInvalidArgumentError.error.js'

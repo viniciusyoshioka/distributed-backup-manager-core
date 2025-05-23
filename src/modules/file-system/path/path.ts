@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import { PathType } from './path.types'
+import { PathType } from './path.types.js'
 
 
 export class Path {

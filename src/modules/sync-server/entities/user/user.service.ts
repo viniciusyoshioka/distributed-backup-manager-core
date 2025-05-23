@@ -2,10 +2,10 @@ import { compare, hash } from 'bcryptjs'
 import { validate } from 'class-validator'
 import { jwtVerify, SignJWT } from 'jose'
 
-import { BadRequestException, NotFoundException } from '../../errors'
-import { CreateUserDTO, UserCredentialsDTO, UserPayloadDTO, UserTokenDTO } from './dto'
-import { UserEntity } from './user.entity'
-import { UserRepository } from './user.repository'
+import { BadRequestException, NotFoundException } from '../../errors/index.js'
+import { CreateUserDTO, UserCredentialsDTO, UserPayloadDTO, UserTokenDTO } from './dto/index.js'
+import { UserEntity } from './user.entity.js'
+import { UserRepository } from './user.repository.js'
 
 
 const SALT_LENGTH = 10
