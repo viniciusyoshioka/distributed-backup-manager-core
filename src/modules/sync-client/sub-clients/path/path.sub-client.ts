@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import FormData from 'form-data'
 import fs from 'node:fs'
 
+import { assertDotEnvIsValid } from '../../../../env/index.js'
 import { PathType } from '../../../file-system/index.js'
 import { HashType } from '../../../hash/index.js'
 import { IpVersion, NetworkAddress } from '../../../network/index.js'
@@ -11,17 +12,21 @@ export class PathSubClient {
 
 
   private readonly client: AxiosInstance
+  private readonly token: string
 
 
   constructor(serverAddress: NetworkAddress) {
-    const { address, version } = serverAddress.ip
-    const { port } = serverAddress
+    assertDotEnvIsValid()
+
+    const { ip, port } = serverAddress
+    const { address, version } = ip
 
     const baseURL = version === IpVersion.IPv6
       ? `http://[${address}]:${port}/api/path/v1`
       : `http://${address}:${port}/api/path/v1`
 
     this.client = axios.create({ baseURL })
+    this.token = process.env.ACCESS_TOKEN
   }
 
 
@@ -29,6 +34,9 @@ export class PathSubClient {
     const { data } = await this.client.get<boolean>('/exists', {
       params: {
         path: absolutePath,
+      },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
       },
     })
 
@@ -41,6 +49,9 @@ export class PathSubClient {
       params: {
         path: absolutePath,
       },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
     })
 
     return data
@@ -52,6 +63,9 @@ export class PathSubClient {
       params: {
         path: absolutePath,
       },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
     })
 
     return data
@@ -59,9 +73,17 @@ export class PathSubClient {
 
 
   async createDirectory(absolutePath: string): Promise<void> {
-    await this.client.post('/directory', {
-      path: absolutePath,
-    })
+    await this.client.post(
+      '/directory',
+      {
+        path: absolutePath,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      },
+    )
   }
 
 
@@ -70,6 +92,9 @@ export class PathSubClient {
       params: {
         path: absolutePath,
       },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
     })
   }
 
@@ -77,6 +102,9 @@ export class PathSubClient {
     await this.client.delete('/directory', {
       params: {
         path: absolutePath,
+      },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
       },
     })
   }
@@ -87,6 +115,9 @@ export class PathSubClient {
       params: {
         path: absolutePath,
         hashType,
+      },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
       },
     })
 
@@ -99,6 +130,7 @@ export class PathSubClient {
     const fileStream = fs.createReadStream(fromAbsolutePath)
     form.append('uploadFile', fileStream)
     form.append('path', toAbsolutePath)
+    form.append('Authorization', `Bearer ${this.token}`)
 
     await this.client.post('/file/copy', form, {
       headers: form.getHeaders(),
