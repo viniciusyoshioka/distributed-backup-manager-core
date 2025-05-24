@@ -4,28 +4,8 @@ import readline from 'node:readline/promises'
 import { ExecutionTime } from '../../decorators/index.js'
 import { Queue } from '../../utils/index.js'
 import { FileSystem, Path, PathType } from '../file-system/index.js'
-import type { Diffs } from './syncer.types.js'
-
-
-interface GetDiffsParams {
-  sourceParentPath: Path
-  destinationParentPath: Path
-  sourceChildrenNames: string[]
-  destinationChildrenNames: string[]
-}
-
-interface PathDiffs {
-  pathsToCreate: string[]
-  pathsToUpdate: string[]
-  pathsToDelete: string[]
-  childrenPathsToScan: string[]
-}
-
-enum SyncOperation {
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE',
-}
+import type { Diffs, GetDiffsParams, PathDiffs } from './syncer.types.js'
+import { SyncOperation } from './syncer.types.js'
 
 
 export enum SyncerExceptionMode {
