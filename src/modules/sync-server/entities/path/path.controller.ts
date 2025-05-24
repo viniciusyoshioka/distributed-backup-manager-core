@@ -117,67 +117,106 @@ export class PathController {
 
 
   @Get()
-  private async getPathExists(req: Request): Promise<boolean> {
+  private async getPathExists(req: WithAuthUser<Request>): Promise<boolean> {
     const query = PathMapper.fromObjectToPathParamDto(req.query)
-    const pathExists = await this.pathService.getPathExists(query.path)
+
+    const pathExists = await this.pathService.getPathExists({
+      path: query.path,
+      user: req.user,
+    })
+
     return pathExists
   }
 
 
   @Get()
-  private async getPathType(req: Request): Promise<PathType> {
+  private async getPathType(req: WithAuthUser<Request>): Promise<PathType> {
     const query = PathMapper.fromObjectToPathParamDto(req.query)
-    const pathType = await this.pathService.getPathType(query.path)
+
+    const pathType = await this.pathService.getPathType({
+      path: query.path,
+      user: req.user,
+    })
+
     return pathType
   }
 
   @Get()
-  private async readDirectory(req: Request): Promise<string[] | null> {
+  private async readDirectory(req: WithAuthUser<Request>): Promise<string[] | null> {
     const query = PathMapper.fromObjectToPathParamDto(req.query)
-    const pathChildren = await this.pathService.readDirectory(query.path)
+
+    const pathChildren = await this.pathService.readDirectory({
+      path: query.path,
+      user: req.user,
+    })
+
     return pathChildren
   }
 
 
   @Post()
-  private async createDirectory(req: Request): Promise<void> {
+  private async createDirectory(req: WithAuthUser<Request>): Promise<void> {
     const query = PathMapper.fromObjectToPathParamDto(req.body as object)
-    await this.pathService.createDirectory(query.path)
+
+    await this.pathService.createDirectory({
+      path: query.path,
+      user: req.user,
+    })
   }
 
 
   @Delete()
-  private async deleteFile(req: Request): Promise<void> {
+  private async deleteFile(req: WithAuthUser<Request>): Promise<void> {
     const query = PathMapper.fromObjectToPathParamDto(req.query)
-    await this.pathService.deleteFile(query.path)
+
+    await this.pathService.deleteFile({
+      path: query.path,
+      user: req.user,
+    })
   }
 
   @Delete()
-  private async deleteDirectory(req: Request): Promise<void> {
+  private async deleteDirectory(req: WithAuthUser<Request>): Promise<void> {
     const query = PathMapper.fromObjectToPathParamDto(req.query)
-    await this.pathService.deleteDirectory(query.path)
+
+    await this.pathService.deleteDirectory({
+      path: query.path,
+      user: req.user,
+    })
   }
 
 
   @Get()
-  private async getFileHash(req: Request): Promise<string | null> {
+  private async getFileHash(req: WithAuthUser<Request>): Promise<string | null> {
     const query = PathMapper.fromObjectToGetFileHashDto(req.query)
-    const fileHash = await this.pathService.getFileHash(query.path, query.hashType)
+
+    const fileHash = await this.pathService.getFileHash({
+      path: query.path,
+      hashType: query.hashType,
+      user: req.user,
+    })
+
     return fileHash
   }
 
   @Post()
-  private async copyFile(req: Request): Promise<void> {
+  private async copyFile(req: WithAuthUser<Request>): Promise<void> {
     if (!req.file?.path) {
       throw new BadRequestException('File path not received')
     }
 
     const query = PathMapper.fromObjectToPathParamDto(req.body as object)
 
+    // TODO: Change this path to a temporary folder where the files are uploaded and is not
+    // easily accessible to the user. Use a env variable
     const cwd = process.cwd()
     const uploadRelativePath = req.file.path
     const pathWhereFileWasUploaded = Path.join([cwd, uploadRelativePath])
 
-    await this.pathService.moveUploadedFile(pathWhereFileWasUploaded, query.path)
+    await this.pathService.moveUploadedFile({
+      uploadedFilePath: pathWhereFileWasUploaded,
+      destinationPath: query.path,
+      user: req.user,
+    })
   }
 }

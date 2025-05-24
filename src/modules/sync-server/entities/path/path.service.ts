@@ -1,5 +1,6 @@
 import { FileSystem, Path, PathType } from '../../../file-system/index.js'
 import { hash, HashType } from '../../../hash/index.js'
+import { UserPayloadDTO } from '../user/index.js'
 
 
 export interface PathServiceParams {
@@ -21,77 +22,130 @@ export class PathService {
   }
 
 
-  private assertPathIsSubPathOfRoot(path: Path): void {
-    const pathIsSubPathOfRoot = path.isSubPathOf(this.rootPath)
-    if (!pathIsSubPathOfRoot) {
-      throw new Error('Given path is not a subpath of root path')
+  private assertPathIsAbsolutePath(path: string): void {
+    const pathIsAbsolute = Path.isAbsolute(path)
+    if (!pathIsAbsolute) {
+      throw new Error('Given path should be an absolute path')
+    }
+  }
+
+  private assertPathIsRelativePath(path: string): void {
+    const pathIsAbsolute = Path.isAbsolute(path)
+    if (pathIsAbsolute) {
+      throw new Error('Given path should be a relative path')
     }
   }
 
 
-  async getPathExists(path: string): Promise<boolean> {
-    const pathInstance = new Path(path)
-    this.assertPathIsSubPathOfRoot(pathInstance)
+  async getPathExists(params: {
+    path: string
+    user: UserPayloadDTO
+  }): Promise<boolean> {
+    const { path, user } = params
+
+    this.assertPathIsRelativePath(path)
+    const pathInstance = new Path([this.rootPath.absolutePath, user.id, path])
 
     return await this.fileSystem.exists(pathInstance)
   }
 
 
-  async getPathType(path: string): Promise<PathType> {
-    const pathInstance = new Path(path)
-    this.assertPathIsSubPathOfRoot(pathInstance)
+  async getPathType(params: {
+    path: string
+    user: UserPayloadDTO
+  }): Promise<PathType> {
+    const { path, user } = params
+
+    this.assertPathIsRelativePath(path)
+    const pathInstance = new Path([this.rootPath.absolutePath, user.id, path])
 
     return await this.fileSystem.resolvePathType(pathInstance)
   }
 
 
-  async readDirectory(path: string): Promise<string[] | null> {
-    const pathInstance = new Path(path)
-    this.assertPathIsSubPathOfRoot(pathInstance)
+  async readDirectory(params: {
+    path: string
+    user: UserPayloadDTO
+  }): Promise<string[] | null> {
+    const { path, user } = params
+
+    this.assertPathIsRelativePath(path)
+    const pathInstance = new Path([this.rootPath.absolutePath, user.id, path])
 
     return await this.fileSystem.readDirectory(pathInstance)
   }
 
 
-  async createDirectory(path: string): Promise<void> {
-    const pathInstance = new Path(path)
-    this.assertPathIsSubPathOfRoot(pathInstance)
+  async createDirectory(params: {
+    path: string
+    user: UserPayloadDTO
+  }): Promise<void> {
+    const { path, user } = params
+
+    this.assertPathIsRelativePath(path)
+    const pathInstance = new Path([this.rootPath.absolutePath, user.id, path])
 
     await this.fileSystem.createDirectory(pathInstance)
   }
 
 
-  async deleteFile(path: string): Promise<void> {
-    const pathInstance = new Path(path)
-    this.assertPathIsSubPathOfRoot(pathInstance)
+  async deleteFile(params: {
+    path: string
+    user: UserPayloadDTO
+  }): Promise<void> {
+    const { path, user } = params
+
+    this.assertPathIsRelativePath(path)
+    const pathInstance = new Path([this.rootPath.absolutePath, user.id, path])
 
     await this.fileSystem.deleteFile(pathInstance)
   }
 
-  async deleteDirectory(path: string): Promise<void> {
-    const pathInstance = new Path(path)
-    this.assertPathIsSubPathOfRoot(pathInstance)
+  async deleteDirectory(params: {
+    path: string
+    user: UserPayloadDTO
+  }): Promise<void> {
+    const { path, user } = params
+
+    this.assertPathIsRelativePath(path)
+    const pathInstance = new Path([this.rootPath.absolutePath, user.id, path])
 
     await this.fileSystem.deleteDirectory(pathInstance)
   }
 
 
-  async getFileHash(path: string, hashType = HashType.SHA_256): Promise<string | null> {
-    const pathInstance = new Path(path)
-    this.assertPathIsSubPathOfRoot(pathInstance)
+  async getFileHash(params: {
+    path: string
+    hashType?: HashType
+    user: UserPayloadDTO
+  }): Promise<string | null> {
+    const { path, hashType = HashType.SHA_256, user } = params
+
+    this.assertPathIsRelativePath(path)
+    const pathInstance = new Path([this.rootPath.absolutePath, user.id, path])
 
     await this.fileSystem.resolvePathType(pathInstance)
     return await hash(pathInstance, hashType)
   }
 
-  async moveUploadedFile(fromPath: string, toPath: string): Promise<void> {
-    // Its not required to assert that fromPath is subpath of root path
-    // because it is where the file is stored by the server after upload
-    const fromPathInstance = new Path(fromPath)
+  async moveUploadedFile(params: {
+    uploadedFilePath: string
+    destinationPath: string
+    user: UserPayloadDTO
+  }): Promise<void> {
+    const { uploadedFilePath, destinationPath, user } = params
 
-    const toPathInstance = new Path(toPath)
-    this.assertPathIsSubPathOfRoot(toPathInstance)
+    this.assertPathIsAbsolutePath(uploadedFilePath)
+    this.assertPathIsRelativePath(destinationPath)
 
-    await this.fileSystem.moveFile(fromPathInstance, toPathInstance)
+    // TODO: Validate uploadedFilePath to assert it is in uploaded files directory
+    const uploadedFilePathInstance = new Path(uploadedFilePath)
+    const destinationPathInstance = new Path([
+      this.rootPath.absolutePath,
+      user.id,
+      destinationPath,
+    ])
+
+    await this.fileSystem.moveFile(uploadedFilePathInstance, destinationPathInstance)
   }
 }
