@@ -1,5 +1,6 @@
 import type { Request } from 'express'
 import { RequestHandler, Router } from 'express'
+import * as jose from 'jose'
 import multer from 'multer'
 
 import { Path, PathType } from '../../../file-system/index.js'
@@ -99,7 +100,14 @@ export class PathController {
       throw new UnauthorizedException('Invalid authorization header format')
     }
 
-    await UserService.validateJwtToken(token)
+    try {
+      await UserService.validateJwtToken(token)
+    } catch (error) {
+      if (error instanceof jose.errors.JWTExpired) {
+        throw new UnauthorizedException('JWT token has expired')
+      }
+      throw new UnauthorizedException('Invalid or malformed JWT token')
+    }
   }
 
 
