@@ -3,8 +3,9 @@ import { RequestHandler, Router } from 'express'
 import multer from 'multer'
 
 import { Path, PathType } from '../../../file-system/index.js'
-import { Delete, Get, Post } from '../../decorators/index.js'
-import { BadRequestException } from '../../errors/index.js'
+import { Delete, Get, Middleware, Post } from '../../decorators/index.js'
+import { BadRequestException, UnauthorizedException } from '../../errors/index.js'
+import { UserService } from '../user/user.service.js'
 import { PathMapper } from './path.mapper.js'
 import { PathService } from './path.service.js'
 
@@ -33,22 +34,72 @@ export class PathController {
 
 
     // Path
-    router.get('/exists', this.getPathExists.bind(this) as unknown as RequestHandler)
-    router.get('/path-type', this.getPathType.bind(this) as unknown as RequestHandler)
+    router.get(
+      '/exists',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.getPathExists.bind(this) as unknown as RequestHandler,
+    )
+    router.get(
+      '/path-type',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.getPathType.bind(this) as unknown as RequestHandler,
+    )
 
     // File
-    router.delete('/file', this.deleteFile.bind(this) as unknown as RequestHandler)
-    router.get('/file/hash', this.getFileHash.bind(this) as unknown as RequestHandler)
-    router.post('/file/copy', upload.single('uploadFile'), this.copyFile.bind(this) as unknown as RequestHandler)
+    router.delete(
+      '/file',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.deleteFile.bind(this) as unknown as RequestHandler,
+    )
+    router.get(
+      '/file/hash',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.getFileHash.bind(this) as unknown as RequestHandler,
+    )
+    router.post(
+      '/file/copy',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      upload.single('uploadFile'),
+      this.copyFile.bind(this) as unknown as RequestHandler,
+    )
 
     // Directory
-    router.post('/directory', this.createDirectory.bind(this) as unknown as RequestHandler)
-    router.delete('/directory', this.deleteDirectory.bind(this) as unknown as RequestHandler)
+    router.post(
+      '/directory',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.createDirectory.bind(this) as unknown as RequestHandler,
+    )
+    router.delete(
+      '/directory',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.deleteDirectory.bind(this) as unknown as RequestHandler,
+    )
 
-    router.get('/directory/read', this.readDirectory.bind(this) as unknown as RequestHandler)
+    router.get(
+      '/directory/read',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.readDirectory.bind(this) as unknown as RequestHandler,
+    )
 
 
     return router
+  }
+
+
+  // TODO: Move to auth module and import to use here. This middleware can be reused
+  @Middleware()
+  private async authenticationMiddleware(req: Request): Promise<void> {
+    const authorizationHeader = req.headers['authorization']
+    if (!authorizationHeader) {
+      throw new UnauthorizedException('Authorization header is missing')
+    }
+
+    const [bearer, token] = authorizationHeader.split(' ', 2)
+    if (bearer !== 'Bearer' || !token) {
+      throw new UnauthorizedException('Invalid authorization header format')
+    }
+
+    await UserService.validateJwtToken(token)
   }
 
 
