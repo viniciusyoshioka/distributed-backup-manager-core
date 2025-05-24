@@ -15,7 +15,7 @@ import { assertDotEnvIsValid, InvalidEnvVariablesError } from './env/index.js'
 import { LocalFileSystem, Path, RemoteFileSystem } from './modules/file-system/index.js'
 import { NetworkAddress } from './modules/network/index.js'
 import { SyncClient } from './modules/sync-client/index.js'
-import { LocalSyncer, RemoteSyncer, Syncer } from './modules/syncer/index.js'
+import { Syncer } from './modules/syncer/index.js'
 
 
 async function registerUser(args: AuthRegisterUserArgs) {
@@ -69,67 +69,38 @@ async function auth(args: AuthArgs | AuthRegisterUserArgs | AuthLoginUserArgs) {
 }
 
 
-function createLocalSyncer(params: {
-  sourcePath: Path
-  destinationPath: Path
-  exceptions: Path[]
-  skipConfirmation: boolean
-}): Syncer {
-  const localFileSystem = new LocalFileSystem()
-
-  return new LocalSyncer({
-    source: params.sourcePath,
-    destination: params.destinationPath,
-    exceptions: params.exceptions,
-    skipConfirmation: params.skipConfirmation,
-    fileSystem: localFileSystem,
-  })
-}
-
-function createRemoteSyncer(params: {
-  sourcePath: Path
-  destinationPath: Path
-  exceptions: Path[]
-  skipConfirmation: boolean
-  destinationAddress: string
-  destinationPort: string
-}): Syncer {
-  const destinationAddress = new NetworkAddress(params.destinationAddress, params.destinationPort)
-  const syncClient = new SyncClient(destinationAddress)
-
-  const localFileSystem = new LocalFileSystem()
-  const remoteFileSystem = new RemoteFileSystem({ syncClient })
-
-  return new RemoteSyncer({
-    source: params.sourcePath,
-    destination: params.destinationPath,
-    exceptions: params.exceptions,
-    skipConfirmation: params.skipConfirmation,
-    localFileSystem,
-    remoteFileSystem,
-  })
-}
-
 async function sync(args: SyncArgs) {
   const sourcePath = new Path(args['--source'])
   const destinationPath = new Path(args['--destination'])
   const exceptions = args['--exception'].map(exception => new Path(exception))
 
-  const syncer = args['--destination-address'] && args['--destination-port']
-    ? createRemoteSyncer({
-        sourcePath: sourcePath,
-        destinationPath: destinationPath,
-        exceptions,
-        skipConfirmation: args['--skip-confirmation'],
-        destinationAddress: args['--destination-address'],
-        destinationPort: args['--destination-port'],
-      })
-    : createLocalSyncer({
-        sourcePath: sourcePath,
-        destinationPath: destinationPath,
-        exceptions,
-        skipConfirmation: args['--skip-confirmation'],
-      })
+
+  const sourceAddress = (args['--source-address'] && args['--source-port'])
+    ? new NetworkAddress(args['--source-address'], args['--source-port'])
+    : null
+  const destinationAddress = (args['--destination-address'] && args['--destination-port'])
+    ? new NetworkAddress(args['--destination-address'], args['--destination-port'])
+    : null
+  if (sourceAddress && destinationAddress) {
+    throw new Error('Both source and destination addresses cannot be provided at the same time')
+  }
+
+  const sourceFileSystem = sourceAddress
+    ? new RemoteFileSystem({ syncClient: new SyncClient(sourceAddress) })
+    : new LocalFileSystem()
+  const destinationFileSystem = destinationAddress
+    ? new RemoteFileSystem({ syncClient: new SyncClient(destinationAddress) })
+    : new LocalFileSystem()
+
+
+  const syncer = new Syncer({
+    source: sourcePath,
+    destination: destinationPath,
+    exceptions,
+    skipConfirmation: args['--skip-confirmation'],
+    sourceFileSystem,
+    destinationFileSystem,
+  })
 
   await syncer.startSync()
 }

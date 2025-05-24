@@ -32,6 +32,12 @@ export class RemoteFileSystem implements FileSystem {
   }
 
 
+  async getFileHash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
+    const fileHash = await this.syncClient.path.getFileHash(path.absolutePath, hashType)
+    return fileHash
+  }
+
+
   async readDirectory(path: Path): Promise<string[] | null> {
     return await this.syncClient.path.readDirectory(path.absolutePath)
   }
@@ -59,10 +65,5 @@ export class RemoteFileSystem implements FileSystem {
   // eslint-disable-next-line @typescript-eslint/require-await
   async moveFile(fromPath: Path, toPath: Path): Promise<void> {
     throw new Error("Move files on a remote machine, probably shouldn't be necessary")
-  }
-
-  async getFileHash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
-    const fileHash = await this.syncClient.path.getFileHash(path.absolutePath, hashType)
-    return fileHash
   }
 }

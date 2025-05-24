@@ -1,5 +1,6 @@
 import fs, { RmOptions } from 'node:fs'
 
+import { hash, HashType } from '../../hash/hash.js'
 import { Path, PathType } from '../path/index.js'
 import { FileSystem } from './file-system.js'
 
@@ -51,6 +52,12 @@ export class LocalFileSystem implements FileSystem {
     const type = await this.getPathType(path)
     path.updateType(type)
     return type
+  }
+
+
+  async getFileHash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
+    await this.resolvePathType(path)
+    return await hash(path, hashType)
   }
 
 

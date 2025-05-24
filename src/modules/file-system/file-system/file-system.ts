@@ -1,3 +1,4 @@
+import { HashType } from '../../hash/index.js'
 import { Path, PathType } from '../path/index.js'
 
 
@@ -5,6 +6,8 @@ export interface FileSystem {
   exists(path: Path): Promise<boolean>
 
   resolvePathType(path: Path): Promise<PathType>
+
+  getFileHash(path: Path, hashType?: HashType): Promise<string | null>
 
   readDirectory(path: Path): Promise<string[] | null>
 
