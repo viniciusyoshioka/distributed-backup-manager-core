@@ -17,6 +17,8 @@ export interface SyncArgs {
   '--source': string
   '--destination': string
   '--exception': string[]
+  '--source-address': string | null
+  '--source-port': string | null
   '--destination-address': string | null
   '--destination-port': string | null
   '--skip-confirmation': boolean
@@ -28,18 +30,21 @@ interface SyncArgsSpec extends Spec {
   '--source': Handler
   '--destination': Handler
   '--exception': Handler
+  '--source-address': Handler
+  '--source-port': Handler
   '--destination-address': Handler
   '--destination-port': Handler
   '--skip-confirmation': Handler
 }
 
 // TODO: Add exception mode argument
-// TODO: Add source address argument
 const syncArgsSpec: SyncArgsSpec = {
   '--help': Boolean,
   '--source': String,
   '--destination': String,
   '--exception': [String] as unknown as Handler,
+  '--source-address': String,
+  '--source-port': String,
   '--destination-address': String,
   '--destination-port': String,
   '--skip-confirmation': Boolean,
@@ -48,8 +53,6 @@ const syncArgsSpec: SyncArgsSpec = {
   '-s': '--source',
   '-d': '--destination',
   '-e': '--exception',
-  '-a': '--destination-address',
-  '-p': '--destination-port',
   '-c': '--skip-confirmation',
 }
 
@@ -99,8 +102,10 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
         -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
         -d, --destination <path>        Path to a folder that will be synced with --source (required)
         -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
-        -a, --destination-address <ip>  Machine's IP address for remote sync. If not provided, a local sync will be performed
-        -p, --destination-port <port>   Port on the remote machine to connect for sync. Used with --destination-address. Defaults to "${process.env.PORT}"
+        --source-address <ip>           IP address of source machine for remote sync. If not provided, local machine will be used as source. Cannot be used with --destination-address
+        --source-port <port>            Port on the source machine to connect for sync. Used with --source-address. Defaults to "${process.env.PORT}"
+        --destination-address <ip>      IP address of destination machine for remote sync. If not provided, local machine will be used as destination. Cannot be used with --source-address
+        --destination-port <port>       Port on the remote machine to connect for sync. Used with --destination-address. Defaults to "${process.env.PORT}"
         -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
       Examples:
@@ -117,6 +122,8 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
     this.parseSource()
     this.parseDestination()
     this.parseExceptions()
+    this.parseSourceAddress()
+    this.parseSourcePort()
     this.parseDestinationAddress()
     this.parseDestinationPort()
     this.parseSkipConfirmation()
@@ -171,11 +178,63 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
     this.args['--exception'] = normalizedExceptionPaths
   }
 
+  private parseSourceAddress() {
+    const sourceAddress = this.args['--source-address'] as string | undefined
+    if (!sourceAddress) {
+      this.args['--source-address'] = null
+      return
+    }
+
+    const destinationAddress = this.args['--destination-address'] as string | undefined
+    if (destinationAddress) {
+      throw new CliInvalidArgumentError('Arguments "--source-address" and "--destination-address" cannot be used together')
+    }
+
+    const sourceAddressIsValid = IP.isValid(sourceAddress)
+    if (!sourceAddressIsValid) {
+      throw new CliInvalidArgumentError(`IP address "${sourceAddress}" for argument "--source-address" is not a valid IP address`)
+    }
+  }
+
+  private parseSourcePort() {
+    const hasSourceAddress = !!this.args['--source-address']
+    const sourcePort = this.args['--source-port'] as string | undefined
+
+    if (hasSourceAddress) {
+      if (!sourcePort) {
+        const defaultPort = process.env.PORT
+        if (!defaultPort) {
+          throw new CliInvalidArgumentError('No "PORT" variable was found in .env file. This should not happen')
+        }
+
+        this.args['--source-port'] = defaultPort
+        return
+      }
+
+      const sourcePortIsValid = NetworkAddress.isPortValid(sourcePort)
+      if (!sourcePortIsValid) {
+        throw new CliInvalidArgumentError(`Port "${sourcePort}" for argument "--source-port" is not a valid port`)
+      }
+
+      return
+    }
+
+    if (sourcePort) {
+      console.log(`Argument "--source-port" was given without "--source-address". Ignoring it`)
+    }
+    this.args['--source-port'] = null
+  }
+
   private parseDestinationAddress() {
     const destinationAddress = this.args['--destination-address'] as string | undefined
     if (!destinationAddress) {
       this.args['--destination-address'] = null
       return
+    }
+
+    const sourceAddress = this.args['--source-address'] as string | undefined
+    if (sourceAddress) {
+      throw new CliInvalidArgumentError('Arguments "--source-address" and "--destination-address" cannot be used together')
     }
 
     const destinationAddressIsValid = IP.isValid(destinationAddress)
