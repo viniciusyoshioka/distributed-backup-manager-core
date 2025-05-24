@@ -107,6 +107,7 @@ export class UserService {
     const payload = { id: user.id, name: user.name, email: user.email }
 
     const signedJwtToken = await new SignJWT(payload)
+      .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('1h')
       .sign(secret)
 
