@@ -116,7 +116,8 @@ export class UserService {
     }
   }
 
-  async validateJwtToken(token: string): Promise<UserPayloadDTO> {
+  // TODO: Remove static modifier and move JWT logic to auth module
+  static async validateJwtToken(token: string): Promise<UserPayloadDTO> {
     const secret = new TextEncoder().encode(process.env.SYNC_SERVER_JWT_SECRET)
     const { payload } = await jwtVerify(token, secret)
 
