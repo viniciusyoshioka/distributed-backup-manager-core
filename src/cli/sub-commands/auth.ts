@@ -187,18 +187,18 @@ export class AuthSubCommand implements SubCommand<
 
       Options for ${AuthSubCommandAction.REGISTER} action:
         -h, --help                        Show this help message and exit
-        -n, --name <name>                 User name
+        -n, --name <name>                 User name. Must be at least 3 characters long
         -e, --email <email>               User email
-        -w, --password <password>         User password
-        -a, --machine-address <address>   Remote machine address
-        -p, --machine-port <port>         Remote machine port
+        -w, --password <password>         User password. Must be a strong password. A strong password must be at least 8 characters long, contain at least 1 lowercase letter, 1 uppercase letter, 1 number and 1 symbol
+        -a, --machine-address <address>   IP address of remote machine
+        -p, --machine-port <port>         Remote machine port. Used with --machine-address. Defaults to "${process.env.PORT}"
 
       Options for ${AuthSubCommandAction.LOGIN} action:
         -h, --help                        Show this help message and exit
         -e, --email <email>               User email
-        -w, --password <password>         User password
-        -a, --machine-address <address>   Remote machine address
-        -p, --machine-port <port>         Remote machine port
+        -w, --password <password>         User password. Must be a strong password. A strong password must be at least 8 characters long, contain at least 1 lowercase letter, 1 uppercase letter, 1 number and 1 symbol
+        -a, --machine-address <address>   IP address of remote machine
+        -p, --machine-port <port>         Remote machine port. Used with --machine-address. Defaults to "${process.env.PORT}"
 
       Examples:
         ${Cli.SHORT_NAME} ${AuthSubCommand.SUBCOMMAND_NAME} ${AuthSubCommandAction.REGISTER} -n "The user name" -e "user@domain.com" --w "rj#TK5PfLs" -a 192.168.1.10 -p 8080
