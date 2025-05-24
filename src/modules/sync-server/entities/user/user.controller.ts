@@ -27,9 +27,9 @@ export class UserController {
     const router = Router()
 
 
-    router.get('', this.getUser.bind(this) as unknown as RequestHandler)
+    // router.get('', this.getUser.bind(this) as unknown as RequestHandler)
     router.post('', this.createUser.bind(this) as unknown as RequestHandler)
-    router.put('', this.updateUser.bind(this) as unknown as RequestHandler)
+    // router.put('', this.updateUser.bind(this) as unknown as RequestHandler)
     router.delete('/:id', this.deleteUser.bind(this) as unknown as RequestHandler)
     router.post('/login', this.loginUser.bind(this) as unknown as RequestHandler)
 
