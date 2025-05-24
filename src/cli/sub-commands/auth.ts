@@ -201,7 +201,8 @@ export class AuthSubCommand implements SubCommand<
         -p, --machine-port <port>         Remote machine port
 
       Examples:
-        ${Cli.SHORT_NAME} ${AuthSubCommand.SUBCOMMAND_NAME}
+        ${Cli.SHORT_NAME} ${AuthSubCommand.SUBCOMMAND_NAME} ${AuthSubCommandAction.REGISTER} -n "The user name" -e "user@domain.com" --w "rj#TK5PfLs" -a 192.168.1.10 -p 8080
+        ${Cli.SHORT_NAME} ${AuthSubCommand.SUBCOMMAND_NAME} ${AuthSubCommandAction.LOGIN} --email "user@domain.com" --password "$VfBw!ePs0" -a 192.168.1.10
     `)
 
     console.log(helpMessage)
