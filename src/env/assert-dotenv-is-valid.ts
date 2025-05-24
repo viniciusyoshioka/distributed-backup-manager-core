@@ -18,6 +18,7 @@ const envSchema = z
       { message: 'SYNC_SERVER_DATABASE_PATH must be an absolute path' },
     ),
     SYNC_SERVER_JWT_SECRET: z.string().min(64),
+    ACCESS_TOKEN: z.string(),
   })
   .superRefine((arg, ctx) => {
     if (arg.EXECUTION_TIME_ENABLED === 'true' && arg.STAGE !== 'development') {

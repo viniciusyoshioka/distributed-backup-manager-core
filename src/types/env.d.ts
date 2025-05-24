@@ -8,5 +8,6 @@ declare namespace NodeJS {
     SYNC_SERVER_ROOT_DESTINATION_PATH: string
     SYNC_SERVER_DATABASE_PATH: string
     SYNC_SERVER_JWT_SECRET: string
+    ACCESS_TOKEN: string
   }
 }
