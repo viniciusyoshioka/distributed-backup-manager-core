@@ -55,6 +55,8 @@ export class UserController {
     // TODO: Implement
   }
 
+  // TODO: Add middleware to require user authentication for the user to delete itself.
+  // TODO: When the machine wants to delete a remote user, it doesn't need authentication
   @Delete()
   private async deleteUser(req: Request): Promise<UserWithoutPasswordDTO> {
     const { id } = req.params

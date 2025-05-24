@@ -29,6 +29,7 @@ export class UserSubClient {
   }
 
   async deleteUser(id: string): Promise<UserWithoutPasswordDTO> {
+    // TODO: Pass access token to server
     const { data } = await this.client.delete<UserWithoutPasswordDTO>(`/${id}`)
 
     return data
