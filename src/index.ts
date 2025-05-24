@@ -1,5 +1,3 @@
-import dedent from 'dedent'
-
 import {
   AuthArgs,
   AuthLoginUserArgs,
@@ -51,11 +49,7 @@ async function loginUser(args: AuthLoginUserArgs) {
       password: args['--password'],
     })
 
-    console.log(dedent(`
-      User logged in successfully.
-
-      Token: ${token}\n
-    `))
+    console.log(`User logged in successfully. Token: ${token}`)
   } catch (error) {
     console.error('Error logging in user.', error)
   }
