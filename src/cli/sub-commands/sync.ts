@@ -109,9 +109,11 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
         -c, --skip-confirmation         Skip confirmation prompt and sync all differences automatically
 
       Examples:
-        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup/dest                       # Sync local folders
-        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup -e node_modules -e .git    # Sync excluding patterns
-        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup -a 192.168.1.1 -p 1234 -c  # Remote sync with no confirmation
+        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup/dest                                             # Sync local folders
+        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup/dest -c                                          # Sync local folders without confirmation
+        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup -e node_modules -e .git                          # Sync excluding patterns
+        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup --destination-address 192.168.1.1                # Remote sync with remote destination machine
+        ${Cli.SHORT_NAME} ${SyncSubCommand.SUBCOMMAND_NAME} -s /home/user/src -d /backup --source-address 192.168.1.2 --source-port 1234  # Remote sync with remote source machine
     `)
 
     console.log(helpMessage)
