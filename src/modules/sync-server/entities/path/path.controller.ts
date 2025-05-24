@@ -2,10 +2,12 @@ import type { Request } from 'express'
 import { RequestHandler, Router } from 'express'
 import * as jose from 'jose'
 import multer from 'multer'
+import type { SetOptional } from 'type-fest'
 
 import { Path, PathType } from '../../../file-system/index.js'
 import { Delete, Get, Middleware, Post } from '../../decorators/index.js'
 import { BadRequestException, UnauthorizedException } from '../../errors/index.js'
+import type { WithAuthUser } from '../../types/index.js'
 import { UserService } from '../user/user.service.js'
 import { PathMapper } from './path.mapper.js'
 import { PathService } from './path.service.js'
@@ -89,7 +91,9 @@ export class PathController {
 
   // TODO: Move to auth module and import to use here. This middleware can be reused
   @Middleware()
-  private async authenticationMiddleware(req: Request): Promise<void> {
+  private async authenticationMiddleware(
+    req: SetOptional<WithAuthUser<Request>, 'user'>,
+  ): Promise<void> {
     const authorizationHeader = req.headers['authorization']
     if (!authorizationHeader) {
       throw new UnauthorizedException('Authorization header is missing')
@@ -101,7 +105,8 @@ export class PathController {
     }
 
     try {
-      await UserService.validateJwtToken(token)
+      const userPayload = await UserService.validateJwtToken(token)
+      req.user = userPayload
     } catch (error) {
       if (error instanceof jose.errors.JWTExpired) {
         throw new UnauthorizedException('JWT token has expired')
