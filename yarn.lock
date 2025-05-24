@@ -2611,6 +2611,7 @@ __metadata:
     sqlite3: "npm:^5.1.7"
     ts-jest: "npm:^29.3.0"
     tsx: "npm:^4.19.4"
+    type-fest: "npm:^4.41.0"
     typeorm: "npm:^0.3.22"
     typescript: "npm:^5.8.2"
     typescript-eslint: "npm:^8.28.0"
