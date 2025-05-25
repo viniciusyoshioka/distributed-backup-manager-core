@@ -130,10 +130,12 @@ export class PathSubClient {
     const fileStream = fs.createReadStream(fromAbsolutePath)
     form.append('uploadFile', fileStream)
     form.append('path', toAbsolutePath)
-    form.append('Authorization', `Bearer ${this.token}`)
 
     await this.client.post('/file/copy', form, {
-      headers: form.getHeaders(),
+      headers: {
+        ...form.getHeaders(),
+        Authorization: `Bearer ${this.token}`,
+      },
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
     })
