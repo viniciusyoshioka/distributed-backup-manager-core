@@ -92,6 +92,8 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
   }
 
 
+  // TODO: Update --exception validation when --source is relative
+  // TODO: Update --exception help message
   private showHelpAndExit() {
     const helpMessage = dedent(`Usage:
 
@@ -99,8 +101,8 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
 
       Options:
         -h, --help                      Show this help message and exit
-        -s, --source <path>             Path to a folder that will be used as source to sync another folder (the path in --destination) (required)
-        -d, --destination <path>        Path to a folder that will be synced with --source (required)
+        -s, --source <path>             Path to a folder that will be used as source during the sync. Required on local and remote sync without --source-address and must be an absolute path. On remote sync with --source-address, it is optional and must be a relative path
+        -d, --destination <path>        Path to a folder that will be used as destination during the sync. Required on local and remote sync without --destination-address and must be an absolute path. On remote sync with --destination-address, it is optional and must be a relative path
         -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
         --source-address <ip>           IP address of source machine for remote sync. If not provided, local machine will be used as source. Cannot be used with --destination-address
         --source-port <port>            Port on the source machine to connect for sync. Used with --source-address. Defaults to "${process.env.PORT}"
@@ -132,30 +134,128 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
   }
 
   private parseSource() {
+    const hasSourceAddress = !!this.args['--source-address']
+    const hasDestinationAddress = !!this.args['--destination-address']
+    const isLocalSync = !hasSourceAddress && !hasDestinationAddress
+
+    if (isLocalSync) {
+      this.parseSourceInLocalSync()
+    } else {
+      this.parseSourceInRemoteSync()
+    }
+  }
+
+  private parseSourceInLocalSync() {
     const sourcePath = this.args['--source'] as string | undefined
     if (!sourcePath) {
-      throw new CliInvalidArgumentError('Argument "--source" is required')
+      throw new CliInvalidArgumentError('Argument "--source" is required when performing local sync')
     }
 
     const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
     if (!sourcePathIsAbsolutePath) {
       const absoluteSourcePath = Path.join([this.cwd, sourcePath])
       this.args['--source'] = absoluteSourcePath
-      console.log(`Argument "--source" is not an absolute path. Using "${absoluteSourcePath}" instead`)
+      console.log(`Argument "--source" is not an absolute path. It must be absolute when performing local sync. Using "${absoluteSourcePath}" instead`)
+    }
+  }
+
+  private parseSourceInRemoteSync() {
+    const hasSourceAddress = !!this.args['--source-address']
+
+    if (hasSourceAddress) {
+      this.parseSourcePathInRemoteSyncWithSourceAddress()
+    } else {
+      this.parseSourcePathInRemoteSyncWithoutSourceAddress()
+    }
+  }
+
+  private parseSourcePathInRemoteSyncWithSourceAddress() {
+    const sourcePath = this.args['--source'] as string | undefined
+    if (!sourcePath) {
+      this.args['--source'] = ''
+      return
+    }
+
+    const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
+    if (sourcePathIsAbsolutePath) {
+      throw new CliInvalidArgumentError(`Argument "--source" is an absolute path. It must be relative when performing remote sync with "--source-address"`)
+    }
+  }
+
+  private parseSourcePathInRemoteSyncWithoutSourceAddress() {
+    const sourcePath = this.args['--source'] as string | undefined
+    if (!sourcePath) {
+      throw new CliInvalidArgumentError('Argument "--source" is required when performing remote sync without "--source-address"')
+    }
+
+    const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
+    if (!sourcePathIsAbsolutePath) {
+      const absoluteSourcePath = Path.join([this.cwd, sourcePath])
+      this.args['--source'] = absoluteSourcePath
+      console.log(`Argument "--source" is not an absolute path. It must be absolute when performing remote sync without "--source-address". Using "${absoluteSourcePath}" instead`)
     }
   }
 
   private parseDestination() {
+    const hasSourceAddress = !!this.args['--source-address']
+    const hasDestinationAddress = !!this.args['--destination-address']
+    const isLocalSync = !hasSourceAddress && !hasDestinationAddress
+
+    if (isLocalSync) {
+      this.parseDestinationInLocalSync()
+    } else {
+      this.parseDestinationInRemoteSync()
+    }
+  }
+
+  private parseDestinationInLocalSync() {
     const destinationPath = this.args['--destination'] as string | undefined
     if (!destinationPath) {
-      throw new CliInvalidArgumentError('Argument "--destination" is required')
+      throw new CliInvalidArgumentError('Argument "--destination" is required when performing local sync')
     }
 
     const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
     if (!destinationPathIsAbsolutePath) {
       const absoluteDestinationPath = Path.join([this.cwd, destinationPath])
       this.args['--destination'] = absoluteDestinationPath
-      console.log(`Argument "--destination" is not an absolute path. Using "${absoluteDestinationPath}" instead`)
+      console.log(`Argument "--destination" is not an absolute path. It must be absolute when performing local sync. Using "${absoluteDestinationPath}" instead`)
+    }
+  }
+
+  private parseDestinationInRemoteSync() {
+    const hasDestinationAddress = !!this.args['--destination-address']
+
+    if (hasDestinationAddress) {
+      this.parseDestinationPathInRemoteSyncWithDestinationAddress()
+    } else {
+      this.parseDestinationPathInRemoteSyncWithoutDestinationAddress()
+    }
+  }
+
+  private parseDestinationPathInRemoteSyncWithDestinationAddress() {
+    const destinationPath = this.args['--destination'] as string | undefined
+    if (!destinationPath) {
+      this.args['--destination'] = ''
+      return
+    }
+
+    const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
+    if (destinationPathIsAbsolutePath) {
+      throw new CliInvalidArgumentError(`Argument "--destination" is an absolute path. It must be relative when performing remote sync with "--destination-address"`)
+    }
+  }
+
+  private parseDestinationPathInRemoteSyncWithoutDestinationAddress() {
+    const destinationPath = this.args['--destination'] as string | undefined
+    if (!destinationPath) {
+      throw new CliInvalidArgumentError('Argument "--destination" is required when performing remote sync without "--destination-address"')
+    }
+
+    const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
+    if (!destinationPathIsAbsolutePath) {
+      const absoluteDestinationPath = Path.join([this.cwd, destinationPath])
+      this.args['--destination'] = absoluteDestinationPath
+      console.log(`Argument "--destination" is not an absolute path. It must be absolute when performing remote sync without "--destination-address". Using "${absoluteDestinationPath}" instead`)
     }
   }
 

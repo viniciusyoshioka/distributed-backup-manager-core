@@ -70,8 +70,12 @@ async function auth(args: AuthArgs | AuthRegisterUserArgs | AuthLoginUserArgs) {
 
 
 async function sync(args: SyncArgs) {
-  const sourcePath = new Path(args['--source'])
-  const destinationPath = new Path(args['--destination'])
+  const sourcePath = args['--source'] === ''
+    ? new Path([process.env.SYNC_SERVER_ROOT_DESTINATION_PATH, args['--source']])
+    : new Path(args['--source'])
+  const destinationPath = args['--destination'] === ''
+    ? new Path([process.env.SYNC_SERVER_ROOT_DESTINATION_PATH, args['--destination']])
+    : new Path(args['--destination'])
   const exceptions = args['--exception'].map(exception => new Path(exception))
 
 
