@@ -12,7 +12,7 @@ import {
   SyncSubCommand,
 } from './cli/index.js'
 import { assertDotEnvIsValid, InvalidEnvVariablesError } from './env/index.js'
-import { LocalFileSystem, Path, RemoteFileSystem } from './modules/file-system/index.js'
+import { LocalFileSystem, Path, RelativePath, RemoteFileSystem } from './modules/file-system/index.js'
 import { NetworkAddress } from './modules/network/index.js'
 import { SyncClient } from './modules/sync-client/index.js'
 import { Syncer } from './modules/syncer/index.js'
@@ -70,13 +70,15 @@ async function auth(args: AuthArgs | AuthRegisterUserArgs | AuthLoginUserArgs) {
 
 
 async function sync(args: SyncArgs) {
-  const sourcePath = !args['--source'] || !Path.isAbsolute(args['--source'])
-    ? new Path([process.env.SYNC_SERVER_ROOT_DESTINATION_PATH, args['--source']])
-    : new Path(args['--source'])
-  const destinationPath = !args['--destination'] || !Path.isAbsolute(args['--destination'])
-    ? new Path([process.env.SYNC_SERVER_ROOT_DESTINATION_PATH, args['--destination']])
-    : new Path(args['--destination'])
-  const exceptions = args['--exception'].map(exception => new Path(exception))
+  const sourcePath = Path.isAbsolute(args['--source'])
+    ? new Path(args['--source'])
+    : new RelativePath(args['--source'])
+  const destinationPath = Path.isAbsolute(args['--destination'])
+    ? new Path(args['--destination'])
+    : new RelativePath(args['--destination'])
+  const exceptions = args['--exception'].map(exception => {
+    return new RelativePath(exception)
+  })
 
 
   const sourceAddress = (args['--source-address'] && args['--source-port'])
@@ -89,12 +91,19 @@ async function sync(args: SyncArgs) {
     throw new Error('Both source and destination addresses cannot be provided at the same time')
   }
 
+  const localFileSystem = new LocalFileSystem()
   const sourceFileSystem = sourceAddress
-    ? new RemoteFileSystem({ syncClient: new SyncClient(sourceAddress) })
-    : new LocalFileSystem()
+    ? new RemoteFileSystem({
+      syncClient: new SyncClient(sourceAddress),
+      localFileSystem,
+    })
+    : localFileSystem
   const destinationFileSystem = destinationAddress
-    ? new RemoteFileSystem({ syncClient: new SyncClient(destinationAddress) })
-    : new LocalFileSystem()
+    ? new RemoteFileSystem({
+      syncClient: new SyncClient(destinationAddress),
+      localFileSystem,
+    })
+    : localFileSystem
 
 
   const syncer = new Syncer({

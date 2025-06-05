@@ -30,7 +30,12 @@ export function Delete(): MethodDecorator {
       console.log(requestLog)
 
 
-      function handlePostSuccessResponse(returnValue: unknown): void {
+      function handleDeleteSuccessResponse(returnValue: unknown): void {
+        if (response.headersSent) {
+          console.log(`[DELETE] Response: "${endpointPath}"`)
+          return
+        }
+
         const stringifiedReturnValue = typeof returnValue === 'string'
           ? returnValue
           : JSON.stringify(returnValue, null, 2)
@@ -51,7 +56,7 @@ export function Delete(): MethodDecorator {
         if (returnValue instanceof Promise) {
           returnValue
             .then(result => {
-              handlePostSuccessResponse(result)
+              handleDeleteSuccessResponse(result)
             })
             .catch((error: unknown) => {
               handleErrorAndSendResponse({ response, error, target, propertyKey })
@@ -59,7 +64,7 @@ export function Delete(): MethodDecorator {
           return
         }
 
-        handlePostSuccessResponse(returnValue)
+        handleDeleteSuccessResponse(returnValue)
       } catch (error) {
         handleErrorAndSendResponse({ response, error, target, propertyKey })
       }

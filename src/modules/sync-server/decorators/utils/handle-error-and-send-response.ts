@@ -12,6 +12,10 @@ export function handleErrorAndSendResponse(params: {
 }): void {
   const { response, error, target, propertyKey } = params
 
+  if (response.headersSent) {
+    return
+  }
+
   const targetClassName = target.constructor.name
   const targetPropertyName = String(propertyKey)
   const targetPropertyPath = `${targetClassName}.${targetPropertyName}`

@@ -3,7 +3,7 @@ import readline from 'node:readline/promises'
 
 import { ExecutionTime } from '../../decorators/index.js'
 import { Queue } from '../../utils/index.js'
-import { FileSystem, Path, PathType } from '../file-system/index.js'
+import { FileSystem, Path, PathType, RelativePath } from '../file-system/index.js'
 import type { Diffs, GetDiffsParams, PathDiffs } from './syncer.types.js'
 import { SyncOperation } from './syncer.types.js'
 
@@ -15,11 +15,11 @@ export enum SyncerExceptionMode {
 
 
 export interface SyncerParams {
-  source: Path
-  destination: Path
+  source: Path | RelativePath
+  destination: Path | RelativePath
 
   /**
-   * List of paths to allow or to block when syncing.
+   * List of relative paths, inside of source path, to allow or to block when syncing.
    * The behavior changes according to the `exceptionMode`.
    * - If `exceptionMode` is `SyncerMode.ALLOWLIST`, all paths will be ignored,
    * except the ones in this list.
@@ -28,7 +28,7 @@ export interface SyncerParams {
    *
    * Default: `[]`
    */
-  exceptions?: Path[]
+  exceptions?: RelativePath[]
 
   /**
    * - When `SyncerExceptionMode.ALLOWLIST`, all paths in `exceptions` will be synced.
@@ -39,6 +39,7 @@ export interface SyncerParams {
   exceptionMode?: SyncerExceptionMode
 
   skipConfirmation?: boolean
+
   sourceFileSystem: FileSystem
   destinationFileSystem: FileSystem
 }
@@ -47,9 +48,9 @@ export interface SyncerParams {
 export class Syncer {
 
 
-  private readonly source: Path
-  private readonly destination: Path
-  private readonly exceptions: Path[]
+  private readonly source: Path | RelativePath
+  private readonly destination: Path | RelativePath
+  private readonly exceptions: RelativePath[]
   private readonly exceptionMode: SyncerExceptionMode
   private readonly skipConfirmation: boolean
   private readonly sourceFileSystem: FileSystem
@@ -68,31 +69,49 @@ export class Syncer {
 
 
   private async assertParamsAreValid(): Promise<void> {
-    await this.sourceFileSystem.resolvePathType(this.source)
-    if (this.source.type !== PathType.DIR) {
-      throw new Error(`Source path "${this.source.absolutePath}" must be a directory`)
-    }
-
-    await this.destinationFileSystem.resolvePathType(this.destination)
-    if (this.destination.type !== PathType.DIR) {
-      throw new Error(`Destination path "${this.destination.absolutePath}" must be a directory`)
-    }
-
-    this.exceptions.forEach(exception => {
-      const exceptionPathIsSubPathOfSource = exception.isSubPathOf(this.source)
-      if (!exceptionPathIsSubPathOfSource) {
-        throw new Error(`Exception path "${exception.absolutePath}" is not a subpath of source path "${this.source.absolutePath}"`)
+    if (this.source instanceof Path) {
+      const sourceExists = await this.sourceFileSystem.exists(this.source)
+      if (!sourceExists) {
+        throw new Error(`Source path "${this.source.absolutePath}" does not exist`)
       }
-    })
+
+      const sourcePathType = await this.sourceFileSystem.resolvePathType(this.source)
+      if (sourcePathType !== PathType.DIR) {
+        throw new Error(`Source path "${this.source.absolutePath}" must be a directory`)
+      }
+    }
+
+
+    const destinationPath = this.destination instanceof Path
+      ? this.destination.absolutePath
+      : this.destination.relativePath
+
+    const destinationExists = await this.destinationFileSystem.exists(this.destination)
+    if (destinationExists) {
+      const destinationPathType = await this.destinationFileSystem.resolvePathType(this.destination)
+      if (destinationPathType !== PathType.DIR) {
+        throw new Error(`Destination path "${destinationPath}" must be a directory`)
+      }
+    }
+
+
+    if (this.source instanceof Path) {
+      for (let i = 0; i < this.exceptions.length; i++) {
+        const exception = this.exceptions[i]
+        const exceptionPath: Path = new Path([this.source.absolutePath, exception.relativePath])
+
+        const exceptionPathIsSubPathOfSource = exceptionPath.isSubPathOf(this.source)
+        if (!exceptionPathIsSubPathOfSource) {
+          throw new Error(`Exception path "${exceptionPath.absolutePath}" is not a subpath of source path "${this.source.absolutePath}"`)
+        }
+      }
+    }
   }
 
 
   @ExecutionTime()
   private async scanDiffs(): Promise<Diffs | null> {
-    const rootAbsolutePath = this.source.absolutePath
-    const rootRelativePath = this.source.getRelativePathToRoot(rootAbsolutePath)
-
-    const pathsToScan = new Queue<string>(rootRelativePath)
+    const pathsToScan = new Queue<string>('')
     const pathsToCreate = new Queue<string>()
     const pathsToUpdate = new Queue<string>()
     const pathsToDelete = new Queue<string>()
@@ -186,17 +205,23 @@ export class Syncer {
   }
 
 
-  private isPathInExceptionList(path: Path): boolean {
-    const rootAbsolutePath = this.source.absolutePath
-
+  private isPathInExceptionList(path: Path | RelativePath): boolean {
     return this.exceptions.some(exception => {
-      const relativeExceptionPath = exception.getRelativePathToRoot(rootAbsolutePath)
-      const relativePath = path.getRelativePathToRoot(rootAbsolutePath)
-      return relativePath.startsWith(relativeExceptionPath)
+      if (path instanceof RelativePath) {
+        return path.isSubPathOf(exception)
+      }
+
+      const sourcePathIsAbsolute = this.source instanceof Path
+      if (!sourcePathIsAbsolute) {
+        throw new Error('Cannot check if an absolute path is in the exception list when source path is a relative path')
+      }
+
+      const exceptionAbsolutePath = new Path([this.source.absolutePath, exception.relativePath])
+      return path.isSubPathOf(exceptionAbsolutePath)
     })
   }
 
-  private isPathAllowedToSync(path: Path): boolean {
+  private isPathAllowedToSync(path: Path | RelativePath): boolean {
     const pathIsInExceptionList = this.isPathInExceptionList(path)
     switch (this.exceptionMode) {
       case SyncerExceptionMode.ALLOWLIST:
@@ -212,18 +237,28 @@ export class Syncer {
   private async scanPathDiffs(path: string): Promise<PathDiffs> {
     console.log(`Scanning diffs for "${path}"...`)
 
-    const sourcePath = new Path([this.source.absolutePath, path])
-    const destinationPath = new Path([this.destination.absolutePath, path])
+    const sourcePath = this.source instanceof Path
+      ? new Path([this.source.absolutePath, path])
+      : new RelativePath([this.source.relativePath, path])
+    const destinationPath = this.destination instanceof Path
+      ? new Path([this.destination.absolutePath, path])
+      : new RelativePath([this.destination.relativePath, path])
 
 
     const sourceChildren = await this.sourceFileSystem.readDirectory(sourcePath)
     if (!sourceChildren) {
-      throw new Error(`Source path "${sourcePath.absolutePath}" is not a directory`)
+      const sourcePathToLog = sourcePath instanceof Path
+        ? sourcePath.absolutePath
+        : sourcePath.relativePath
+      throw new Error(`Source path "${sourcePathToLog}" is not a directory`)
     }
 
     const destinationChildren = await this.destinationFileSystem.readDirectory(destinationPath)
     if (!destinationChildren) {
-      throw new Error(`Destination path "${destinationPath.absolutePath}" is not a directory`)
+      const destinationPathToLog = destinationPath instanceof Path
+        ? destinationPath.absolutePath
+        : destinationPath.relativePath
+      throw new Error(`Destination path "${destinationPathToLog}" is not a directory`)
     }
 
 
@@ -247,13 +282,39 @@ export class Syncer {
     const childrenPathsToScan: string[] = []
 
 
+    // Checks for empty folders. If the folder exists in source, even if it is empty,
+    // it should be created in destination to keep the structure.
+    if (!sourceChildrenNames.length) {
+      const sourceRelativePath = sourceParentPath.getRelativePathToRoot(
+        this.source instanceof Path ? this.source.absolutePath : this.source.relativePath,
+      )
+
+      const destinationParentExists = await this.destinationFileSystem.exists(destinationParentPath)
+      if (!destinationParentExists) {
+        pathsToCreate.push(sourceRelativePath)
+      } else {
+        const destinationParentsChildren = await this.destinationFileSystem.readDirectory(
+          destinationParentPath,
+        )
+        if (destinationParentsChildren?.length) {
+          pathsToUpdate.push(sourceRelativePath)
+        }
+      }
+    }
+
     for (const sourceChildName of sourceChildrenNames) {
-      const sourceChildPath = new Path([sourceParentPath.absolutePath, sourceChildName])
-      const destinationChildPath = new Path([destinationParentPath.absolutePath, sourceChildName])
+      const sourceChildPath = sourceParentPath instanceof Path
+        ? new Path([sourceParentPath.absolutePath, sourceChildName])
+        : new RelativePath([sourceParentPath.relativePath, sourceChildName])
+      const destinationChildPath = destinationParentPath instanceof Path
+        ? new Path([destinationParentPath.absolutePath, sourceChildName])
+        : new RelativePath([destinationParentPath.relativePath, sourceChildName])
 
       await this.sourceFileSystem.resolvePathType(sourceChildPath)
       await this.destinationFileSystem.resolvePathType(destinationChildPath)
-      const sourceRelativePath = sourceChildPath.getRelativePathToRoot(this.source.absolutePath)
+      const sourceRelativePath = sourceChildPath.getRelativePathToRoot(
+        this.source instanceof Path ? this.source.absolutePath : this.source.relativePath,
+      )
 
 
       const isSourceChildAllowedToSync = this.isPathAllowedToSync(sourceChildPath)
@@ -308,12 +369,14 @@ export class Syncer {
 
     // Delete path in destination
     for (const destinationChildName of destinationChildrenNames) {
-      const destinationChildPath = new Path([
-        destinationParentPath.absolutePath,
-        destinationChildName,
-      ])
+      const destinationChildPath = destinationParentPath instanceof Path
+        ? new Path([destinationParentPath.absolutePath, destinationChildName])
+        : new RelativePath([destinationParentPath.relativePath, destinationChildName])
+
       const destinationRelativePath = destinationChildPath.getRelativePathToRoot(
-        this.destination.absolutePath,
+        this.destination instanceof Path
+          ? this.destination.absolutePath
+          : this.destination.relativePath,
       )
 
 
@@ -396,6 +459,8 @@ export class Syncer {
   // TODO: Fix local and remote fileSystems not working correctly when swapping the order.
   // When the destinationFileSystem is the local machine, it is not prepared to download the file
   // or execute other file operations correctly for any expected case
+  // TODO: Add try/catch
+  // TODO: Add comment explaining the reason of createDirectory instead of copyDirectory
   private async createPathsInDestination(pathsToCreate: Queue<string>): Promise<void> {
     if (pathsToCreate.isEmpty()) return
 
@@ -404,17 +469,37 @@ export class Syncer {
       const path = pathsToCreate.dequeue()
       console.log(`\t${path}`)
 
-      const pathFromSource = new Path([this.source.absolutePath, path])
-      const pathFromDestination = new Path([this.destination.absolutePath, path])
 
-      // TODO: Add try/catch
-      await this.destinationFileSystem.copyFile(pathFromSource, pathFromDestination)
+      const pathFromSource = this.source instanceof Path
+        ? new Path([this.source.absolutePath, path])
+        : new RelativePath([this.source.relativePath, path])
+      await this.sourceFileSystem.resolvePathType(pathFromSource)
+
+      const pathFromDestination = this.destination instanceof Path
+        ? new Path([this.destination.absolutePath, path])
+        : new RelativePath([this.destination.relativePath, path])
+
+
+      if (pathFromSource.type === PathType.DIR) {
+        await this.destinationFileSystem.createDirectory(pathFromDestination)
+        continue
+      }
+
+      if (pathFromSource.type === PathType.FILE) {
+        if (pathFromSource instanceof RelativePath) {
+          await this.sourceFileSystem.copyFile(pathFromSource, pathFromDestination)
+        } else {
+          await this.destinationFileSystem.copyFile(pathFromSource, pathFromDestination)
+        }
+      }
     }
   }
 
   // TODO: Fix local and remote fileSystems not working correctly when swapping the order.
   // When the destinationFileSystem is the local machine, it is not prepared to download the file
   // or execute other file operations correctly for any expected case
+  // TODO: Add try/catch
+  // TODO: Add comment explaining the reason of createDirectory instead of copyDirectory
   private async updatePathsInDestination(pathsToUpdate: Queue<string>): Promise<void> {
     if (pathsToUpdate.isEmpty()) return
 
@@ -423,18 +508,35 @@ export class Syncer {
       const path = pathsToUpdate.dequeue()
       console.log(`\t${path}`)
 
-      const pathFromSource = new Path([this.source.absolutePath, path])
-      const pathFromDestination = new Path([this.destination.absolutePath, path])
+      const pathFromSource = this.source instanceof Path
+        ? new Path([this.source.absolutePath, path])
+        : new RelativePath([this.source.relativePath, path])
+      await this.sourceFileSystem.resolvePathType(pathFromSource)
 
-      // TODO: Add try/catch
-      await this.destinationFileSystem.deleteFile(pathFromDestination)
-      await this.destinationFileSystem.copyFile(pathFromSource, pathFromDestination)
+      const pathFromDestination = this.destination instanceof Path
+        ? new Path([this.destination.absolutePath, path])
+        : new RelativePath([this.destination.relativePath, path])
+      await this.destinationFileSystem.resolvePathType(pathFromDestination)
+
+
+      if (pathFromDestination.type === PathType.FILE) {
+        await this.destinationFileSystem.deleteFile(pathFromDestination)
+      } else if (pathFromDestination.type === PathType.DIR) {
+        await this.destinationFileSystem.deleteDirectory(pathFromDestination)
+      }
+
+      if (pathFromSource.type === PathType.FILE) {
+        await this.destinationFileSystem.copyFile(pathFromSource, pathFromDestination)
+      } else if (pathFromSource.type === PathType.DIR) {
+        await this.destinationFileSystem.createDirectory(pathFromDestination)
+      }
     }
   }
 
   // TODO: Fix local and remote fileSystems not working correctly when swapping the order.
   // When the destinationFileSystem is the local machine, it is not prepared to download the file
   // or execute other file operations correctly for any expected case
+  // TODO: Add try/catch
   private async deletePathsInDestination(pathsToDelete: Queue<string>): Promise<void> {
     if (pathsToDelete.isEmpty()) return
 
@@ -443,18 +545,15 @@ export class Syncer {
       const path = pathsToDelete.dequeue()
       console.log(`\t${path}`)
 
-      const pathFromDestination = new Path([this.destination.absolutePath, path])
+      const pathFromDestination = this.destination instanceof Path
+        ? new Path([this.destination.absolutePath, path])
+        : new RelativePath([this.destination.relativePath, path])
       await this.destinationFileSystem.resolvePathType(pathFromDestination)
 
       if (pathFromDestination.type === PathType.FILE) {
-        // TODO: Add try/catch
         await this.destinationFileSystem.deleteFile(pathFromDestination)
-        continue
-      }
-      if (pathFromDestination.type === PathType.DIR) {
-        // TODO: Add try/catch
+      } else if (pathFromDestination.type === PathType.DIR) {
         await this.destinationFileSystem.deleteDirectory(pathFromDestination)
-        continue
       }
     }
   }

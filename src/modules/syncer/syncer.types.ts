@@ -1,10 +1,10 @@
 import { Queue } from '../../utils/index.js'
-import { Path } from '../file-system/index.js'
+import { Path, RelativePath } from '../file-system/index.js'
 
 
 export interface GetDiffsParams {
-  sourceParentPath: Path
-  destinationParentPath: Path
+  sourceParentPath: Path | RelativePath
+  destinationParentPath: Path | RelativePath
   sourceChildrenNames: string[]
   destinationChildrenNames: string[]
 }

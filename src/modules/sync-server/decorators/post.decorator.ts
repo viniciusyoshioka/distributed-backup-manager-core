@@ -33,6 +33,11 @@ export function Post(): MethodDecorator {
 
 
       function handlePostSuccessResponse(returnValue: unknown): void {
+        if (response.headersSent) {
+          console.log(`[POST] Response: "${endpointPath}"`)
+          return
+        }
+
         const stringifiedReturnValue = typeof returnValue === 'string'
           ? returnValue
           : JSON.stringify(returnValue, null, 2)

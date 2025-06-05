@@ -1,9 +1,10 @@
 import axios, { AxiosInstance } from 'axios'
 import FormData from 'form-data'
 import fs from 'node:fs'
+import { v4 } from 'uuid'
 
 import { assertDotEnvIsValid } from '../../../../env/index.js'
-import { PathType } from '../../../file-system/index.js'
+import { Path, PathType } from '../../../file-system/index.js'
 import { HashType } from '../../../hash/index.js'
 import { IpVersion, NetworkAddress } from '../../../network/index.js'
 
@@ -124,14 +125,61 @@ export class PathSubClient {
     return data
   }
 
-  async copyFile(fromAbsolutePath: string, toAbsolutePath: string): Promise<void> {
+  async moveUploadedFile(uploadedFilePath: string, destinationPath: string): Promise<void> {
+    await this.client.put(
+      '/file/move-uploaded-file',
+      {
+        uploadedFilePath,
+        destinationPath,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      },
+    )
+  }
+
+  async downloadFile(relativePath: string): Promise<string> {
+    const response = await this.client.get(`/file/download`, {
+      params: {
+        path: relativePath,
+      },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+      responseType: 'stream',
+    })
+
+    return await new Promise<string>((resolve, reject) => {
+      const tmpDownloadedFilePath = new Path([
+        process.env.SYNC_CLIENT_TMP_DOWNLOADS_PATH,
+        v4(),
+      ])
+
+      const tmpDownloadedFileStream = fs.createWriteStream(tmpDownloadedFilePath.absolutePath)
+
+      tmpDownloadedFileStream.on('finish', () => {
+        tmpDownloadedFileStream.close()
+        resolve(tmpDownloadedFilePath.absolutePath)
+      })
+
+      tmpDownloadedFileStream.on('error', error => {
+        tmpDownloadedFileStream.close()
+        reject(error)
+      })
+
+      response.data.pipe(tmpDownloadedFileStream)
+    })
+  }
+
+  async uploadFile(absolutePath: string): Promise<string> {
     const form = new FormData()
 
-    const fileStream = fs.createReadStream(fromAbsolutePath)
+    const fileStream = fs.createReadStream(absolutePath)
     form.append('uploadFile', fileStream)
-    form.append('path', toAbsolutePath)
 
-    await this.client.post('/file/copy', form, {
+    const { data } = await this.client.post<string>('/file/upload', form, {
       headers: {
         ...form.getHeaders(),
         Authorization: `Bearer ${this.token}`,
@@ -139,5 +187,7 @@ export class PathSubClient {
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
     })
+
+    return data
   }
 }

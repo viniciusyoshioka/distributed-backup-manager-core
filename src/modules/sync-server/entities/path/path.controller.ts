@@ -1,12 +1,13 @@
-import type { Request } from 'express'
+import type { Request, Response } from 'express'
 import { RequestHandler, Router } from 'express'
 import * as jose from 'jose'
 import multer from 'multer'
+import fs from 'node:fs'
 import type { SetOptional } from 'type-fest'
 
-import { Path, PathType } from '../../../file-system/index.js'
-import { Delete, Get, Middleware, Post } from '../../decorators/index.js'
-import { BadRequestException, UnauthorizedException } from '../../errors/index.js'
+import { PathType } from '../../../file-system/index.js'
+import { Delete, Get, Middleware, Post, Put } from '../../decorators/index.js'
+import { BadRequestException, InternalServerErrorException, UnauthorizedException } from '../../errors/index.js'
 import type { WithAuthUser } from '../../types/index.js'
 import { UserService } from '../user/user.service.js'
 import { PathMapper } from './path.mapper.js'
@@ -31,9 +32,9 @@ export class PathController {
 
   build(): Router {
     const router = Router()
-    // TODO: Create a temporary folder to receive uploads in a place the user doesn't have access to
-    // TODO: Receive the absolute path from .env or cli argument (when subcommands were implemented)
-    const upload = multer({ dest: 'uploads/' })
+    const upload = multer({
+      dest: process.env.SYNC_SERVER_TMP_UPLOADS_PATH,
+    })
 
 
     // Path
@@ -59,11 +60,21 @@ export class PathController {
       this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
       this.getFileHash.bind(this) as unknown as RequestHandler,
     )
+    router.put(
+      '/file/move-uploaded-file',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.moveUploadedFile.bind(this) as unknown as RequestHandler,
+    )
+    router.get(
+      '/file/download',
+      this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
+      this.downloadFile.bind(this) as unknown as RequestHandler,
+    )
     router.post(
-      '/file/copy',
+      '/file/upload',
       this.authenticationMiddleware.bind(this) as unknown as RequestHandler,
       upload.single('uploadFile'),
-      this.copyFile.bind(this) as unknown as RequestHandler,
+      this.uploadFile.bind(this) as unknown as RequestHandler,
     )
 
     // Directory
@@ -199,24 +210,52 @@ export class PathController {
     return fileHash
   }
 
+  @Put()
+  private async moveUploadedFile(req: WithAuthUser<Request>): Promise<void> {
+    const query = PathMapper.fromObjectToMoveUploadedFileDto(req.body as object)
+
+    await this.pathService.moveUploadedFile({
+      uploadedFilePath: query.uploadedFilePath,
+      destinationPath: query.destinationPath,
+      user: req.user,
+    })
+  }
+
+  // @Get()
+  private downloadFile(req: WithAuthUser<Request>, res: Response): void {
+    const query = PathMapper.fromObjectToPathParamDto(req.query)
+
+    const filePathToDownload = this.pathService.getFilePathToDownload({
+      relativePath: query.path,
+      user: req.user,
+    })
+
+    const fileReadStream = fs.createReadStream(filePathToDownload.absolutePath)
+    fileReadStream.pipe(res)
+
+    fileReadStream.on('error', error => {
+      console.error('Error downloading file: ', error)
+      fileReadStream.close()
+      throw new InternalServerErrorException('Error downloading file')
+    })
+
+    fileReadStream.on('finish', () => {
+      fileReadStream.close()
+      res.sendStatus(200)
+    })
+  }
+
   @Post()
-  private async copyFile(req: WithAuthUser<Request>): Promise<void> {
+  private uploadFile(req: WithAuthUser<Request>): string {
     if (!req.file?.path) {
       throw new BadRequestException('File path not received')
     }
 
-    const query = PathMapper.fromObjectToPathParamDto(req.body as object)
+    const pathWhereFileWasUploaded = req.file.path
+    const uploadedFileRelativePath = this.pathService.getUploadedFileRelativePathToTmpPath(
+      pathWhereFileWasUploaded,
+    )
 
-    // TODO: Change this path to a temporary folder where the files are uploaded and is not
-    // easily accessible to the user. Use a env variable
-    const cwd = process.cwd()
-    const uploadRelativePath = req.file.path
-    const pathWhereFileWasUploaded = Path.join([cwd, uploadRelativePath])
-
-    await this.pathService.moveUploadedFile({
-      uploadedFilePath: pathWhereFileWasUploaded,
-      destinationPath: query.path,
-      user: req.user,
-    })
+    return uploadedFileRelativePath
   }
 }

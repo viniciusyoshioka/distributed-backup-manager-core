@@ -1,5 +1,6 @@
 import { FileSystem, Path, PathType } from '../../../file-system/index.js'
 import { hash, HashType } from '../../../hash/index.js'
+import { BadRequestException } from '../../errors/index.js'
 import { UserPayloadDTO } from '../user/index.js'
 
 
@@ -135,17 +136,73 @@ export class PathService {
   }): Promise<void> {
     const { uploadedFilePath, destinationPath, user } = params
 
-    this.assertPathIsAbsolutePath(uploadedFilePath)
+    this.assertPathIsRelativePath(uploadedFilePath)
     this.assertPathIsRelativePath(destinationPath)
 
-    // TODO: Validate uploadedFilePath to assert it is in uploaded files directory
-    const uploadedFilePathInstance = new Path(uploadedFilePath)
+    const uploadedFilePathInstance = new Path([
+      process.env.SYNC_SERVER_TMP_UPLOADS_PATH,
+      uploadedFilePath,
+    ])
     const destinationPathInstance = new Path([
       this.rootPath.absolutePath,
       user.id,
       destinationPath,
     ])
 
+    const uploadedFileExists = await this.fileSystem.exists(uploadedFilePathInstance)
+    if (!uploadedFileExists) {
+      throw new BadRequestException('Uploaded file does not exists')
+    }
+    const uploadedFileIsInTmpUploadsPath = this.isUploadedFileInTmpUploadsPath(
+      uploadedFilePathInstance,
+    )
+    if (!uploadedFileIsInTmpUploadsPath) {
+      await this.deleteUploadedFile(uploadedFilePathInstance)
+      throw new BadRequestException('Invalid uploaded file path')
+    }
+
     await this.fileSystem.moveFile(uploadedFilePathInstance, destinationPathInstance)
+  }
+
+  private isUploadedFileInTmpUploadsPath(uploadedFilePath: Path): boolean {
+    const syncServerTmpUploadsPath = new Path(process.env.SYNC_SERVER_TMP_UPLOADS_PATH)
+    const uploadedFileIsInTmpUploadsPath = uploadedFilePath.isSubPathOf(syncServerTmpUploadsPath)
+    return uploadedFileIsInTmpUploadsPath
+  }
+
+  private async deleteUploadedFile(uploadedFilePath: Path): Promise<void> {
+    await this.fileSystem.resolvePathType(uploadedFilePath)
+
+    if (uploadedFilePath.type === PathType.FILE) {
+      await this.fileSystem.deleteFile(uploadedFilePath)
+    }
+    if (uploadedFilePath.type === PathType.DIR) {
+      await this.fileSystem.deleteDirectory(uploadedFilePath)
+    }
+  }
+
+  getFilePathToDownload(params: {
+    relativePath: string
+    user: UserPayloadDTO
+  }): Path {
+    const { relativePath, user } = params
+
+    this.assertPathIsRelativePath(relativePath)
+
+    const filePathToDownload = new Path([
+      process.env.SYNC_SERVER_ROOT_DESTINATION_PATH,
+      user.id,
+      relativePath,
+    ])
+
+    return filePathToDownload
+  }
+
+  getUploadedFileRelativePathToTmpPath(uploadedFile: string): string {
+    this.assertPathIsAbsolutePath(uploadedFile)
+
+    const syncServerTmpUploadsPath = new Path(process.env.SYNC_SERVER_TMP_UPLOADS_PATH)
+    const uploadedFilePath = new Path(uploadedFile)
+    return uploadedFilePath.getRelativePathToRoot(syncServerTmpUploadsPath.absolutePath)
   }
 }

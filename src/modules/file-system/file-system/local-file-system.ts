@@ -2,11 +2,22 @@ import fs, { RmOptions } from 'node:fs'
 
 import { hash, HashType } from '../../hash/hash.js'
 import { Path, PathType } from '../path/index.js'
+import { RelativePath } from '../relative-path/index.js'
 import { FileSystem } from './file-system.js'
 
 
 export class LocalFileSystem implements FileSystem {
-  async exists(path: Path): Promise<boolean> {
+  private assertIsPathInstance(path: Path | RelativePath): asserts path is Path {
+    const isPathInstance = path instanceof Path
+    if (!isPathInstance) {
+      throw new Error('"path" param must be an instance of Path in LocalFileSystem')
+    }
+  }
+
+
+  async exists(path: Path | RelativePath): Promise<boolean> {
+    this.assertIsPathInstance(path)
+
     try {
       await fs.promises.access(path.absolutePath, fs.constants.F_OK)
       return true
@@ -16,7 +27,9 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  private async getPathType(path: Path): Promise<PathType> {
+  private async getPathType(path: Path | RelativePath): Promise<PathType> {
+    this.assertIsPathInstance(path)
+
     const pathExists = await this.exists(path)
     if (!pathExists) {
       return PathType.NULL
@@ -48,20 +61,29 @@ export class LocalFileSystem implements FileSystem {
     }
   }
 
-  async resolvePathType(path: Path): Promise<PathType> {
+  async resolvePathType(path: Path | RelativePath): Promise<PathType> {
+    this.assertIsPathInstance(path)
+
     const type = await this.getPathType(path)
     path.updateType(type)
     return type
   }
 
 
-  async getFileHash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
+  async getFileHash(
+    path: Path | RelativePath,
+    hashType = HashType.SHA_256,
+  ): Promise<string | null> {
+    this.assertIsPathInstance(path)
+
     await this.resolvePathType(path)
     return await hash(path, hashType)
   }
 
 
-  async readDirectory(path: Path): Promise<string[] | null> {
+  async readDirectory(path: Path | RelativePath): Promise<string[] | null> {
+    this.assertIsPathInstance(path)
+
     const pathExists = await this.exists(path)
     if (!pathExists) {
       return []
@@ -76,7 +98,9 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async createDirectory(path: Path): Promise<void> {
+  async createDirectory(path: Path | RelativePath): Promise<void> {
+    this.assertIsPathInstance(path)
+
     const pathExists = await this.exists(path)
     if (pathExists) {
       throw new Error('Cannot create directory because path already exists')
@@ -86,7 +110,9 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  private async delete(path: Path): Promise<void> {
+  private async delete(path: Path | RelativePath): Promise<void> {
+    this.assertIsPathInstance(path)
+
     await this.resolvePathType(path)
 
     if (path.type === PathType.FILE) {
@@ -102,7 +128,9 @@ export class LocalFileSystem implements FileSystem {
     throw new Error(`Path type ${path.type} is not supported by delete`)
   }
 
-  async deleteFile(path: Path): Promise<void> {
+  async deleteFile(path: Path | RelativePath): Promise<void> {
+    this.assertIsPathInstance(path)
+
     const pathExists = await this.exists(path)
     if (!pathExists) {
       throw new Error('Cannot delete file because it does not exists')
@@ -121,7 +149,9 @@ export class LocalFileSystem implements FileSystem {
     await fs.promises.rm(path.absolutePath, rmOptions)
   }
 
-  async deleteDirectory(path: Path): Promise<void> {
+  async deleteDirectory(path: Path | RelativePath): Promise<void> {
+    this.assertIsPathInstance(path)
+
     const pathExists = await this.exists(path)
     if (!pathExists) {
       throw new Error('Cannot delete directory because it does not exists')
@@ -141,7 +171,10 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async copyFile(fromPath: Path, toPath: Path): Promise<void> {
+  async copyFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+    this.assertIsPathInstance(fromPath)
+    this.assertIsPathInstance(toPath)
+
     const fromPathExists = await this.exists(fromPath)
     if (!fromPathExists) {
       throw new Error('Cannot copy file from fromPath to toPath because fromPath does not exists')
@@ -167,7 +200,10 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async moveFile(fromPath: Path, toPath: Path): Promise<void> {
+  async moveFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+    this.assertIsPathInstance(fromPath)
+    this.assertIsPathInstance(toPath)
+
     const fromPathExists = await this.exists(fromPath)
     if (!fromPathExists) {
       throw new Error('Cannot move file from fromPath to toPath because fromPath does not exists')

@@ -2615,6 +2615,7 @@ __metadata:
     typeorm: "npm:^0.3.22"
     typescript: "npm:^5.8.2"
     typescript-eslint: "npm:^8.28.0"
+    uuid: "npm:^11.1.0"
     zod: "npm:^3.24.2"
   languageName: unknown
   linkType: soft

@@ -1,5 +1,5 @@
 import { HashType } from '../../../hash/index.js'
-import { GetFileHashDTO, PathParamDTO } from './dto/index.js'
+import { GetFileHashDTO, MoveUploadedFileDTO, PathParamDTO } from './dto/index.js'
 
 
 export class PathMapper {
@@ -17,6 +17,15 @@ export class PathMapper {
     const dto = new GetFileHashDTO()
     dto.path = path
     dto.hashType = hashType as HashType
+    return dto
+  }
+
+  static fromObjectToMoveUploadedFileDto(obj: object): MoveUploadedFileDTO {
+    const { uploadedFilePath, destinationPath } = obj as Record<string, string>
+
+    const dto = new MoveUploadedFileDTO()
+    dto.uploadedFilePath = uploadedFilePath
+    dto.destinationPath = destinationPath
     return dto
   }
 }

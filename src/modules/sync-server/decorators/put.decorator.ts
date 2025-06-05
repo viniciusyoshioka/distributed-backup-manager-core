@@ -33,6 +33,11 @@ export function Put(): MethodDecorator {
 
 
       function handlePutSuccessResponse(returnValue: unknown): void {
+        if (response.headersSent) {
+          console.log(`[PUT] Response: "${endpointPath}"`)
+          return
+        }
+
         const stringifiedReturnValue = typeof returnValue === 'string'
           ? returnValue
           : JSON.stringify(returnValue, null, 2)

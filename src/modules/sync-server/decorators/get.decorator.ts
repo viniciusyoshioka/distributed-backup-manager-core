@@ -31,6 +31,11 @@ export function Get(): MethodDecorator {
 
 
       function handleGetSuccessResponse(returnValue: unknown): void {
+        if (response.headersSent) {
+          console.log(`[GET] Response: "${endpointPath}"`)
+          return
+        }
+
         const stringifiedReturnValue = typeof returnValue === 'string'
           ? returnValue
           : JSON.stringify(returnValue, null, 2)

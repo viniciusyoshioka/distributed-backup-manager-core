@@ -92,8 +92,6 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
   }
 
 
-  // TODO: Update --exception validation when --source is relative
-  // TODO: Update --exception help message
   private showHelpAndExit() {
     const helpMessage = dedent(`Usage:
 
@@ -101,9 +99,9 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
 
       Options:
         -h, --help                      Show this help message and exit
-        -s, --source <path>             Path to a folder that will be used as source during the sync. Required on local and remote sync without --source-address and must be an absolute path. On remote sync with --source-address, it is optional and must be a relative path
-        -d, --destination <path>        Path to a folder that will be used as destination during the sync. Required on local and remote sync without --destination-address and must be an absolute path. On remote sync with --destination-address, it is optional and must be a relative path
-        -e, --exception <path>          Paths to exclude from sync (can be used multiple times; must be a subpath of --source)
+        -s, --source <path>             Path to a folder that will be used as source during the sync. Required on local sync. Required on remote sync without --source-address and it must be an absolute path. On remote sync with --source-address, it is optional and must be a relative path
+        -d, --destination <path>        Path to a folder that will be used as destination during the sync. Required on local sync. Required on remote sync without --destination-address and it must be an absolute path. On remote sync with --destination-address, it is optional and must be a relative path
+        -e, --exception <path>          Paths to exclude from sync (it must be a relative path; it must be a subpath of --source; it can be used multiple times; if not passed, no path will be excluded)
         --source-address <ip>           IP address of source machine for remote sync. If not provided, local machine will be used as source. Cannot be used with --destination-address
         --source-port <port>            Port on the source machine to connect for sync. Used with --source-address. Defaults to "${process.env.PORT}"
         --destination-address <ip>      IP address of destination machine for remote sync. If not provided, local machine will be used as destination. Cannot be used with --source-address
@@ -266,18 +264,12 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
       return
     }
 
-    const normalizedExceptionPaths = exceptionPaths.map(exceptionPath => {
+    exceptionPaths.forEach(exceptionPath => {
       const exceptionPathIsAbsolute = Path.isAbsolute(exceptionPath)
       if (exceptionPathIsAbsolute) {
-        return exceptionPath
+        throw new CliInvalidArgumentError(`A "--exception" argument (${exceptionPath}) is an absolute path. It must be a relative path`)
       }
-
-      const absoluteExceptionPath = Path.join([this.cwd, exceptionPath])
-      console.log(`A "--exception" argument is not an absolute path. Using "${absoluteExceptionPath}" instead for "${exceptionPath}"`)
-      return absoluteExceptionPath
     })
-
-    this.args['--exception'] = normalizedExceptionPaths
   }
 
   private parseSourceAddress() {
