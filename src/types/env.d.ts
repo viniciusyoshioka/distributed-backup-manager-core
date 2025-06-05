@@ -11,6 +11,5 @@ declare namespace NodeJS {
     SYNC_SERVER_TMP_UPLOADS_PATH: string
     SYNC_CLIENT_TMP_DOWNLOADS_PATH: string
     ACCESS_TOKEN: string
-    IDENTIFIER: string
   }
 }

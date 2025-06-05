@@ -28,7 +28,6 @@ const envSchema = z
       { message: 'SYNC_SERVER_TMP_UPLOADS_PATH must be an absolute path' },
     ),
     ACCESS_TOKEN: z.string(),
-    IDENTIFIER: z.string(),
   })
   .superRefine((arg, ctx) => {
     if (arg.EXECUTION_TIME_ENABLED === 'true' && arg.STAGE !== 'development') {
