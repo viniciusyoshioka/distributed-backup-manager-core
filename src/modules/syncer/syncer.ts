@@ -456,11 +456,7 @@ export class Syncer {
   }
 
 
-  // TODO: Fix local and remote fileSystems not working correctly when swapping the order.
-  // When the destinationFileSystem is the local machine, it is not prepared to download the file
-  // or execute other file operations correctly for any expected case
   // TODO: Add try/catch
-  // TODO: Add comment explaining the reason of createDirectory instead of copyDirectory
   private async createPathsInDestination(pathsToCreate: Queue<string>): Promise<void> {
     if (pathsToCreate.isEmpty()) return
 
@@ -495,11 +491,7 @@ export class Syncer {
     }
   }
 
-  // TODO: Fix local and remote fileSystems not working correctly when swapping the order.
-  // When the destinationFileSystem is the local machine, it is not prepared to download the file
-  // or execute other file operations correctly for any expected case
   // TODO: Add try/catch
-  // TODO: Add comment explaining the reason of createDirectory instead of copyDirectory
   private async updatePathsInDestination(pathsToUpdate: Queue<string>): Promise<void> {
     if (pathsToUpdate.isEmpty()) return
 
@@ -526,16 +518,17 @@ export class Syncer {
       }
 
       if (pathFromSource.type === PathType.FILE) {
-        await this.destinationFileSystem.copyFile(pathFromSource, pathFromDestination)
+        if (pathFromSource instanceof RelativePath) {
+          await this.sourceFileSystem.copyFile(pathFromSource, pathFromDestination)
+        } else {
+          await this.destinationFileSystem.copyFile(pathFromSource, pathFromDestination)
+        }
       } else if (pathFromSource.type === PathType.DIR) {
         await this.destinationFileSystem.createDirectory(pathFromDestination)
       }
     }
   }
 
-  // TODO: Fix local and remote fileSystems not working correctly when swapping the order.
-  // When the destinationFileSystem is the local machine, it is not prepared to download the file
-  // or execute other file operations correctly for any expected case
   // TODO: Add try/catch
   private async deletePathsInDestination(pathsToDelete: Queue<string>): Promise<void> {
     if (pathsToDelete.isEmpty()) return
