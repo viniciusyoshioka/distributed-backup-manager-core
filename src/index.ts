@@ -91,18 +91,21 @@ async function sync(args: SyncArgs) {
     throw new Error('Both source and destination addresses cannot be provided at the same time')
   }
 
+  const remoteAddress = sourceAddress ?? destinationAddress
+  const syncClient = remoteAddress
+    ? new SyncClient(remoteAddress)
+    : undefined
+
   const localFileSystem = new LocalFileSystem()
-  const sourceFileSystem = sourceAddress
-    ? new RemoteFileSystem({
-      syncClient: new SyncClient(sourceAddress),
-      localFileSystem,
-    })
+  const remoteFileSystem = syncClient
+    ? new RemoteFileSystem({ syncClient, localFileSystem })
+    : undefined
+
+  const sourceFileSystem = (remoteFileSystem && sourceAddress)
+    ? remoteFileSystem
     : localFileSystem
-  const destinationFileSystem = destinationAddress
-    ? new RemoteFileSystem({
-      syncClient: new SyncClient(destinationAddress),
-      localFileSystem,
-    })
+  const destinationFileSystem = (remoteFileSystem && destinationAddress)
+    ? remoteFileSystem
     : localFileSystem
 
 
@@ -113,6 +116,7 @@ async function sync(args: SyncArgs) {
     skipConfirmation: args['--skip-confirmation'],
     sourceFileSystem,
     destinationFileSystem,
+    syncClient,
   })
 
   await syncer.startSync()

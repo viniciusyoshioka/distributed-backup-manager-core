@@ -2,6 +2,18 @@ import { Queue } from '../../utils/index.js'
 import { Path, RelativePath } from '../file-system/index.js'
 
 
+export enum HandshakeFailureReason {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  VERSION_INCOMPATIBILITY = 'VERSION_INCOMPATIBILITY',
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
+}
+
+export interface HandshakeResult {
+  isSuccessful: boolean
+  reason?: HandshakeFailureReason
+}
+
+
 export interface GetDiffsParams {
   sourceParentPath: Path | RelativePath
   destinationParentPath: Path | RelativePath

@@ -1,11 +1,14 @@
+import { AxiosError } from 'axios'
 import { stdin, stdout } from 'node:process'
 import readline from 'node:readline/promises'
 
 import { ExecutionTime } from '../../decorators/index.js'
 import { Queue } from '../../utils/index.js'
 import { FileSystem, Path, PathType, RelativePath } from '../file-system/index.js'
-import type { Diffs, GetDiffsParams, PathDiffs } from './syncer.types.js'
-import { SyncOperation } from './syncer.types.js'
+import { SyncClient } from '../sync-client/index.js'
+import { CURRENT_HANDSHAKE_PROTOCOL } from '../sync-server/index.js'
+import type { Diffs, GetDiffsParams, HandshakeResult, PathDiffs } from './syncer.types.js'
+import { HandshakeFailureReason, SyncOperation } from './syncer.types.js'
 
 
 export enum SyncerExceptionMode {
@@ -42,6 +45,7 @@ export interface SyncerParams {
 
   sourceFileSystem: FileSystem
   destinationFileSystem: FileSystem
+  syncClient?: SyncClient
 }
 
 
@@ -55,6 +59,7 @@ export class Syncer {
   private readonly skipConfirmation: boolean
   private readonly sourceFileSystem: FileSystem
   private readonly destinationFileSystem: FileSystem
+  private readonly syncClient: SyncClient | undefined
 
 
   constructor(params: SyncerParams) {
@@ -65,8 +70,74 @@ export class Syncer {
     this.skipConfirmation = params.skipConfirmation ?? false
     this.sourceFileSystem = params.sourceFileSystem
     this.destinationFileSystem = params.destinationFileSystem
+    this.syncClient = params.syncClient
   }
 
+
+  @ExecutionTime()
+  private async handshake(): Promise<HandshakeResult> {
+    try {
+      if (!this.syncClient) {
+        return { isSuccessful: true }
+      }
+
+      const syncServerHandshake = await this.syncClient.sync.handshake()
+
+      const isSameVersion = syncServerHandshake.version === CURRENT_HANDSHAKE_PROTOCOL.version
+      const isCompatibleVersion = syncServerHandshake.compatiblePreviousClientVersions.includes(
+        CURRENT_HANDSHAKE_PROTOCOL.version,
+      )
+
+      if (isSameVersion || isCompatibleVersion) {
+        return { isSuccessful: true }
+      }
+      return {
+        isSuccessful: false,
+        reason: HandshakeFailureReason.VERSION_INCOMPATIBILITY,
+      }
+    } catch (error) {
+      const { code, response } = error as AxiosError
+
+      const networkErrorCodes = ['EHOSTUNREACH', 'ENETUNREACH', 'ECONNREFUSED']
+      const hasNetworkError = networkErrorCodes.includes(code as string)
+      if (hasNetworkError) return {
+        isSuccessful: false,
+        reason: HandshakeFailureReason.NETWORK_ERROR,
+      }
+
+      if (response?.status === 401) return {
+        isSuccessful: false,
+        reason: HandshakeFailureReason.AUTHENTICATION_ERROR,
+      }
+
+      throw error
+    }
+  }
+
+  private showHandshakeFailureReason(reason?: HandshakeFailureReason): void {
+    switch (reason) {
+      case HandshakeFailureReason.NETWORK_ERROR:
+        console.log([
+          'Unable to reach the remote machine. Please:',
+          '- Check the machine address and port;',
+          '- Check your network connection;',
+          '- Ensure, if possible, the remote machine is powered on;',
+          '- Ensure, if possible, the sync-server is running on the remote machine;',
+          '- Ensure, if possible, the sync-server is listening on the correct port;',
+          '- Ensure, if possible, the sync-server is not blocked by a firewall, antivirus or other kinds of software;',
+        ].join('\n'))
+        break
+      case HandshakeFailureReason.VERSION_INCOMPATIBILITY:
+        console.log('The version of this client is not compatible with the program version on the remote machine. Please update the client to the latest version.')
+        break
+      case HandshakeFailureReason.AUTHENTICATION_ERROR:
+        console.log('Authentication failed. Please verify your credentials and try again.')
+        break
+      case undefined:
+        console.log('The initialization process was not successful, but no specific reason was provided. This should not happen. Please, report this issue to the developers.')
+        break
+    }
+  }
 
   private async assertParamsAreValid(): Promise<void> {
     if (this.source instanceof Path) {
@@ -167,6 +238,12 @@ export class Syncer {
   }
 
   async startSync(): Promise<void> {
+    const handshakeResult = await this.handshake()
+    if (!handshakeResult.isSuccessful) {
+      this.showHandshakeFailureReason(handshakeResult.reason)
+      return
+    }
+
     await this.assertParamsAreValid()
 
 

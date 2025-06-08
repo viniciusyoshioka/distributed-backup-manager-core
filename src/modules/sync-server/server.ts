@@ -3,7 +3,7 @@ import 'reflect-metadata'
 
 import { assertDotEnvIsValid, InvalidEnvVariablesError } from '../../env/index.js'
 import { dataSource } from './database/index.js'
-import { createPathRouterV1, createUserRouterV1 } from './entities/index.js'
+import { createPathRouterV1, createSyncRouterV1, createUserRouterV1 } from './entities/index.js'
 
 
 function checkDotEnv(): boolean {
@@ -65,6 +65,9 @@ async function createAndStartServer(): Promise<void> {
 
   const pathRouter = createPathRouterV1()
   apiRoute.use('/path/v1', pathRouter)
+
+  const syncRouter = createSyncRouterV1()
+  apiRoute.use('/sync/v1', syncRouter)
 
   const userRouter = createUserRouterV1(dataSource)
   apiRoute.use('/user/v1', userRouter)
