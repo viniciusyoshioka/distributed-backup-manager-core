@@ -1403,6 +1403,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ip@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "@types/ip@npm:1.1.3"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/af576e33830196be01b71c48ad5f83380a1c51d62f394a5601e8c2a5b8b31cf6dc8fe71ac39c38d806bcf1d6f1c5c8205c129eca6b6d168c0df7ab3722df23b9
+  languageName: node
+  linkType: hard
+
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0, @types/istanbul-lib-coverage@npm:^2.0.1":
   version: 2.0.6
   resolution: "@types/istanbul-lib-coverage@npm:2.0.6"
@@ -2591,6 +2600,7 @@ __metadata:
     "@nestjs/swagger": "npm:^11.2.0"
     "@stylistic/eslint-plugin": "npm:^4.2.0"
     "@types/express": "npm:^5"
+    "@types/ip": "npm:^1.1.3"
     "@types/jest": "npm:^29.5.14"
     "@types/multer": "npm:^1"
     "@vinicius1313/eslint-config": "npm:^2.0.1"
