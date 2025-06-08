@@ -7,7 +7,7 @@ import { Queue } from '../../utils/index.js'
 import { FileSystem, Path, PathType, RelativePath } from '../file-system/index.js'
 import { SyncClient } from '../sync-client/index.js'
 import { CURRENT_HANDSHAKE_PROTOCOL } from '../sync-server/index.js'
-import type { Diffs, GetDiffsParams, HandshakeResult, PathDiffs } from './syncer.types.js'
+import type { Diffs, GetDiffsParams, HandshakeResult } from './syncer.types.js'
 import { HandshakeFailureReason, SyncOperation } from './syncer.types.js'
 
 
@@ -183,26 +183,10 @@ export class Syncer {
 
   @ExecutionTime()
   private async scanDiffs(): Promise<Diffs | null> {
-    const pathsToScan = new Queue<string>('')
-    const pathsToCreate = new Queue<string>()
-    const pathsToUpdate = new Queue<string>()
-    const pathsToDelete = new Queue<string>()
+    const pathToScan = ''
 
-    while (!pathsToScan.isEmpty()) {
-      const pathToScan = pathsToScan.dequeue()
-      const scannedDiffs = await this.scanPathDiffs(pathToScan)
-
-      scannedDiffs.childrenPathsToScan.forEach(child => pathsToScan.enqueue(child))
-      scannedDiffs.pathsToCreate.forEach(path => pathsToCreate.enqueue(path))
-      scannedDiffs.pathsToUpdate.forEach(path => pathsToUpdate.enqueue(path))
-      scannedDiffs.pathsToDelete.forEach(path => pathsToDelete.enqueue(path))
-    }
-
-    return this.createDiffsOrNull({
-      pathsToCreate,
-      pathsToUpdate,
-      pathsToDelete,
-    })
+    const diffs = await this.scanPathDiffs(pathToScan)
+    return this.createDiffsOrNull(diffs)
   }
 
   @ExecutionTime()
@@ -312,7 +296,7 @@ export class Syncer {
   }
 
 
-  private async scanPathDiffs(path: string): Promise<PathDiffs> {
+  private async scanPathDiffs(path: string): Promise<Diffs> {
     console.log(`Scanning diffs for "${path}"...`)
 
     const sourcePath = this.source instanceof Path
@@ -349,15 +333,29 @@ export class Syncer {
   }
 
   // TODO: Add a 'itemsToRename' to avoid transfer files (same hash but different name)
-  private async getDiffs(params: GetDiffsParams): Promise<PathDiffs> {
+  private async getDiffs(params: GetDiffsParams): Promise<Diffs> {
     const { sourceParentPath, destinationParentPath } = params
     const { sourceChildrenNames, destinationChildrenNames } = params
 
 
-    const pathsToCreate: string[] = []
-    const pathsToUpdate: string[] = []
-    const pathsToDelete: string[] = []
-    const childrenPathsToScan: string[] = []
+    const pathsToCreate = new Queue<string>()
+    const pathsToUpdate = new Queue<string>()
+    const pathsToDelete = new Queue<string>()
+
+    const enqueueDiffs = (diffs: Diffs): void => {
+      while (!diffs.pathsToCreate.isEmpty()) {
+        const item = diffs.pathsToCreate.dequeue()
+        pathsToCreate.enqueue(item)
+      }
+      while (!diffs.pathsToUpdate.isEmpty()) {
+        const item = diffs.pathsToUpdate.dequeue()
+        pathsToUpdate.enqueue(item)
+      }
+      while (!diffs.pathsToDelete.isEmpty()) {
+        const item = diffs.pathsToDelete.dequeue()
+        pathsToDelete.enqueue(item)
+      }
+    }
 
 
     // Checks for empty folders. If the folder exists in source, even if it is empty,
@@ -369,13 +367,13 @@ export class Syncer {
 
       const destinationParentExists = await this.destinationFileSystem.exists(destinationParentPath)
       if (!destinationParentExists) {
-        pathsToCreate.push(sourceRelativePath)
+        pathsToCreate.enqueue(sourceRelativePath)
       } else {
         const destinationParentsChildren = await this.destinationFileSystem.readDirectory(
           destinationParentPath,
         )
         if (destinationParentsChildren?.length) {
-          pathsToUpdate.push(sourceRelativePath)
+          pathsToUpdate.enqueue(sourceRelativePath)
         }
       }
     }
@@ -405,10 +403,11 @@ export class Syncer {
       const destinationHasChildWithSameName = destinationChildrenNames.includes(sourceChildName)
       if (!destinationHasChildWithSameName) {
         if (sourceChildPath.type === PathType.FILE) {
-          pathsToCreate.push(sourceRelativePath)
+          pathsToCreate.enqueue(sourceRelativePath)
         }
         if (sourceChildPath.type === PathType.DIR) {
-          childrenPathsToScan.push(sourceRelativePath)
+          const scannedPathDiffs = await this.scanPathDiffs(sourceRelativePath)
+          enqueueDiffs(scannedPathDiffs)
         }
         continue
       }
@@ -417,10 +416,11 @@ export class Syncer {
       // Update path in destination (delete and create again)
       if (sourceChildPath.type !== destinationChildPath.type) {
         if (sourceChildPath.type === PathType.FILE) {
-          pathsToUpdate.push(sourceRelativePath)
+          pathsToUpdate.enqueue(sourceRelativePath)
         }
         if (sourceChildPath.type === PathType.DIR) {
-          childrenPathsToScan.push(sourceRelativePath)
+          const scannedPathDiffs = await this.scanPathDiffs(sourceRelativePath)
+          enqueueDiffs(scannedPathDiffs)
         }
         continue
       }
@@ -432,7 +432,7 @@ export class Syncer {
         ])
 
         if (sourceHash !== destinationHash) {
-          pathsToUpdate.push(sourceRelativePath)
+          pathsToUpdate.enqueue(sourceRelativePath)
         }
         continue
       }
@@ -440,7 +440,8 @@ export class Syncer {
 
       // Is not a file to sync, so add to 'children to scan' array
       if (sourceChildPath.type === PathType.DIR) {
-        childrenPathsToScan.push(sourceRelativePath)
+        const scannedPathDiffs = await this.scanPathDiffs(sourceRelativePath)
+        enqueueDiffs(scannedPathDiffs)
       }
     }
 
@@ -460,7 +461,7 @@ export class Syncer {
 
       const sourceHasChildWithSameName = sourceChildrenNames.includes(destinationChildName)
       if (!sourceHasChildWithSameName) {
-        pathsToDelete.push(destinationRelativePath)
+        pathsToDelete.enqueue(destinationRelativePath)
         continue
       }
     }
@@ -470,7 +471,6 @@ export class Syncer {
       pathsToCreate,
       pathsToUpdate,
       pathsToDelete,
-      childrenPathsToScan,
     }
   }
 
