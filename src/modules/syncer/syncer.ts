@@ -139,6 +139,7 @@ export class Syncer {
     }
   }
 
+  @ExecutionTime()
   private async assertParamsAreValid(): Promise<void> {
     if (this.source instanceof Path) {
       const sourceExists = await this.sourceFileSystem.exists(this.source)
