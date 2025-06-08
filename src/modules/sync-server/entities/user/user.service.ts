@@ -108,7 +108,7 @@ export class UserService {
 
     const signedJwtToken = await new SignJWT(payload)
       .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime('1h')
+      .setExpirationTime('1d')
       .sign(secret)
 
     return {
