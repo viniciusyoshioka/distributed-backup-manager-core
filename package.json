@@ -29,7 +29,7 @@
         "form-data": "^4.0.2",
         "ip": "^2.0.1",
         "jose": "^6.0.11",
-        "multer": "^2.0.0",
+        "multer": "^2.0.1",
         "reflect-metadata": "^0.2.2",
         "rxjs": "^7.8.2",
         "sqlite3": "^5.1.7",
