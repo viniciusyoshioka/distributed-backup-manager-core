@@ -42,7 +42,7 @@
         "@types/jest": "^29.5.14",
         "@types/multer": "^1",
         "@vinicius1313/eslint-config": "^2.0.1",
-        "@vinicius1313/tsconfig": "^1.0.0",
+        "@vinicius1313/tsconfig": "^2.0.0",
         "eslint": "^9.23.0",
         "jest": "^29.7.0",
         "ts-jest": "^29.3.0",

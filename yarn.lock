@@ -1660,10 +1660,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vinicius1313/tsconfig@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@vinicius1313/tsconfig@npm:1.0.0"
-  checksum: 10c0/7c1bad53a8c05081cef1acaa319bc840ddcf3fff196bdf897fb83b297639864b75d77a44715db4f0bcdb58c5c78d710c609a7051a43e198a95dc92724b697575
+"@vinicius1313/tsconfig@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@vinicius1313/tsconfig@npm:2.0.0"
+  checksum: 10c0/035a412505ed98aa9e7cb2189dcec7b19001013e4d3b44b56fa8972c7ddd34f844b512c98b59da2016d539a5853a3fd164fd55e817e802877c9160d6cfdec9aa
   languageName: node
   linkType: hard
 
@@ -2594,7 +2594,7 @@ __metadata:
     "@types/jest": "npm:^29.5.14"
     "@types/multer": "npm:^1"
     "@vinicius1313/eslint-config": "npm:^2.0.1"
-    "@vinicius1313/tsconfig": "npm:^1.0.0"
+    "@vinicius1313/tsconfig": "npm:^2.0.0"
     arg: "npm:^5.0.2"
     axios: "npm:^1.8.4"
     bcryptjs: "npm:^3.0.2"
