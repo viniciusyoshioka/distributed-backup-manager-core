@@ -6,11 +6,11 @@ import { handleErrorAndSendResponse } from './utils/index.js'
 
 export function Middleware(): MethodDecorator {
   return (
-    target: Object,
+    target: object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ): PropertyDescriptor => {
-    const originalMethod = descriptor.value
+    const originalMethod = descriptor.value as (...args: unknown[]) => unknown
 
 
     descriptor.value = function(...args: unknown[]): void {
@@ -40,7 +40,7 @@ export function Middleware(): MethodDecorator {
 
 
       try {
-        const returnValue = originalMethod.apply(this, args) as unknown
+        const returnValue = originalMethod.apply(this, args)
 
         if (returnValue instanceof Promise) {
           returnValue

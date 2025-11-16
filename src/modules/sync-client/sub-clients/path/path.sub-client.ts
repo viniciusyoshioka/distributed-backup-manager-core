@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios'
 import axios from 'axios'
 import FormData from 'form-data'
+import type { ReadStream } from 'node:fs'
 import fs from 'node:fs'
 import { v4 } from 'uuid'
 
@@ -144,7 +145,7 @@ export class PathSubClient {
   }
 
   async downloadFile(relativePath: string): Promise<string> {
-    const response = await this.client.get('/file/download', {
+    const response = await this.client.get<ReadStream>('/file/download', {
       params: {
         path: relativePath,
       },

@@ -13,7 +13,7 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
 
 
   return (
-    target: Object,
+    target: object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ): PropertyDescriptor => {
@@ -22,11 +22,11 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
     }
 
 
-    const originalMethod = descriptor.value
+    const originalMethod = descriptor.value as (...args: unknown[]) => unknown
 
     descriptor.value = function(...args: unknown[]): unknown {
       const startTime = performance.now()
-      const result = originalMethod.apply(this, args) as unknown
+      const result = originalMethod.apply(this, args)
 
 
       const logExecution = () => {
