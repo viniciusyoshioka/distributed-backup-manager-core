@@ -5,14 +5,7 @@
         "outDir": "dist",
         "declaration": true,
         "declarationDir": "dist",
-        "incremental": true,
-        "lib": [
-            "ESNext",
-            "DOM",
-        ],
-        "module": "ESNext",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
+        "incremental": true
     },
     "include": [
         "src"
