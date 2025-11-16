@@ -1,8 +1,10 @@
-import axios, { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
+import axios from 'axios'
 
 import { assertDotEnvIsValid } from '../../../../env/index.js'
-import { IpVersion, NetworkAddress } from '../../../network/index.js'
-import { HandshakeProtocol } from '../../../sync-server/index.js'
+import type { NetworkAddress } from '../../../network/index.js'
+import { IpVersion } from '../../../network/index.js'
+import type { HandshakeProtocol } from '../../../sync-server/index.js'
 
 
 export class SyncSubClient {

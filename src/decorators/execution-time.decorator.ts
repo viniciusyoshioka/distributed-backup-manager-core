@@ -9,7 +9,7 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
 
   const isEnabled = options.isEnabled !== undefined
     ? options.isEnabled
-    : process.env.EXECUTION_TIME_DECORATOR_ENABLED === 'true'
+    : process.env['EXECUTION_TIME_DECORATOR_ENABLED'] === 'true'
 
 
   return (

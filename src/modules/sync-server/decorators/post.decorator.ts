@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
 import { indent } from '../../../utils/index.js'
 import { handleErrorAndSendResponse } from './utils/index.js'

@@ -1,1 +1,1 @@
-export type * from './with-auth-user'
+export type * from './with-auth-user.ts'

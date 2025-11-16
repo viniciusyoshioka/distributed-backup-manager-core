@@ -1,4 +1,4 @@
-import { NetworkAddress } from '../network/index.js'
+import type { NetworkAddress } from '../network/index.js'
 import { PathSubClient, SyncSubClient, UserSubClient } from './sub-clients/index.js'
 
 

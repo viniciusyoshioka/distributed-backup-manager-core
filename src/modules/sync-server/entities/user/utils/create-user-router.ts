@@ -1,5 +1,5 @@
-import { Router } from 'express'
-import { DataSource } from 'typeorm'
+import type { Router } from 'express'
+import type { DataSource } from 'typeorm'
 
 import { UserController } from '../user.controller.js'
 import { UserRepository } from '../user.repository.js'

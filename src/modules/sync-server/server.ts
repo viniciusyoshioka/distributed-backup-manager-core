@@ -1,7 +1,8 @@
 import express from 'express'
 import 'reflect-metadata'
 
-import { assertDotEnvIsValid, InvalidEnvVariablesError } from '../../env/index.js'
+import type { InvalidEnvVariablesError } from '../../env/index.js'
+import { assertDotEnvIsValid } from '../../env/index.js'
 import { dataSource } from './database/index.js'
 import { createPathRouterV1, createSyncRouterV1, createUserRouterV1 } from './entities/index.js'
 

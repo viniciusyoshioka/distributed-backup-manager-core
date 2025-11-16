@@ -1,5 +1,5 @@
-import { Queue } from '../../utils/index.js'
-import { Path, RelativePath } from '../file-system/index.js'
+import type { Queue } from '../../utils/index.js'
+import type { Path, RelativePath } from '../file-system/index.js'
 
 
 export enum HandshakeFailureReason {

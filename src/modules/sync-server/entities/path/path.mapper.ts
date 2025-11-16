@@ -1,4 +1,4 @@
-import { HashType } from '../../../hash/index.js'
+import type { HashType } from '../../../hash/index.js'
 import { GetFileHashDTO, MoveUploadedFileDTO, PathParamDTO } from './dto/index.js'
 
 

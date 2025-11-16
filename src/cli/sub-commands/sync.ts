@@ -1,4 +1,5 @@
-import arg, { Handler, Spec } from 'arg'
+import type { Handler, Spec } from 'arg'
+import arg from 'arg'
 import dedent from 'dedent'
 import process from 'node:process'
 
@@ -7,7 +8,7 @@ import { Path } from '../../modules/file-system/index.js'
 import { IP, NetworkAddress } from '../../modules/network/index.js'
 import { Cli } from '../cli.js'
 import { CliExitExecutionError, CliInvalidArgumentError } from '../errors/index.js'
-import type { SubCommand } from '../sub-command.interface'
+import type { SubCommand } from '../sub-command.interface.ts'
 import { getSubCommandArgument } from '../utils/index.js'
 
 
@@ -176,7 +177,7 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
 
     const sourcePathIsAbsolutePath = Path.isAbsolute(sourcePath)
     if (sourcePathIsAbsolutePath) {
-      throw new CliInvalidArgumentError(`Argument "--source" is an absolute path. It must be relative when performing remote sync with "--source-address"`)
+      throw new CliInvalidArgumentError('Argument "--source" is an absolute path. It must be relative when performing remote sync with "--source-address"')
     }
   }
 
@@ -239,7 +240,7 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
 
     const destinationPathIsAbsolutePath = Path.isAbsolute(destinationPath)
     if (destinationPathIsAbsolutePath) {
-      throw new CliInvalidArgumentError(`Argument "--destination" is an absolute path. It must be relative when performing remote sync with "--destination-address"`)
+      throw new CliInvalidArgumentError('Argument "--destination" is an absolute path. It must be relative when performing remote sync with "--destination-address"')
     }
   }
 
@@ -314,7 +315,7 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
     }
 
     if (sourcePort) {
-      console.log(`Argument "--source-port" was given without "--source-address". Ignoring it`)
+      console.log('Argument "--source-port" was given without "--source-address". Ignoring it')
     }
     this.args['--source-port'] = null
   }
@@ -361,7 +362,7 @@ export class SyncSubCommand implements SubCommand<SyncArgs> {
     }
 
     if (destinationPort) {
-      console.log(`Argument "--destination-port" was given without "--destination-address". Ignoring it`)
+      console.log('Argument "--destination-port" was given without "--destination-address". Ignoring it')
     }
     this.args['--destination-port'] = null
   }

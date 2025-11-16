@@ -1,4 +1,5 @@
-import arg, { Handler, Spec } from 'arg'
+import type { Handler, Spec } from 'arg'
+import arg from 'arg'
 import { isEmail, isStrongPassword } from 'class-validator'
 import dedent from 'dedent'
 import process from 'node:process'

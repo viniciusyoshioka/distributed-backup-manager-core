@@ -1,6 +1,6 @@
-import { HashType } from '../../hash/index.js'
-import { Path, PathType } from '../path/index.js'
-import { RelativePath } from '../relative-path/index.js'
+import type { HashType } from '../../hash/index.js'
+import type { Path, PathType } from '../path/index.js'
+import type { RelativePath } from '../relative-path/index.js'
 
 
 export interface FileSystem {

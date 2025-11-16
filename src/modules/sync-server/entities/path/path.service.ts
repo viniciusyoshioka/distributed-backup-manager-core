@@ -1,7 +1,8 @@
-import { FileSystem, Path, PathType } from '../../../file-system/index.js'
+import type { FileSystem } from '../../../file-system/index.js'
+import { Path, PathType } from '../../../file-system/index.js'
 import { hash, HashType } from '../../../hash/index.js'
 import { BadRequestException } from '../../errors/index.js'
-import { UserPayloadDTO } from '../user/index.js'
+import type { UserPayloadDTO } from '../user/index.js'
 
 
 export interface PathServiceParams {

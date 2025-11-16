@@ -1,4 +1,5 @@
-import { DataSource, Repository } from 'typeorm'
+import type { DataSource } from 'typeorm'
+import { Repository } from 'typeorm'
 
 import { UserEntity } from './user.entity.js'
 

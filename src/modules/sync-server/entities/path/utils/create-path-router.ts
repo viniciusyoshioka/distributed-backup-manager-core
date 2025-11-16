@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import type { Router } from 'express'
 
 import { LocalFileSystem, Path } from '../../../../file-system/index.js'
 import { PathController } from '../path.controller.js'

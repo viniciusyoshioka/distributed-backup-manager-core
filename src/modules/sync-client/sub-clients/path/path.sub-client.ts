@@ -1,12 +1,15 @@
-import axios, { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
+import axios from 'axios'
 import FormData from 'form-data'
 import fs from 'node:fs'
 import { v4 } from 'uuid'
 
 import { assertDotEnvIsValid } from '../../../../env/index.js'
-import { Path, PathType } from '../../../file-system/index.js'
+import type { PathType } from '../../../file-system/index.js'
+import { Path } from '../../../file-system/index.js'
 import { HashType } from '../../../hash/index.js'
-import { IpVersion, NetworkAddress } from '../../../network/index.js'
+import type { NetworkAddress } from '../../../network/index.js'
+import { IpVersion } from '../../../network/index.js'
 
 
 export class PathSubClient {
@@ -141,7 +144,7 @@ export class PathSubClient {
   }
 
   async downloadFile(relativePath: string): Promise<string> {
-    const response = await this.client.get(`/file/download`, {
+    const response = await this.client.get('/file/download', {
       params: {
         path: relativePath,
       },
