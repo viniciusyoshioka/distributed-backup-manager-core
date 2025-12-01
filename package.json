@@ -25,7 +25,7 @@
         "bcryptjs": "^3.0.2",
         "class-validator": "^0.14.1",
         "dedent": "^1.5.3",
-        "express": "^5.1.0",
+        "express": "^5.2.0",
         "form-data": "^4.0.2",
         "jose": "^6.0.11",
         "multer": "^2.0.0",
