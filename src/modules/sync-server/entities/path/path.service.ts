@@ -167,7 +167,9 @@ export class PathService {
 
   private isUploadedFileInTmpUploadsPath(uploadedFilePath: Path): boolean {
     const syncServerTmpUploadsPath = new Path(process.env.SYNC_SERVER_TMP_UPLOADS_PATH)
-    const uploadedFileIsInTmpUploadsPath = uploadedFilePath.isSubPathOf(syncServerTmpUploadsPath)
+    const uploadedFileIsInTmpUploadsPath = uploadedFilePath.isSubPathOf(
+      syncServerTmpUploadsPath,
+    )
     return uploadedFileIsInTmpUploadsPath
   }
 

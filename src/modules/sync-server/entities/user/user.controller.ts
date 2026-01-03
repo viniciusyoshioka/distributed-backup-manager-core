@@ -66,7 +66,9 @@ export class UserController {
 
   @Post()
   private async loginUser(req: Request): Promise<UserTokenDTO> {
-    const userCredentialsDto = UserMapper.fromObjectToUserCredentialsDto(req.body as object)
+    const userCredentialsDto = UserMapper.fromObjectToUserCredentialsDto(
+      req.body as object,
+    )
     const userToken = await this.userService.loginUser(userCredentialsDto)
     return userToken
   }
