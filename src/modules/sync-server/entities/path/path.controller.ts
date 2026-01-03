@@ -252,9 +252,8 @@ export class PathController {
     }
 
     const pathWhereFileWasUploaded = req.file.path
-    const uploadedFileRelativePath = this.pathService.getUploadedFileRelativePathToTmpPath(
-      pathWhereFileWasUploaded,
-    )
+    const uploadedFileRelativePath = this.pathService
+      .getUploadedFileRelativePathToTmpPath(pathWhereFileWasUploaded)
 
     return uploadedFileRelativePath
   }

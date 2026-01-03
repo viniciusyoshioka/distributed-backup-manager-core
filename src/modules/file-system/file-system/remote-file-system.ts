@@ -88,17 +88,26 @@ export class RemoteFileSystem implements FileSystem {
   }
 
 
-  async copyFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async copyFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     const fromPathIsAbsolute = fromPath instanceof Path
     const toPathIsAbsolute = toPath instanceof Path
 
     if (fromPathIsAbsolute && !toPathIsAbsolute) {
-      const uploadedFileIdentifier = await this.syncClient.path.uploadFile(fromPath.absolutePath)
-      await this.syncClient.path.moveUploadedFile(uploadedFileIdentifier, toPath.relativePath)
+      const uploadedFileIdentifier = await this.syncClient
+        .path
+        .uploadFile(fromPath.absolutePath)
+      await this.syncClient
+        .path
+        .moveUploadedFile(uploadedFileIdentifier, toPath.relativePath)
       return
     }
     if (!fromPathIsAbsolute && toPathIsAbsolute) {
-      const downloadedFilePath = await this.syncClient.path.downloadFile(fromPath.relativePath)
+      const downloadedFilePath = await this.syncClient
+        .path
+        .downloadFile(fromPath.relativePath)
       const downloadedFilePathInstance = new Path(downloadedFilePath)
       await this.localFileSystem.moveFile(downloadedFilePathInstance, toPath)
       return
@@ -112,7 +121,10 @@ export class RemoteFileSystem implements FileSystem {
 
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  async moveFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async moveFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     throw new Error("Move files on a remote machine, probably shouldn't be necessary")
   }
 }

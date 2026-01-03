@@ -115,7 +115,10 @@ export class PathSubClient {
   }
 
 
-  async getFileHash(absolutePath: string, hashType = HashType.SHA_256): Promise<string | null> {
+  async getFileHash(
+    absolutePath: string,
+    hashType = HashType.SHA_256,
+  ): Promise<string | null> {
     const { data } = await this.client.get<string | null>('/file/hash', {
       params: {
         path: absolutePath,
@@ -129,7 +132,10 @@ export class PathSubClient {
     return data
   }
 
-  async moveUploadedFile(uploadedFilePath: string, destinationPath: string): Promise<void> {
+  async moveUploadedFile(
+    uploadedFilePath: string,
+    destinationPath: string,
+  ): Promise<void> {
     await this.client.put(
       '/file/move-uploaded-file',
       {
@@ -161,7 +167,9 @@ export class PathSubClient {
         v4(),
       ])
 
-      const tmpDownloadedFileStream = fs.createWriteStream(tmpDownloadedFilePath.absolutePath)
+      const tmpDownloadedFileStream = fs.createWriteStream(
+        tmpDownloadedFilePath.absolutePath,
+      )
 
       tmpDownloadedFileStream.on('finish', () => {
         tmpDownloadedFileStream.close()

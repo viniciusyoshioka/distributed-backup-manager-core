@@ -47,7 +47,8 @@ export class RelativePath {
   }
 
   /**
-   * Solve the relative path from `fromPath` to `toPath` based on the current working directory.
+   * Solve the relative path from `fromPath` to `toPath` based on the
+   * current working directory.
    *
    * @example
    * const pathA = '/path/to/a/file'

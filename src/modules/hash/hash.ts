@@ -10,7 +10,10 @@ export enum HashType {
 }
 
 
-export async function hash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
+export async function hash(
+  path: Path,
+  hashType = HashType.SHA_256,
+): Promise<string | null> {
   if (path.type !== PathType.FILE) {
     return null
   }

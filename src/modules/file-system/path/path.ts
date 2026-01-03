@@ -49,7 +49,10 @@ export class Path {
     return path.isAbsolute(pathToCheck)
   }
 
-  private static assertPathIsAbsolute(pathToCheck: string, customErrorMessage?: string): void {
+  private static assertPathIsAbsolute(
+    pathToCheck: string,
+    customErrorMessage?: string,
+  ): void {
     const pathIsAbsolute = Path.isAbsolute(pathToCheck)
     if (!pathIsAbsolute) {
       const errorMessage = customErrorMessage ?? 'Path must be absolute'
@@ -74,7 +77,8 @@ export class Path {
   }
 
   /**
-   * Solve the relative path from `fromPath` to `toPath` based on the current working directory.
+   * Solve the relative path from `fromPath` to `toPath` based on
+   * the current working directory.
    *
    * @example
    * const pathA = '/path/to/a/file'

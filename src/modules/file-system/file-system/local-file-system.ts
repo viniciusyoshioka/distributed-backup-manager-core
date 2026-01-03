@@ -172,7 +172,10 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async copyFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async copyFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     this.assertIsPathInstance(fromPath)
     this.assertIsPathInstance(toPath)
 
@@ -201,7 +204,10 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async moveFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async moveFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     this.assertIsPathInstance(fromPath)
     this.assertIsPathInstance(toPath)
 
