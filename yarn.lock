@@ -2061,16 +2061,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vinicius1313/eslint-config@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@vinicius1313/eslint-config@npm:2.1.0"
+"@vinicius1313/eslint-config@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@vinicius1313/eslint-config@npm:2.2.0"
   peerDependencies:
     eslint: ">= 9"
     typescript: ">=4.8.4 <6.0.0"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/7e16dd11be4499955cacb8eeb48164e72b49a16da23c8dc7d76db935e5065dc42bc7fa14013e08459c81e54f77e3775e8e1dda5dbeb728f52ff3a56c2d0cd8c9
+  checksum: 10c0/120600194fa31610e073db21ebcb66650bb6e3fe404ab34be39685b49846ce6983ff58a84f54eab0562e349313c1db767f72646068aff0314de7a1aa846e0fe2
   languageName: node
   linkType: hard
 
@@ -3033,7 +3033,7 @@ __metadata:
     "@types/express": "npm:^5.0.6"
     "@types/jest": "npm:^30.0.0"
     "@types/multer": "npm:^2.0.0"
-    "@vinicius1313/eslint-config": "npm:^2.1.0"
+    "@vinicius1313/eslint-config": "npm:^2.2.0"
     "@vinicius1313/tsconfig": "npm:^2.0.0"
     arg: "npm:^5.0.2"
     axios: "npm:^1.13.2"
