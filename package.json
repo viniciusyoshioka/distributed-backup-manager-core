@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "postinstall": "npx patch-package",
-        "lint": "eslint './src/**/*.{js,ts,tsx}'",
+        "lint": "eslint 'src/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'",
         "typecheck": "tsc --noEmit",
         "test": "jest",
         "build": "tsc",
