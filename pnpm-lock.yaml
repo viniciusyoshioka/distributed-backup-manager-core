@@ -78,6 +78,9 @@ importers:
       '@types/multer':
         specifier: ^2.1.0
         version: 2.1.0
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.5.0
       '@vinicius1313/eslint-config':
         specifier: ^2.3.0
         version: 2.3.0(@eslint/js@9.39.4)(@stylistic/eslint-plugin@5.10.0(eslint@10.1.0))(eslint@10.1.0)(typescript-eslint@8.57.2(eslint@10.1.0)(typescript@6.0.2))(typescript@6.0.2)
