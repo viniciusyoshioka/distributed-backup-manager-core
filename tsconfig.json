@@ -4,7 +4,9 @@
         "outDir": "dist",
         "declaration": true,
         "declarationDir": "dist",
-        "incremental": true
+        "types": [
+            "jest"
+        ]
     },
     "include": [
         "src"
