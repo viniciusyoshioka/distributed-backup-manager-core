@@ -8,7 +8,7 @@ import { InvalidEnvVariablesError } from './errors/index.js'
 const envSchema = z
   .object({
     STAGE: z.enum(['development', 'production']),
-    PORT: z.number({ coerce: true }).positive(),
+    PORT: z.coerce.number().positive(),
     EXECUTION_TIME_ENABLED: z.enum(['true', 'false']).optional(),
     SYNC_SERVER_ROOT_DESTINATION_PATH: z.string().refine(
       destinationRootPath => path.isAbsolute(destinationRootPath),
