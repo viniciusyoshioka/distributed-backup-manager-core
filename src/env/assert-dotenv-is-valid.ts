@@ -32,7 +32,7 @@ const envSchema = z
   .superRefine((arg, ctx) => {
     if (arg.EXECUTION_TIME_ENABLED === 'true' && arg.STAGE !== 'development') {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['EXECUTION_TIME_ENABLED'],
         message: 'EXECUTION_TIME_ENABLED can only be "true" when STAGE is "development"',
       })
