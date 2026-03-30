@@ -129,7 +129,7 @@ export class PathController {
 
   @Get()
   private async getPathExists(req: WithAuthUser<Request>): Promise<boolean> {
-    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const query = PathMapper.fromObjectToPathParamDto(req.query as object)
 
     const pathExists = await this.pathService.getPathExists({
       path: query.path,
@@ -142,7 +142,7 @@ export class PathController {
 
   @Get()
   private async getPathType(req: WithAuthUser<Request>): Promise<PathType> {
-    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const query = PathMapper.fromObjectToPathParamDto(req.query as object)
 
     const pathType = await this.pathService.getPathType({
       path: query.path,
@@ -154,7 +154,7 @@ export class PathController {
 
   @Get()
   private async readDirectory(req: WithAuthUser<Request>): Promise<string[] | null> {
-    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const query = PathMapper.fromObjectToPathParamDto(req.query as object)
 
     const pathChildren = await this.pathService.readDirectory({
       path: query.path,
@@ -178,7 +178,7 @@ export class PathController {
 
   @Delete()
   private async deleteFile(req: WithAuthUser<Request>): Promise<void> {
-    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const query = PathMapper.fromObjectToPathParamDto(req.query as object)
 
     await this.pathService.deleteFile({
       path: query.path,
@@ -188,7 +188,7 @@ export class PathController {
 
   @Delete()
   private async deleteDirectory(req: WithAuthUser<Request>): Promise<void> {
-    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const query = PathMapper.fromObjectToPathParamDto(req.query as object)
 
     await this.pathService.deleteDirectory({
       path: query.path,
@@ -199,7 +199,7 @@ export class PathController {
 
   @Get()
   private async getFileHash(req: WithAuthUser<Request>): Promise<string | null> {
-    const query = PathMapper.fromObjectToGetFileHashDto(req.query)
+    const query = PathMapper.fromObjectToGetFileHashDto(req.query as object)
 
     const fileHash = await this.pathService.getFileHash({
       path: query.path,
@@ -223,7 +223,7 @@ export class PathController {
 
   // @Get()
   private downloadFile(req: WithAuthUser<Request>, res: Response): void {
-    const query = PathMapper.fromObjectToPathParamDto(req.query)
+    const query = PathMapper.fromObjectToPathParamDto(req.query as object)
 
     const filePathToDownload = this.pathService.getFilePathToDownload({
       relativePath: query.path,
