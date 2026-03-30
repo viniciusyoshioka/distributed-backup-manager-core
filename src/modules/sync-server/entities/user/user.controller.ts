@@ -60,6 +60,11 @@ export class UserController {
   @Delete()
   private async deleteUser(req: Request): Promise<UserWithoutPasswordDTO> {
     const { id } = req.params
+
+    if (Array.isArray(id)) {
+      throw new BadRequestException('Only one "id" parameter is allowed')
+    }
+
     const deletedUser = await this.userService.deleteUser(id)
     return UserMapper.fromEntityToDtoWithoutPassword(deletedUser)
   }
