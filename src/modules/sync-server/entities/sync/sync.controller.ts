@@ -18,7 +18,7 @@ export class SyncController {
 
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(_params: SyncControllerParams) {}
+  constructor(params: SyncControllerParams) {}
 
 
   build(): Router {
