@@ -14,7 +14,7 @@ export const HANDSHAKE_PROTOCOLS: HandshakeProtocol[] = [
 
 
 export const CURRENT_HANDSHAKE_PROTOCOL = HANDSHAKE_PROTOCOLS
-  .reduce<HandshakeProtocol>((acc, current) => {
+  .reduce((acc, current) => {
     if (current.version > acc.version) {
       return current
     }
