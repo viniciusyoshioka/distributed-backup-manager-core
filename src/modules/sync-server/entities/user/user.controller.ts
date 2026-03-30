@@ -2,6 +2,7 @@ import type { Request } from 'express'
 import { RequestHandler, Router } from 'express'
 
 import { Delete, Get, Post, Put } from '../../decorators/index.js'
+import { BadRequestException } from '../../errors/index.js'
 import { UserTokenDTO, UserWithoutPasswordDTO } from './dto/index.js'
 import { UserMapper } from './user.mapper.js'
 import { UserService } from './user.service.js'
