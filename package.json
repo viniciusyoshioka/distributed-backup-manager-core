@@ -16,9 +16,9 @@
         "sync-server:start:prod": "node --env-file='.env' ./dist/modules/sync-server/server.js"
     },
     "dependencies": {
-        "@nestjs/common": "^11.1.17",
-        "@nestjs/core": "^11.1.17",
-        "@nestjs/platform-express": "^11.1.17",
+        "@nestjs/common": "^11.1.18",
+        "@nestjs/core": "^11.1.18",
+        "@nestjs/platform-express": "^11.1.18",
         "@nestjs/swagger": "^11.2.6",
         "arg": "^5.0.2",
         "axios": "^1.14.0",
@@ -43,16 +43,16 @@
         "@types/express-serve-static-core": "^5.1.1",
         "@types/jest": "^30.0.0",
         "@types/multer": "^2.1.0",
-        "@types/node": "^25.5.0",
+        "@types/node": "^25.5.2",
         "@vinicius1313/eslint-config": "^2.3.0",
         "@vinicius1313/tsconfig": "^3.0.1",
         "eslint": "^10.1.0",
         "jest": "^30.3.0",
-        "ts-jest": "^29.4.6",
+        "ts-jest": "^29.4.9",
         "tsx": "^4.21.0",
         "type-fest": "^5.5.0",
         "typescript": "^6.0.2",
-        "typescript-eslint": "^8.57.2"
+        "typescript-eslint": "^8.58.0"
     },
     "engines": {
         "node": ">=18"
