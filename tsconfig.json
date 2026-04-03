@@ -5,9 +5,6 @@
         "outDir": "dist",
         "declaration": true,
         "declarationDir": "dist",
-        "importHelpers": false,
-        "noUnusedParameters": false,
-        "noUnusedLocals": false,
         "types": [
             "jest"
         ]
