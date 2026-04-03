@@ -1,14 +1,16 @@
-import {
+import type {
   AuthArgs,
   AuthLoginUserArgs,
   AuthRegisterUserArgs,
+  SyncArgs,
+} from './cli/index.js'
+import {
   AuthSubCommand,
   AuthSubCommandAction,
   Cli,
   CliExitExecutionError,
   CliInvalidArgumentError,
   getSubCommandAction,
-  SyncArgs,
   SyncSubCommand,
 } from './cli/index.js'
 import { assertDotEnvIsValid, InvalidEnvVariablesError } from './env/index.js'

@@ -21,7 +21,7 @@ export class NetworkAddress {
 
   private static assertPortIsValid(port: string | number): void {
     if (typeof port === 'string') {
-      port = Number.parseInt(port)
+      port = Number.parseInt(port, 10)
     }
 
     if (Number.isNaN(port)) {

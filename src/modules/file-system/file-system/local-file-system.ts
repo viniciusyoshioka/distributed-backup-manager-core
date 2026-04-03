@@ -1,9 +1,10 @@
-import fs, { RmOptions } from 'node:fs'
+import type { RmOptions } from 'node:fs'
+import fs from 'node:fs'
 
 import { hash, HashType } from '../../hash/hash.js'
 import { Path, PathType } from '../path/index.js'
-import { RelativePath } from '../relative-path/index.js'
-import { FileSystem } from './file-system.js'
+import type { RelativePath } from '../relative-path/index.js'
+import type { FileSystem } from './file-system.js'
 
 
 export class LocalFileSystem implements FileSystem {
@@ -171,7 +172,10 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async copyFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async copyFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     this.assertIsPathInstance(fromPath)
     this.assertIsPathInstance(toPath)
 
@@ -200,7 +204,10 @@ export class LocalFileSystem implements FileSystem {
   }
 
 
-  async moveFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async moveFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     this.assertIsPathInstance(fromPath)
     this.assertIsPathInstance(toPath)
 

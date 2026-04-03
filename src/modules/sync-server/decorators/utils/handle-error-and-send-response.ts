@@ -1,4 +1,4 @@
-import { Response } from 'express'
+import type { Response } from 'express'
 
 import { BaseException } from '../../errors/index.js'
 
@@ -7,7 +7,7 @@ import { BaseException } from '../../errors/index.js'
 export function handleErrorAndSendResponse(params: {
   response: Response
   error: unknown
-  target: Object
+  target: object
   propertyKey: string | symbol
 }): void {
   const { response, error, target, propertyKey } = params

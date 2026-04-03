@@ -1,5 +1,5 @@
 import { CreateUserDTO, UserCredentialsDTO, UserDTO, UserWithoutPasswordDTO } from './dto/index.js'
-import { UserEntity } from './user.entity.js'
+import type { UserEntity } from './user.entity.js'
 
 
 export class UserMapper {

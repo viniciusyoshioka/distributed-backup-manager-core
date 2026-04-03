@@ -1,8 +1,9 @@
 import { HashType } from '../../hash/index.js'
-import { SyncClient } from '../../sync-client/index.js'
-import { Path, PathType } from '../path/index.js'
-import { RelativePath } from '../relative-path/index.js'
-import { FileSystem } from './file-system.js'
+import type { SyncClient } from '../../sync-client/index.js'
+import type { PathType } from '../path/index.js'
+import { Path } from '../path/index.js'
+import type { RelativePath } from '../relative-path/index.js'
+import type { FileSystem } from './file-system.js'
 
 
 export interface RemoteFileSystemParams {
@@ -87,17 +88,26 @@ export class RemoteFileSystem implements FileSystem {
   }
 
 
-  async copyFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async copyFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     const fromPathIsAbsolute = fromPath instanceof Path
     const toPathIsAbsolute = toPath instanceof Path
 
     if (fromPathIsAbsolute && !toPathIsAbsolute) {
-      const uploadedFileIdentifier = await this.syncClient.path.uploadFile(fromPath.absolutePath)
-      await this.syncClient.path.moveUploadedFile(uploadedFileIdentifier, toPath.relativePath)
+      const uploadedFileIdentifier = await this.syncClient
+        .path
+        .uploadFile(fromPath.absolutePath)
+      await this.syncClient
+        .path
+        .moveUploadedFile(uploadedFileIdentifier, toPath.relativePath)
       return
     }
     if (!fromPathIsAbsolute && toPathIsAbsolute) {
-      const downloadedFilePath = await this.syncClient.path.downloadFile(fromPath.relativePath)
+      const downloadedFilePath = await this.syncClient
+        .path
+        .downloadFile(fromPath.relativePath)
       const downloadedFilePathInstance = new Path(downloadedFilePath)
       await this.localFileSystem.moveFile(downloadedFilePathInstance, toPath)
       return
@@ -111,7 +121,10 @@ export class RemoteFileSystem implements FileSystem {
 
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  async moveFile(fromPath: Path | RelativePath, toPath: Path | RelativePath): Promise<void> {
+  async moveFile(
+    fromPath: Path | RelativePath,
+    toPath: Path | RelativePath,
+  ): Promise<void> {
     throw new Error("Move files on a remote machine, probably shouldn't be necessary")
   }
 }

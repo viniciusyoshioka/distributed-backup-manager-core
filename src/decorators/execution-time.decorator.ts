@@ -9,11 +9,11 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
 
   const isEnabled = options.isEnabled !== undefined
     ? options.isEnabled
-    : process.env.EXECUTION_TIME_DECORATOR_ENABLED === 'true'
+    : process.env['EXECUTION_TIME_DECORATOR_ENABLED'] === 'true'
 
 
   return (
-    target: Object,
+    target: object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ): PropertyDescriptor => {
@@ -22,11 +22,11 @@ export function ExecutionTime(options: ExecutionTimeOptions = {}): MethodDecorat
     }
 
 
-    const originalMethod = descriptor.value
+    const originalMethod = descriptor.value as (...args: unknown[]) => unknown
 
     descriptor.value = function(...args: unknown[]): unknown {
       const startTime = performance.now()
-      const result = originalMethod.apply(this, args) as unknown
+      const result = originalMethod.apply(this, args)
 
 
       const logExecution = () => {

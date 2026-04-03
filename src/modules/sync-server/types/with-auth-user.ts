@@ -1,4 +1,4 @@
-import { UserPayloadDTO } from '../entities'
+import type { UserPayloadDTO } from '../entities/index.ts'
 
 
 export type WithAuthUser<T> = T & {

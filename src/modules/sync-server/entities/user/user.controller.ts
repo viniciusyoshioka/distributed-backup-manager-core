@@ -2,6 +2,7 @@ import type { Request } from 'express'
 import { RequestHandler, Router } from 'express'
 
 import { Delete, Get, Post, Put } from '../../decorators/index.js'
+import { BadRequestException } from '../../errors/index.js'
 import { UserTokenDTO, UserWithoutPasswordDTO } from './dto/index.js'
 import { UserMapper } from './user.mapper.js'
 import { UserService } from './user.service.js'
@@ -60,13 +61,20 @@ export class UserController {
   @Delete()
   private async deleteUser(req: Request): Promise<UserWithoutPasswordDTO> {
     const { id } = req.params
+
+    if (Array.isArray(id)) {
+      throw new BadRequestException('Only one "id" parameter is allowed')
+    }
+
     const deletedUser = await this.userService.deleteUser(id)
     return UserMapper.fromEntityToDtoWithoutPassword(deletedUser)
   }
 
   @Post()
   private async loginUser(req: Request): Promise<UserTokenDTO> {
-    const userCredentialsDto = UserMapper.fromObjectToUserCredentialsDto(req.body as object)
+    const userCredentialsDto = UserMapper.fromObjectToUserCredentialsDto(
+      req.body as object,
+    )
     const userToken = await this.userService.loginUser(userCredentialsDto)
     return userToken
   }

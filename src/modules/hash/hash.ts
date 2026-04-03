@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 
-import { Path, PathType } from '../file-system/index.js'
+import type { Path } from '../file-system/index.js'
+import { PathType } from '../file-system/index.js'
 
 
 export enum HashType {
@@ -9,7 +10,10 @@ export enum HashType {
 }
 
 
-export async function hash(path: Path, hashType = HashType.SHA_256): Promise<string | null> {
+export async function hash(
+  path: Path,
+  hashType = HashType.SHA_256,
+): Promise<string | null> {
   if (path.type !== PathType.FILE) {
     return null
   }

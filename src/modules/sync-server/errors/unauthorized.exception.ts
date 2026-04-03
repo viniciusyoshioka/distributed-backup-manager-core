@@ -1,4 +1,5 @@
-import { BaseException, ExceptionResponse } from './base.exception.js'
+import type { ExceptionResponse } from './base.exception.js'
+import { BaseException } from './base.exception.js'
 
 
 export class UnauthorizedException extends BaseException {

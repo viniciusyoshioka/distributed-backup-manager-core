@@ -83,10 +83,13 @@ export class Syncer {
 
       const syncServerHandshake = await this.syncClient.sync.handshake()
 
-      const isSameVersion = syncServerHandshake.version === CURRENT_HANDSHAKE_PROTOCOL.version
-      const isCompatibleVersion = syncServerHandshake.compatiblePreviousClientVersions.includes(
-        CURRENT_HANDSHAKE_PROTOCOL.version,
-      )
+      const isSameVersion = syncServerHandshake.version
+        === CURRENT_HANDSHAKE_PROTOCOL.version
+      const isCompatibleVersion = syncServerHandshake
+        .compatiblePreviousClientVersions
+        .includes(
+          CURRENT_HANDSHAKE_PROTOCOL.version,
+        )
 
       if (isSameVersion || isCompatibleVersion) {
         return { isSuccessful: true }
@@ -160,7 +163,9 @@ export class Syncer {
 
     const destinationExists = await this.destinationFileSystem.exists(this.destination)
     if (destinationExists) {
-      const destinationPathType = await this.destinationFileSystem.resolvePathType(this.destination)
+      const destinationPathType = await this.destinationFileSystem.resolvePathType(
+        this.destination,
+      )
       if (destinationPathType !== PathType.DIR) {
         throw new Error(`Destination path "${destinationPath}" must be a directory`)
       }
@@ -170,7 +175,10 @@ export class Syncer {
     if (this.source instanceof Path) {
       for (let i = 0; i < this.exceptions.length; i++) {
         const exception = this.exceptions[i]
-        const exceptionPath: Path = new Path([this.source.absolutePath, exception.relativePath])
+        const exceptionPath: Path = new Path([
+          this.source.absolutePath,
+          exception.relativePath,
+        ])
 
         const exceptionPathIsSubPathOfSource = exceptionPath.isSubPathOf(this.source)
         if (!exceptionPathIsSubPathOfSource) {
@@ -278,7 +286,10 @@ export class Syncer {
         throw new Error('Cannot check if an absolute path is in the exception list when source path is a relative path')
       }
 
-      const exceptionAbsolutePath = new Path([this.source.absolutePath, exception.relativePath])
+      const exceptionAbsolutePath = new Path([
+        this.source.absolutePath,
+        exception.relativePath,
+      ])
       return path.isSubPathOf(exceptionAbsolutePath)
     })
   }
@@ -315,7 +326,9 @@ export class Syncer {
       throw new Error(`Source path "${sourcePathToLog}" is not a directory`)
     }
 
-    const destinationChildren = await this.destinationFileSystem.readDirectory(destinationPath)
+    const destinationChildren = await this.destinationFileSystem.readDirectory(
+      destinationPath,
+    )
     if (!destinationChildren) {
       const destinationPathToLog = destinationPath instanceof Path
         ? destinationPath.absolutePath
@@ -365,7 +378,9 @@ export class Syncer {
         this.source instanceof Path ? this.source.absolutePath : this.source.relativePath,
       )
 
-      const destinationParentExists = await this.destinationFileSystem.exists(destinationParentPath)
+      const destinationParentExists = await this.destinationFileSystem.exists(
+        destinationParentPath,
+      )
       if (!destinationParentExists) {
         pathsToCreate.enqueue(sourceRelativePath)
       } else {
@@ -400,7 +415,9 @@ export class Syncer {
 
 
       // Create path in destination
-      const destinationHasChildWithSameName = destinationChildrenNames.includes(sourceChildName)
+      const destinationHasChildWithSameName = destinationChildrenNames.includes(
+        sourceChildName,
+      )
       if (!destinationHasChildWithSameName) {
         if (sourceChildPath.type === PathType.FILE) {
           pathsToCreate.enqueue(sourceRelativePath)
@@ -459,7 +476,9 @@ export class Syncer {
       )
 
 
-      const sourceHasChildWithSameName = sourceChildrenNames.includes(destinationChildName)
+      const sourceHasChildWithSameName = sourceChildrenNames.includes(
+        destinationChildName,
+      )
       if (!sourceHasChildWithSameName) {
         pathsToDelete.enqueue(destinationRelativePath)
         continue

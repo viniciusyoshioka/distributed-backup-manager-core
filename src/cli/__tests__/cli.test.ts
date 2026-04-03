@@ -1,7 +1,8 @@
-// import { Path } from '../../modules/file-system'
-// import { IP, NetworkAddress } from '../../modules/network'
-// import { Cli } from '../cli'
-// import { CliExitExecutionError, CliInvalidArgumentError } from '../errors'
+/* eslint-disable @stylistic/max-len */
+// import { Path } from '../../modules/file-system/index.ts'
+// import { IP, NetworkAddress } from '../../modules/network/index.ts'
+// import { Cli } from '../cli.ts'
+// import { CliExitExecutionError, CliInvalidArgumentError } from '../errors/index.ts'
 
 
 // // Mock dependencies

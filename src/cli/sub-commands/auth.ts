@@ -1,4 +1,5 @@
-import arg, { Handler, Spec } from 'arg'
+import type { Handler, Spec } from 'arg'
+import arg from 'arg'
 import { isEmail, isStrongPassword } from 'class-validator'
 import dedent from 'dedent'
 import process from 'node:process'
@@ -133,7 +134,9 @@ export class AuthSubCommand implements SubCommand<
     }
     this.subCommandName = subCommandArgument
 
-    const subCommandAction = getSubCommandAction(argv) as AuthSubCommandAction | null | undefined
+    const subCommandAction = getSubCommandAction(
+      argv,
+    ) as AuthSubCommandAction | null | undefined
     if (subCommandAction === null) {
       throw new CliInvalidArgumentError(`Sub command action "${subCommandAction}" is not valid. Expected one of ${AuthSubCommand.SUBCOMMAND_ACTIONS.join(', ')}`)
     }
@@ -157,6 +160,7 @@ export class AuthSubCommand implements SubCommand<
   }
 
 
+  // eslint-disable-next-line @stylistic/max-len
   private parseArgsBasedOnSubCommandAction(): AuthArgs | AuthRegisterUserArgs | AuthLoginUserArgs {
     if (!this.subCommandAction) {
       return arg(authArgsSpec, { argv: this.argv }) as AuthArgs
