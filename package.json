@@ -21,7 +21,7 @@
         "@nestjs/platform-express": "^11.1.18",
         "@nestjs/swagger": "^11.2.6",
         "arg": "^5.0.2",
-        "axios": "^1.14.0",
+        "axios": "^1.15.0",
         "bcryptjs": "^3.0.3",
         "class-validator": "^0.15.1",
         "dedent": "^1.7.2",
