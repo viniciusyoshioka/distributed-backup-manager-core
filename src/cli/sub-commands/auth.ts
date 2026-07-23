@@ -130,7 +130,9 @@ export class AuthSubCommand implements SubCommand<
 
     const subCommandArgument = getSubCommandArgument(argv)
     if (subCommandArgument !== AuthSubCommand.SUBCOMMAND_NAME) {
-      throw new CliInvalidArgumentError(`Sub command "${subCommandArgument}" is not valid. Expected "${AuthSubCommand.SUBCOMMAND_NAME}"`)
+      throw new CliInvalidArgumentError(
+        `Sub command "${subCommandArgument}" is not valid. Expected "${AuthSubCommand.SUBCOMMAND_NAME}"`,
+      )
     }
     this.subCommandName = subCommandArgument
 
@@ -138,7 +140,9 @@ export class AuthSubCommand implements SubCommand<
       argv,
     ) as AuthSubCommandAction | null | undefined
     if (subCommandAction === null) {
-      throw new CliInvalidArgumentError(`Sub command action "${subCommandAction}" is not valid. Expected one of ${AuthSubCommand.SUBCOMMAND_ACTIONS.join(', ')}`)
+      throw new CliInvalidArgumentError(
+        `Sub command action "${subCommandAction}" is not valid. Expected one of ${AuthSubCommand.SUBCOMMAND_ACTIONS.join(', ')}`,
+      )
     }
     this.subCommandAction = subCommandAction
 
@@ -171,8 +175,15 @@ export class AuthSubCommand implements SubCommand<
         return arg(authRegisterUserArgsSpec, { argv: this.argv }) as AuthRegisterUserArgs
       case AuthSubCommandAction.LOGIN:
         return arg(authLoginUserArgsSpec, { argv: this.argv }) as AuthLoginUserArgs
-      default:
-        throw new CliInvalidArgumentError(`Sub command action "${String(this.subCommandAction)}" is not valid. Expected one of ${AuthSubCommand.SUBCOMMAND_ACTIONS.join(', ')}`)
+      default: {
+        this.subCommandAction satisfies never
+
+        const subCommandAction = String(this.subCommandAction)
+        const validSubCommandActions = AuthSubCommand.SUBCOMMAND_ACTIONS.join(', ')
+        throw new CliInvalidArgumentError(
+          `Sub command action "${subCommandAction}" is not valid. Expected one of ${validSubCommandActions}`,
+        )
+      }
     }
   }
 
@@ -225,6 +236,15 @@ export class AuthSubCommand implements SubCommand<
       case AuthSubCommandAction.LOGIN:
         this.validateAndSetDefaultValuesToLoginUserArgs()
         break
+      default: {
+        this.subCommandAction satisfies never
+
+        const subcommandAction = String(this.subCommandAction)
+        const validSubCommandActions = AuthSubCommand.SUBCOMMAND_ACTIONS.join(', ')
+        throw new CliInvalidArgumentError(
+          `Sub command action "${subcommandAction}" is not valid. Expected one of ${validSubCommandActions}`,
+        )
+      }
     }
   }
 
@@ -246,7 +266,9 @@ export class AuthSubCommand implements SubCommand<
     }
 
     if (name.length < 3) {
-      throw new CliInvalidArgumentError('Argument "--name" must be at least 3 characters long')
+      throw new CliInvalidArgumentError(
+        'Argument "--name" must be at least 3 characters long',
+      )
     }
   }
 
@@ -260,7 +282,9 @@ export class AuthSubCommand implements SubCommand<
 
     const emailAddressIsValid = isEmail(email)
     if (!emailAddressIsValid) {
-      throw new CliInvalidArgumentError('Argument "--email" must be a valid email address')
+      throw new CliInvalidArgumentError(
+        'Argument "--email" must be a valid email address',
+      )
     }
   }
 
@@ -280,7 +304,9 @@ export class AuthSubCommand implements SubCommand<
       minSymbols: 1,
     })
     if (!passwordIsStrong) {
-      throw new CliInvalidArgumentError('Argument "--password" must be a strong password. A strong password must be at least 8 characters long, contain at least 1 lowercase letter, 1 uppercase letter, 1 number and 1 symbol')
+      throw new CliInvalidArgumentError(
+        'Argument "--password" must be a strong password. A strong password must be at least 8 characters long, contain at least 1 lowercase letter, 1 uppercase letter, 1 number and 1 symbol',
+      )
     }
   }
 
@@ -289,12 +315,16 @@ export class AuthSubCommand implements SubCommand<
 
     const machineAddress = args['--machine-address'] as string | undefined
     if (!machineAddress) {
-      throw new CliInvalidArgumentError('Argument "--machine-address" is required')
+      throw new CliInvalidArgumentError(
+        'Argument "--machine-address" is required',
+      )
     }
 
     const machineAddressIsValid = IP.isValid(machineAddress)
     if (!machineAddressIsValid) {
-      throw new CliInvalidArgumentError(`IP address "${machineAddress}" for argument "--machine-address" is not a valid IP address`)
+      throw new CliInvalidArgumentError(
+        `IP address "${machineAddress}" for argument "--machine-address" is not a valid IP address`,
+      )
     }
   }
 
@@ -305,7 +335,9 @@ export class AuthSubCommand implements SubCommand<
     if (!machinePort) {
       const defaultPort = process.env.PORT
       if (!defaultPort) {
-        throw new CliInvalidArgumentError('No "PORT" variable was found in .env file. This should not happen')
+        throw new CliInvalidArgumentError(
+          'No "PORT" variable was found in .env file. This should not happen',
+        )
       }
 
       args['--machine-port'] = defaultPort
@@ -314,7 +346,9 @@ export class AuthSubCommand implements SubCommand<
 
     const machinePortIsValid = NetworkAddress.isPortValid(machinePort)
     if (!machinePortIsValid) {
-      throw new CliInvalidArgumentError(`Port "${machinePort}" for argument "--machine-port" is not a valid port`)
+      throw new CliInvalidArgumentError(
+        `Port "${machinePort}" for argument "--machine-port" is not a valid port`,
+      )
     }
     args['--machine-port'] = machinePort
   }
